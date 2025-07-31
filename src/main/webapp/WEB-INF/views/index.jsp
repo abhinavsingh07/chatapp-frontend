@@ -22,7 +22,6 @@
         <!-- Preloader -->
         <div id="preloader"></div>
         <!-- header content -->
-        <%@ include file="layouts/header.jsp" %>
         <!-- main content -->
             <div id="mainContent">
                 <jsp:include page="pages/${view}.jsp" />
