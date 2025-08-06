@@ -4,6 +4,9 @@ import com.apiservice.client.ApiDispatcherService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import java.util.Map;
@@ -27,4 +30,5 @@ public class ApplicationConfig {
         service.setBaseUrl("http://localhost:8080/synk"); // Set your base URL here
         return service;
     }
+
 }

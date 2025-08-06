@@ -22,12 +22,17 @@
         <!-- Preloader -->
         <div id="preloader"></div>
         <!-- header content -->
+          <c:if test="${not empty view and view != 'login' and view != 'register'}">
+        <%@ include file="layouts/header.jsp" %>
+         </c:if>
         <!-- main content -->
             <div id="mainContent">
                 <jsp:include page="pages/${view}.jsp" />
             </div>
-        <!-- footer content -->
+             <c:if test="${not empty view and view != 'login' and view != 'register'}">
+         <!-- footer content -->
             <%@ include file="layouts/footer.jsp" %>
+            </c:if>
         <!-- scripts files -->
         <%@ include file="fragments/scripts.jsp" %>
 
