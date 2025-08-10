@@ -1,7 +1,8 @@
 package com.example.chatsphere.service;
 
-import com.example.chatsphere.dto.JwtResponse;
 import org.springframework.stereotype.Service;
+
+import com.example.chatsphere.security.JwtResponse;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

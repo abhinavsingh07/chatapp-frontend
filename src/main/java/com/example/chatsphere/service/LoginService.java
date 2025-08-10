@@ -1,9 +1,8 @@
 package com.example.chatsphere.service;
 
 import com.example.chatsphere.dto.AuthDTO;
-import com.example.chatsphere.dto.JwtResponse;
 import com.example.chatsphere.dto.UserDTO;
-import org.springframework.http.ResponseEntity;
+import com.example.chatsphere.security.JwtResponse;
 
 public interface LoginService {
     /**

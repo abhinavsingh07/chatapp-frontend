@@ -90,6 +90,12 @@
             <artifactId>api-dispatcher-service</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <!--custom jar Email service-->
+        <dependency>
+            <groupId>com.emailservice</groupId>
+            <artifactId>emailservice</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <!--test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

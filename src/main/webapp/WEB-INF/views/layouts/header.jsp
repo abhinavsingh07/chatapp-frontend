@@ -17,7 +17,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'contacts' %}active{% endif %}" href="${pageContext.request.contextPath}/contacts">
+                        <a class="nav-link {% if request.endpoint == 'contacts' %}active{% endif %}" href="${pageContext.request.contextPath}/contact">
                             <i class="fas fa-users me-1"></i>Contacts
                         </a>
                     </li>

@@ -55,7 +55,7 @@
                            style="width: 50px; height: 50px;">
                            <i class="fas fa-users"></i>
                            </div>-->
-                        <img src="{{ other_user.avatar_url }}" alt="Avatar"
+                        <img src="" alt="Avatar"
                            class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
                         <div class="avatar bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center"
                            style="width: 50px; height: 50px;">
@@ -125,10 +125,10 @@
             <i class="fas fa-comments me-2"></i>Chats
          </h5>
          <div class="btn-group">
-            <button class="btn btn-sm btn-outline-light" onclick="window.location.href='{{ url_for('search') }}'">
+            <button class="btn btn-sm btn-outline-light" onclick="window.location.href=''">
             <i class="fas fa-search"></i>
             </button>
-            <button class="btn btn-sm btn-outline-light" onclick="window.location.href='{{ url_for('contacts') }}'">
+            <button class="btn btn-sm btn-outline-light" onclick="window.location.href=''">
             <i class="fas fa-plus"></i>
             </button>
          </div>

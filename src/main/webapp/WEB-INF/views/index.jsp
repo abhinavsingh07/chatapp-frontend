@@ -16,6 +16,8 @@
         <link rel="manifest" href="<c:url value='/icons/site.webmanifest' />">
         <!-- css files -->
         <%@ include file="fragments/styles.jsp" %>
+          <!-- scripts files -->
+        <%@ include file="fragments/scripts.jsp" %>
     </head>
 
     <body>
@@ -29,12 +31,6 @@
             <div id="mainContent">
                 <jsp:include page="pages/${view}.jsp" />
             </div>
-             <c:if test="${not empty view and view != 'login' and view != 'register'}">
-         <!-- footer content -->
-            <%@ include file="layouts/footer.jsp" %>
-            </c:if>
-        <!-- scripts files -->
-        <%@ include file="fragments/scripts.jsp" %>
 
     </body>
 

@@ -1,6 +1,5 @@
 package com.example.chatsphere.security;
 
-import com.example.chatsphere.dto.JwtResponse;
 import com.example.chatsphere.service.TokenStoreService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -57,7 +56,7 @@ public class CustomSessionJwtFilter extends OncePerRequestFilter {
                 return;
             }
         }
-
+        //if user is not authenticated it can give 404 for page even if page is correctly returned from controller.
         HttpSession session = request.getSession(false);// false means don't create a new session if one doesn't exist
         if (session != null) {
             String loggedInUserId = session.getAttribute("userid").toString();

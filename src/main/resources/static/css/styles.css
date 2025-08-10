@@ -672,15 +672,5 @@ body {
     }
 }
 
- .error-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 2rem;
-        }
-        .error-icon {
-            font-size: 4rem;
-            color: #dc3545;
-        }
+
+

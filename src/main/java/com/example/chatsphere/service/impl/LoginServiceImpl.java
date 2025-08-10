@@ -2,16 +2,13 @@ package com.example.chatsphere.service.impl;
 
 import com.apiservice.client.ApiRequest;
 import com.example.chatsphere.dto.AuthDTO;
-import com.example.chatsphere.dto.JwtResponse;
 import com.example.chatsphere.dto.UserDTO;
+import com.example.chatsphere.security.JwtResponse;
 import com.example.chatsphere.service.LoginService;
 import com.example.chatsphere.util.ApiRequestBuilderUtil;
-import com.example.chatsphere.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.apiservice.client.ApiDispatcherService;
 
