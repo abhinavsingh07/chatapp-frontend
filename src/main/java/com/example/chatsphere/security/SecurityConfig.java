@@ -30,12 +30,12 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable()) // disable CSRF for testing (enable in prod)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/authenticate","/register","/error").permitAll()
+                        .requestMatchers("/", "/login", "/authenticate","/register","/error","/api/authenticate","/api/register").permitAll()
                         .requestMatchers("/WEB-INF/**").permitAll() // allow access to JSPs
                         .requestMatchers("/css/**", "/js/**", "/images/**","/icons/**").permitAll() //allow static resources
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(form -> form.disable()) // using custom login flow
                 .logout(logout -> logout
                         .logoutUrl("/logout")

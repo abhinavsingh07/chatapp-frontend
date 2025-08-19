@@ -30,15 +30,7 @@ public class CustomSessionJwtFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(CustomSessionJwtFilter.class);
     private TokenStoreService tokenStoreService;
 
-    private static final List<String> EXCLUDED_PATHS = List.of(
-            "/login",
-            "/register",
-            "/authenticate",
-            "/error",
-            "/css/",
-            "/js/",
-            "/images/",
-            "/icons/");
+    private static final List<String> EXCLUDED_PATHS = List.of("/login", "/register", "/authenticate", "/error", "/css/", "/js/", "/images/", "/icons/");
 
 
     public CustomSessionJwtFilter(TokenStoreService tokenStoreService) {
@@ -58,11 +50,16 @@ public class CustomSessionJwtFilter extends OncePerRequestFilter {
         }
         //if user is not authenticated it can give 404 for page even if page is correctly returned from controller.
         HttpSession session = request.getSession(false);// false means don't create a new session if one doesn't exist
+        logger.info("checking session");
         if (session != null) {
+
             String loggedInUserId = session.getAttribute("userid").toString();
+            logger.info("Session found, checking for JWT for userid {}", loggedInUserId);
             JwtResponse jwtResponse = tokenStoreService.getToken(loggedInUserId);
             String jwt = jwtResponse.getJwtToken();
+            logger.info("JWT found for user {}, setting authentication in SecurityContext", jwt.substring(0, 10));// Log only the first 10 characters for security reasons
             if (jwt != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
                 //we are authenticating on jwt so creating dummy UsernamePasswordAuthenticationToken and setting in SecurityContextHolder
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken("user", null, List.of());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -72,9 +69,11 @@ public class CustomSessionJwtFilter extends OncePerRequestFilter {
                 // Since you're handling login manually (outside Spring Security), this code tells Spring:
                 //“Hey, trust me, this request is authenticated.”
                 SecurityContextHolder.getContext().setAuthentication(authToken);//we sets every time for each request but check for null before if internally in any place we need or any route we again dont set it
+                filterChain.doFilter(request, response);
             }
+        } else {
+            //send unauthorize response
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
-
-        filterChain.doFilter(request, response);
     }
 }

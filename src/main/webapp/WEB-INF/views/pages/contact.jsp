@@ -124,91 +124,6 @@
       </div>
    </div>
    <script>
-      // document.addEventListener('DOMContentLoaded', function () {
-      //    // Contact search functionality
-      //    const contactSearch = document.getElementById('contactSearch');
-      //    if (contactSearch) {
-      //       contactSearch.addEventListener('input', function () {
-      //          const query = this.value.toLowerCase();
-      //          const contactItems = document.querySelectorAll('.contact-item');
-
-      //          contactItems.forEach(item => {
-      //             const name = item.querySelector('h6').textContent.toLowerCase();
-      //             const username = item.querySelector('p').textContent.toLowerCase();
-
-      //             if (name.includes(query) || username.includes(query)) {
-      //                item.style.display = 'flex';
-      //             } else {
-      //                item.style.display = 'none';
-      //             }
-      //          });
-      //       });
-      //    }
-
-      //    // User search for adding contacts
-      //    const userSearch = document.getElementById('userSearch');
-      //    if (userSearch) {
-      //       let searchTimeout;
-      //       userSearch.addEventListener('input', function () {
-      //          clearTimeout(searchTimeout);
-      //          const query = this.value.trim();
-
-      //          if (query.length < 2) {
-      //             document.getElementById('searchResults').style.display = 'none';
-      //             return;
-      //          }
-
-      //          searchTimeout = setTimeout(() => {
-      //             searchUsers(query);
-      //          }, 500);
-      //       });
-      //    }
-      // });
-
-      // function searchUsers(query) {
-      //    // Show loading state
-      //    const resultsContainer = document.getElementById('searchResults');
-      //    resultsContainer.style.display = 'block';
-      //    resultsContainer.innerHTML = '<div class="text-center p-3"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
-
-      //    // Simulate API call (replace with actual AJAX call)
-      //    setTimeout(() => {
-      //       fetch(`/api/search_users?q=encodeURIComponent(query)`)
-      //          .then(response => response.json())
-      //          .then(data => {
-      //             displaySearchResults(data.users);
-      //          })
-      //          .catch(error => {
-      //             resultsContainer.innerHTML = '<div class="text-center p-3 text-danger"><i class="fas fa-exclamation-triangle"></i> Search failed</div>';
-      //          });
-      //    }, 1000);
-      // }
-
-      //    function displaySearchResults(users) {
-      //       const resultsContainer = document.getElementById('searchResults');
-
-      //       if (users.length === 0) {
-      //          resultsContainer.innerHTML = '<div class="text-center p-3 text-muted"><i class="fas fa-search"></i> No users found</div>';
-      //          return;
-      //       }
-
-      //       const resultsHTML = users.map(user => `
-      //      <div class="d-flex align-items-center p-3 border-bottom search-result-item" data-user-id="${user.id}">
-      //          <div class="flex-shrink-0 me-3">
-      //             `< img src = "" alt = "Avatar" class= "rounded-circle" style = "width: 40px; height: 40px; object-fit: cover;" > `
-      //          </div>
-      //          <div class="flex-grow-1">
-      //              <h6 class="mb-1">user.full_name || user.username</h6>
-      //              <small class="text-muted">user.username</small>
-      //          </div>
-      //          <button class="btn btn-primary btn-sm" onclick="sendContactRequest(user.id)">
-      //              <i class="fas fa-user-plus"></i> Add
-      //          </button>
-      //      </div>
-      //  `).join('');
-
-      //       resultsContainer.innerHTML = resultsHTML;
-      //    }
 
       function sendContactRequest(userId) {
          // Simulate sending contact request
@@ -224,92 +139,101 @@
 
       function startChat(contactId) {
          // Create or navigate to chat with contact
-         alert(`Starting chat functionality will be integrated with backend service for contact contactId`);
+         var util = new Validator();
+         if (!util.isSafe(contactId)) {
+             console.error('Invalid contact ID.');
+            return;
+         }
+
+         // Redirect to chat page with contact ID
+         window.location.href = "${ctx}/chat-room/${userId}/${contactId}";
       }
 
-      function viewProfile(contactId) {
-         // Load and display contact profile
+      function viewProfile(userId) {
+         var util = new Validator();
+         if (!util.isSafe(userId)) {
+            alert('Invalid user ID.');
+            return;
+         }
+
+         // Show loading modal immediately
          const modal = new bootstrap.Modal(document.getElementById('contactProfileModal'));
          const profileContent = document.getElementById('profileContent');
-
          profileContent.innerHTML = '<div class="text-center p-3"><i class="fas fa-spinner fa-spin"></i> Loading profile...</div>';
          modal.show();
 
-         // Simulate loading profile data
-         setTimeout(() => {
-            profileContent.innerHTML = `
-               <div class="text-center mb-4">
-                   <div class="avatar bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                       <i class="fas fa-user fa-2x"></i>
-                   </div>
-                   <h5>Contact Name</h5>
-                   <p class="text-muted">@username</p>
-                   <p class="small">Bio information about the contact...</p>
-               </div>
-               <div class="d-grid gap-2">
-                   <button class="btn btn-primary" onclick="startChat(contactId)">
-                       <i class="fas fa-comment me-2"></i>Start Chat
-                   </button>
-                   <button class="btn btn-outline-secondary" onclick="shareContact(contactId)">
-                       <i class="fas fa-share me-2"></i>Share Contact
-                   </button>
-               </div>
-           `;
-         }, 1000);
+         // Call API to get user details
+         ajaxRequest(
+            "${ctx}/api/user/" + encodeURIComponent(userId),
+            "GET",
+            null,
+            function (response) {
+               console.log("User details loaded successfully:", response);
+
+               if (response && response.data && response.data.length > 0) {
+                  // Pass first user object to profile rendering
+                  renderProfileHtml(response.data[0]);
+               } else {
+                  profileContent.innerHTML = `<div class="text-center text-muted p-3">User not found</div>`;
+               }
+            },
+            function () {
+               profileContent.innerHTML = `<div class="text-center text-danger p-3">Failed to load user details. Please try again.</div>`;
+            }
+         );
       }
 
-      // function editContact(contactId) {
-      //    alert(`Edit contact functionality will be integrated for contact contactId`);
-      // }
+      function renderProfileHtml(user) {
+         var profileContent = document.getElementById('profileContent');
 
-
-
-      function acceptRequest(requestId) {
-         alert(`Accept request functionality will be integrated for request requestId`);
-      }
-
-      function rejectRequest(requestId) {
-         if (confirm('Are you sure you want to reject this contact request?')) {
-            alert(`Reject request functionality will be integrated for request requestId`);
+         // Determine avatar
+         var avatarHTML = "";
+         if (user.profilePictureUrl && user.profilePictureUrl.trim() !== "") {
+            avatarHTML = '<img src="' + user.profilePictureUrl + '" class="rounded-circle mb-3" ' +
+               'style="width: 80px; height: 80px; object-fit: cover;">';
+         } else {
+            avatarHTML = '<div class="avatar bg-secondary text-white rounded-circle d-inline-flex ' +
+               'align-items-center justify-content-center mb-3" ' +
+               'style="width: 80px; height: 80px;">' +
+               '<i class="fas fa-user fa-2x"></i>' +
+               '</div>';
          }
+
+         // Determine name
+         var displayName = "Unknown User";
+         if (user.name && user.name.trim() !== "") {
+            displayName = user.name;
+         }
+
+         // Determine phone number
+         var displayPhone = "@unknown";
+         if (user.phoneNumber && user.phoneNumber.trim() !== "") {
+            displayPhone = "@" + user.phoneNumber;
+         }
+
+         // Determine about/bio
+         var displayAbout = "No bio available";
+         if (user.about && user.about.trim() !== "") {
+            displayAbout = user.about;
+         }
+
+         // Build HTML
+         var html = '';
+         html += '<div class="text-center mb-4">';
+         html += avatarHTML;
+         html += '<h5>' + displayName + '</h5>';
+         html += '<p class="text-muted">' + displayPhone + '</p>';
+         html += '<p class="small">' + displayAbout + '</p>';
+         html += '</div>';
+         html += '<div class="d-grid gap-2">';
+         html += '<button class="btn btn-primary" onclick="startChat(\'' + user.id + '\')">';
+         html += '<i class="fas fa-comment me-2"></i>Start Chat';
+         html += '</button>';
+         html += '</div>';
+
+         profileContent.innerHTML = html;
       }
 
-      // function createGroup() {
-      //    alert('Create group functionality will be integrated');
-      // }
-
-      // function importContacts() {
-      //    alert('Import contacts functionality will be integrated');
-      // }
-
-      // function shareProfile() {
-      //    // Generate share link or QR code
-      //    const shareData = {
-      //       title: 'ChatApp Profile',
-      //       text: 'Connect with me on ChatApp!',
-      //       url: window.location.origin + '/profile/{{ user.username }}'
-      //    };
-
-      //    if (navigator.share) {
-      //       navigator.share(shareData);
-      //    } else {
-      //       // Fallback: copy to clipboard
-      //       navigator.clipboard.writeText(shareData.url).then(() => {
-      //          alert('Profile link copied to clipboard!');
-      //       });
-      //    }
-      // }
-
-      // function addByPhone() {
-      //    const phone = prompt('Enter phone number:');
-      //    if (phone) {
-      //       alert(`Add by phone functionality will be integrated for: phone`);
-      //    }
-      // }
-
-      // function scanQR() {
-      //    alert('QR code scanner will be integrated using camera API');
-      // }
 
       function addByEmail() {
          const email = prompt('Enter email address:');
@@ -434,10 +358,10 @@
                if (contact.contactStatus == 'ADDED') {
                   // Actions
                   html += '<div class="btn-group">';
-                  html += '<button class="btn btn-primary btn-sm" onclick="startChat(\'' + contact.contactId + '\')" title="Start Chat">'
+                  html += '<button class="btn btn-primary btn-sm" onclick="startChat(\'' + contact.contactUserId + '\')" title="Start Chat">'
                      + '<i class="fas fa-comment"></i>'
                      + '</button>';
-                  html += '<button class="btn btn-outline-secondary btn-sm" onclick="viewProfile(\'' + contact.contactId + '\')" title="View Profile">'
+                  html += '<button class="btn btn-outline-secondary btn-sm" onclick="viewProfile(\'' + contact.contactUserId + '\')" title="View Profile">'
                      + '<i class="fas fa-eye"></i>'
                      + '</button>';
                }
@@ -488,5 +412,146 @@
       $(document).ready(function () {
          loadContacts();
       })
+
+      // document.addEventListener('DOMContentLoaded', function () {
+      //    // Contact search functionality
+      //    const contactSearch = document.getElementById('contactSearch');
+      //    if (contactSearch) {
+      //       contactSearch.addEventListener('input', function () {
+      //          const query = this.value.toLowerCase();
+      //          const contactItems = document.querySelectorAll('.contact-item');
+
+      //          contactItems.forEach(item => {
+      //             const name = item.querySelector('h6').textContent.toLowerCase();
+      //             const username = item.querySelector('p').textContent.toLowerCase();
+
+      //             if (name.includes(query) || username.includes(query)) {
+      //                item.style.display = 'flex';
+      //             } else {
+      //                item.style.display = 'none';
+      //             }
+      //          });
+      //       });
+      //    }
+
+      //    // User search for adding contacts
+      //    const userSearch = document.getElementById('userSearch');
+      //    if (userSearch) {
+      //       let searchTimeout;
+      //       userSearch.addEventListener('input', function () {
+      //          clearTimeout(searchTimeout);
+      //          const query = this.value.trim();
+
+      //          if (query.length < 2) {
+      //             document.getElementById('searchResults').style.display = 'none';
+      //             return;
+      //          }
+
+      //          searchTimeout = setTimeout(() => {
+      //             searchUsers(query);
+      //          }, 500);
+      //       });
+      //    }
+      // });
+
+      // function searchUsers(query) {
+      //    // Show loading state
+      //    const resultsContainer = document.getElementById('searchResults');
+      //    resultsContainer.style.display = 'block';
+      //    resultsContainer.innerHTML = '<div class="text-center p-3"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+
+      //    // Simulate API call (replace with actual AJAX call)
+      //    setTimeout(() => {
+      //       fetch(`/api/search_users?q=encodeURIComponent(query)`)
+      //          .then(response => response.json())
+      //          .then(data => {
+      //             displaySearchResults(data.users);
+      //          })
+      //          .catch(error => {
+      //             resultsContainer.innerHTML = '<div class="text-center p-3 text-danger"><i class="fas fa-exclamation-triangle"></i> Search failed</div>';
+      //          });
+      //    }, 1000);
+      // }
+
+      //    function displaySearchResults(users) {
+      //       const resultsContainer = document.getElementById('searchResults');
+
+      //       if (users.length === 0) {
+      //          resultsContainer.innerHTML = '<div class="text-center p-3 text-muted"><i class="fas fa-search"></i> No users found</div>';
+      //          return;
+      //       }
+
+      //       const resultsHTML = users.map(user => `
+      //      <div class="d-flex align-items-center p-3 border-bottom search-result-item" data-user-id="${user.id}">
+      //          <div class="flex-shrink-0 me-3">
+      //             `< img src = "" alt = "Avatar" class= "rounded-circle" style = "width: 40px; height: 40px; object-fit: cover;" > `
+      //          </div>
+      //          <div class="flex-grow-1">
+      //              <h6 class="mb-1">user.full_name || user.username</h6>
+      //              <small class="text-muted">user.username</small>
+      //          </div>
+      //          <button class="btn btn-primary btn-sm" onclick="sendContactRequest(user.id)">
+      //              <i class="fas fa-user-plus"></i> Add
+      //          </button>
+      //      </div>
+      //  `).join('');
+
+      //       resultsContainer.innerHTML = resultsHTML;
+      //    }
+
+
+      // function editContact(contactId) {
+      //    alert(`Edit contact functionality will be integrated for contact contactId`);
+      // }
+
+      // function acceptRequest(requestId) {
+      //    alert(`Accept request functionality will be integrated for request requestId`);
+      // }
+
+      // function rejectRequest(requestId) {
+      //    if (confirm('Are you sure you want to reject this contact request?')) {
+      //       alert(`Reject request functionality will be integrated for request requestId`);
+      //    }
+      // }
+
+
+      // function createGroup() {
+      //    alert('Create group functionality will be integrated');
+      // }
+
+      // function importContacts() {
+      //    alert('Import contacts functionality will be integrated');
+      // }
+
+      // function shareProfile() {
+      //    // Generate share link or QR code
+      //    const shareData = {
+      //       title: 'ChatApp Profile',
+      //       text: 'Connect with me on ChatApp!',
+      //       url: window.location.origin + '/profile/{{ user.username }}'
+      //    };
+
+      //    if (navigator.share) {
+      //       navigator.share(shareData);
+      //    } else {
+      //       // Fallback: copy to clipboard
+      //       navigator.clipboard.writeText(shareData.url).then(() => {
+      //          alert('Profile link copied to clipboard!');
+      //       });
+      //    }
+      // }
+
+      // function addByPhone() {
+      //    const phone = prompt('Enter phone number:');
+      //    if (phone) {
+      //       alert(`Add by phone functionality will be integrated for: phone`);
+      //    }
+      // }
+
+      // function scanQR() {
+      //    alert('QR code scanner will be integrated using camera API');
+      // }
+
+
 
    </script>

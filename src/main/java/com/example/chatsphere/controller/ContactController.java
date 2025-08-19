@@ -28,24 +28,17 @@ public class ContactController {
 
     @GetMapping("/contact")
     public String contactPage(Model model) {
-        logger.info("Rendering contact page");
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.CONTACTS_VIEW);
         return PageMappings.INDEX_PAGE;
     }
 
+    //Api endpoints
     @GetMapping("/api/contact/{userId}")
     @ResponseBody
     public SuccessResponse<ContactUserDTO> getContactsByUserId(@PathVariable String userId) {
         logger.info("Fetching contact list for userId: {}", userId);
-
         SuccessResponse<ContactUserDTO> contacts = contactService.getContactsByUserId(userId);
         logger.info("Found {} contact(s) for userId: {}", contacts.getData().size(), userId);
-
-        String message = contacts.getData().isEmpty()
-                ? "No contact found"
-                : "Contact(s) fetched successfully";
-        contacts.setMessage(message);
-
         return contacts;
     }
 

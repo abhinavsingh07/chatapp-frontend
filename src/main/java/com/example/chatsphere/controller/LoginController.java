@@ -6,6 +6,7 @@ import com.example.chatsphere.mappings.PageMappings;
 import com.example.chatsphere.security.JwtResponse;
 import com.example.chatsphere.service.LoginService;
 import com.example.chatsphere.service.TokenStoreService;
+import com.example.chatsphere.util.SuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -14,10 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
 
 @Controller
 public class LoginController {
@@ -31,7 +31,6 @@ public class LoginController {
     //Login page route
     @GetMapping({"/", "/login"})
     public String loginPage(Model model) {
-        logger.info("Rendering login page");
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.LOGIN_VIEW);
         return PageMappings.INDEX_PAGE;
     }
@@ -39,7 +38,6 @@ public class LoginController {
     // Registration page route
     @GetMapping("/register")
     public String registerPage(Model model) {
-        logger.info("Rendering registration page");
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.REGISTER_VIEW);
         return PageMappings.INDEX_PAGE;
     }
@@ -70,7 +68,9 @@ public class LoginController {
     }
 
 
-    /** APIs Route **/
+    /**
+     * APIs Route
+     **/
     @PostMapping("/authenticate")
     public String doLogin(@ModelAttribute AuthDTO authDTO, Model model, HttpSession session) {
         logger.info("Attempting to authenticate user with phone number or email: {}", authDTO.getPhoneNumberOrEmail());
@@ -93,5 +93,26 @@ public class LoginController {
         model.addAttribute("successMessage", "Registration successful! Please log in.");
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.REGISTER_VIEW);
         return PageMappings.INDEX_PAGE;
+    }
+
+
+    @PostMapping("/api/authenticate")
+    @ResponseBody
+    public SuccessResponse<JwtResponse> authenticate(@RequestBody AuthDTO authDTO,HttpSession session) {
+        logger.info("Attempting to authenticate user with phone number or email: {}", authDTO.getPhoneNumberOrEmail());
+        JwtResponse jwtResponse = loginService.validateCredentials(authDTO);
+        // Storing userid plus jwtResponse in concurrent hashmap for centralized token and user details
+        tokenStoreService.storeToken(jwtResponse.getId(), jwtResponse);
+        session.setAttribute("userid", jwtResponse.getId());
+        return new SuccessResponse<>("200", "Authentication successful", Arrays.asList(jwtResponse));
+    }
+
+    @PostMapping("/api/register")
+    @ResponseBody
+    public SuccessResponse<UserDTO> register(@RequestBody UserDTO userDTO) {
+        logger.info("Attempting to register user with phone number or email: {}", userDTO.getEmail());
+        // Call the service to register the user
+        UserDTO userResponse = loginService.registerUser(userDTO);
+        return new SuccessResponse<>("200", "Registration successful! Please log in.", Arrays.asList(userResponse));
     }
 }

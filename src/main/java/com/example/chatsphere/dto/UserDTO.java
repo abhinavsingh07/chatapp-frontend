@@ -16,11 +16,12 @@ public class UserDTO {
     private String name;
     private String profilePictureUrl;
     private String about;
+    private String roleName;
+
     public UserDTO() {
     }
 
-    //used in test class
-    public UserDTO(String id, String phoneNumber, String email, String password, String name, String profilePictureUrl, String about) {
+    public UserDTO(String id, String phoneNumber, String email, String password, String name, String profilePictureUrl, String about,String roleName) {
         this.id = id;
         this.phoneNumber = phoneNumber;
         this.email = email;
@@ -28,6 +29,7 @@ public class UserDTO {
         this.name = name;
         this.profilePictureUrl = profilePictureUrl;
         this.about = about;
+        this.roleName = roleName;
     }
 
     // Getters and Setters
@@ -85,5 +87,13 @@ public class UserDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
     }
 }
