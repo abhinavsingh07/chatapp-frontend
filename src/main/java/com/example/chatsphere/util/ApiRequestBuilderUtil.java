@@ -5,6 +5,8 @@ import com.example.chatsphere.mappings.EndpointRegistry;
 import com.example.chatsphere.security.JwtResponse;
 import com.example.chatsphere.service.TokenStoreService;
 import com.example.chatsphere.service.impl.LoginServiceImpl;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,18 +55,15 @@ public class ApiRequestBuilderUtil {
             throw new IllegalArgumentException("No endpoint mapping found for key: " + key);
         }
         // builder pattern for ApiRequest
-        return ApiRequest.builder()
-                .withPath(endpoint.getPath())
-                .withMethod(endpoint.getMethod())
-                .withBody(body)// DTO class Make sure body has getters and setters for serialization
+        return ApiRequest.builder().withPath(endpoint.getPath()).withMethod(endpoint.getMethod()).withBody(body)// DTO class Make sure body has getters and setters for serialization
                 .withHeaders(getDefaultHeaders(endpoint)); // should set Content-Type to JSON. getDefaultHeaders Our
-                                                           // custom headers utility method
+        // custom headers utility method
     }
 
     /**
      * Overloaded build method to support GET or other HTTP requests with both
      * path parameters (placeholders in the endpoint path) and query parameters.
-     *
+     * <p>
      * Example:
      * Endpoint path: "/api/contact/{contactId}"
      * pathParams: { "contactId": "12345" }
@@ -76,14 +75,13 @@ public class ApiRequestBuilderUtil {
      *                    the endpoint path
      * @param queryParams Map of query parameters (name → value) to append after '?'
      * @return ApiRequest Built API request with placeholders replaced and query
-     *         string appended
+     * string appended
      * @throws IllegalArgumentException If no endpoint mapping is found for the
      *                                  given key
      */
     public ApiRequest build(String key, Map<String, String> pathParams, Map<String, String> queryParams) {
         ApiEndpoint endpoint = endpointRegistry.get(key);
-        logger.info("Building API request for key: {} & pathParams: {} & queryParams: {}", key, pathParams,
-                queryParams);
+        logger.info("Building API request for key: {} & pathParams: {} & queryParams: {}", key, pathParams, queryParams);
 
         if (endpoint == null) {
             throw new IllegalArgumentException("No endpoint mapping found for key: " + key);
@@ -102,18 +100,11 @@ public class ApiRequestBuilderUtil {
 
         // Append query parameters if provided, properly encoding each value
         if (queryParams != null && !queryParams.isEmpty()) {
-            String queryString = queryParams.entrySet()
-                    .stream()
-                    .map(entry -> entry.getKey() + "=" +
-                            UriUtils.encodeQueryParam(entry.getValue(), StandardCharsets.UTF_8))
-                    .collect(Collectors.joining("&"));
+            String queryString = queryParams.entrySet().stream().map(entry -> entry.getKey() + "=" + UriUtils.encodeQueryParam(entry.getValue(), StandardCharsets.UTF_8)).collect(Collectors.joining("&"));
             pathWithParams += "?" + queryString;
         }
 
-        return ApiRequest.builder()
-                .withPath(pathWithParams)
-                .withMethod(endpoint.getMethod())
-                .withHeaders(getDefaultHeaders(endpoint));
+        return ApiRequest.builder().withPath(pathWithParams).withMethod(endpoint.getMethod()).withHeaders(getDefaultHeaders(endpoint));
     }
 
     public HttpHeaders getDefaultHeaders(ApiEndpoint apiEndpoint) {
@@ -125,17 +116,14 @@ public class ApiRequestBuilderUtil {
         if (apiEndpoint.getPath().contains("/authenticate") || apiEndpoint.getPath().contains("/register")) {
             return headers;
         }
-        // Get current HTTP session
+        // Get current http request
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attr != null) {
-            HttpSession session = attr.getRequest().getSession(false);
-            if (session != null) {
-                String userId = (String) session.getAttribute("userid");
-                logger.debug("fetching userId from session: {}", userId);
-                if (userId != null) {
-                    JwtResponse jwtResponse = tokenStoreService.getToken(userId); // Retrieve JWT from token store
-                    if (jwtResponse.getJwtToken() != null && !jwtResponse.getJwtToken().isBlank()) {
-                        headers.set("Authorization", "Bearer " + jwtResponse.getJwtToken());
+            HttpServletRequest httpRequest = attr.getRequest();
+            if (httpRequest.getCookies() != null) {
+                for (Cookie c : httpRequest.getCookies()) {
+                    if ("jwt".equals(c.getName())) {
+                        headers.setBearerAuth(c.getValue());
                     }
                 }
             }

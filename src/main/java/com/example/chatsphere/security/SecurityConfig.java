@@ -19,6 +19,9 @@ public class SecurityConfig {
     @Autowired
     private TokenStoreService tokenStoreService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
@@ -27,25 +30,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // Disable CSRF protection for simplicity, but consider enabling it in production
-        return http
-                .csrf(csrf -> csrf.disable()) // disable CSRF for testing (enable in prod)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/authenticate","/register","/error","/api/authenticate","/api/register").permitAll()
+        return http.csrf(csrf -> csrf.disable()) // disable CSRF for testing (enable in prod)
+                .authorizeHttpRequests(auth ->
+                        auth.requestMatchers(
+                        "/", "/login",
+                                "/authenticate", "/register",
+                                "/error", "/api/authenticate",
+                                "/api/register").permitAll()
                         .requestMatchers("/WEB-INF/**").permitAll() // allow access to JSPs
-                        .requestMatchers("/css/**", "/js/**", "/images/**","/icons/**").permitAll() //allow static resources
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/icons/**").permitAll() //allow static resources
+                        .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(form -> form.disable()) // using custom login flow
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                )
-                //even if we add this addfilterbefore filter always runs
-                .addFilterBefore(new CustomSessionJwtFilter(tokenStoreService), UsernamePasswordAuthenticationFilter.class)
-                .build();
+                .logout(logout ->
+                        logout.logoutUrl("/logout")
+                                .logoutSuccessUrl("/login")
+                                .invalidateHttpSession(true)
+                                .deleteCookies("JSESSIONID","jwt"))
+                //even if we add this add filter before filter always runs
+                .addFilterBefore(new CustomSessionJwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class).build();
     }
-
 }

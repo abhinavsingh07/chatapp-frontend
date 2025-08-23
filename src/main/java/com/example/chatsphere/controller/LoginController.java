@@ -7,7 +7,9 @@ import com.example.chatsphere.security.JwtResponse;
 import com.example.chatsphere.service.LoginService;
 import com.example.chatsphere.service.TokenStoreService;
 import com.example.chatsphere.util.SuccessResponse;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,15 +74,26 @@ public class LoginController {
      * APIs Route
      **/
     @PostMapping("/authenticate")
-    public String doLogin(@ModelAttribute AuthDTO authDTO, Model model, HttpSession session) {
-        logger.info("Attempting to authenticate user with phone number or email: {}", authDTO.getPhoneNumberOrEmail());
-        JwtResponse jwtResponse = loginService.validateCredentials(authDTO);// may throw ApiException goes to global exception handler then logic go to login page and show error
-        //Storing userid plus jwtResponse in concurrent hashmap for centralized token and user details
-        tokenStoreService.storeToken(jwtResponse.getId(), jwtResponse);
-        //Store details to user session
+    public String doLogin(@ModelAttribute AuthDTO authDTO, Model model, HttpSession session, HttpServletResponse response) {
+        logger.info("Attempting to authenticate user with phone/email: {}", authDTO.getPhoneNumberOrEmail());
+
+        // Validate credentials → service will throw ApiException if invalid
+        JwtResponse jwtResponse = loginService.validateCredentials(authDTO);
+
+        //  put JWT in HttpOnly cookie
+        Cookie jwtCookie = new Cookie("jwt", jwtResponse.getJwtToken());
+        jwtCookie.setHttpOnly(true);      // prevent JS access
+        //jwtCookie.setSecure(true);        // send only over HTTPS for now commenting for dev
+        jwtCookie.setPath("/");           // valid across your app
+        //jwtCookie.setMaxAge(15 * 60);     // 15 min expiration to do using refesh tokens
+        jwtCookie.setAttribute("SameSite", "Strict"); // prevent CSRF
+        response.addCookie(jwtCookie);//add cookie in resposne
+
+        // Still keep non-sensitive user details in session if you want
         session.setAttribute("username", jwtResponse.getName());
         session.setAttribute("userid", jwtResponse.getId());
-        return PageMappings.REDIRECT_HOME;
+
+        return PageMappings.REDIRECT_HOME; // redirect user to home page
     }
 
 
@@ -98,7 +111,7 @@ public class LoginController {
 
     @PostMapping("/api/authenticate")
     @ResponseBody
-    public SuccessResponse<JwtResponse> authenticate(@RequestBody AuthDTO authDTO,HttpSession session) {
+    public SuccessResponse<JwtResponse> authenticate(@RequestBody AuthDTO authDTO, HttpSession session) {
         logger.info("Attempting to authenticate user with phone number or email: {}", authDTO.getPhoneNumberOrEmail());
         JwtResponse jwtResponse = loginService.validateCredentials(authDTO);
         // Storing userid plus jwtResponse in concurrent hashmap for centralized token and user details

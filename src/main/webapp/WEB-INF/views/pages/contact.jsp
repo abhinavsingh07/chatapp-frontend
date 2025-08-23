@@ -124,6 +124,8 @@
       </div>
    </div>
    <script>
+      const ctx = "<c:out value='${ctx}'/>";
+      const userId = "<c:out value='${userid}'/>";
 
       function sendContactRequest(userId) {
          // Simulate sending contact request
@@ -137,24 +139,41 @@
          button.disabled = true;
       }
 
-      function startChat(contactId) {
-         // Create or navigate to chat with contact
+      function startChat(toUserId) {
          var util = new Validator();
-         if (!util.isSafe(contactId)) {
-             console.error('Invalid contact ID.');
-            return;
-         }
+         if (!util.isSafe(userId)) return;
+         if (!util.isSafe(toUserId)) return;
 
-         // Redirect to chat page with contact ID
-         window.location.href = "${ctx}/chat-room/${userId}/${contactId}";
+         const url = `${ctx}/api/conversation/get-or-create/`
+            + encodeURIComponent(userId) + "/"
+            + encodeURIComponent(toUserId);
+
+         ajaxRequest(
+            url,
+            "GET",
+            null,
+            function (response) {
+               console.log("Conversation created/fetched successfully:", JSON.stringify(response));
+
+               if (response && response.data) {
+                  const conversationId = response.data;
+                  // After conversation is ready, load chat room view
+                  window.location.href = `${ctx}/chat-room/` + encodeURIComponent(conversationId) + "/" + encodeURIComponent(toUserId);
+               } else {
+                  console.log("Failed to create or fetch conversation. Please try again.");
+               }
+            },
+            function (err) {
+               console.error("Error while creating conversation:", err);
+            }
+         );
       }
+
+
 
       function viewProfile(userId) {
          var util = new Validator();
-         if (!util.isSafe(userId)) {
-            alert('Invalid user ID.');
-            return;
-         }
+         if (!util.isSafe(userId)) return;
 
          // Show loading modal immediately
          const modal = new bootstrap.Modal(document.getElementById('contactProfileModal'));
@@ -177,7 +196,7 @@
                   profileContent.innerHTML = `<div class="text-center text-muted p-3">User not found</div>`;
                }
             },
-            function () {
+            function (err) {
                profileContent.innerHTML = `<div class="text-center text-danger p-3">Failed to load user details. Please try again.</div>`;
             }
          );
@@ -278,10 +297,7 @@
       function removeContact(contactId) {
          if (confirm('Are you sure you want to remove this contact?')) {
             var util = new Validator();
-            if (!util.isSafe(contactId)) {
-               alert('Invalid contact ID.');
-               return;
-            }
+            if (!util.isSafe(contactId)) return;
 
             ajaxRequest(
                "${ctx}/api/contact/" + contactId + "/remove",

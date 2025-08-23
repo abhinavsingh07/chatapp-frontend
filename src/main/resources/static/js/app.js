@@ -40,15 +40,6 @@ Validator.prototype.isSafe = function (value) {
   return sanitized === value.trim();
 };
 
-Validator.prototype.isSafe = function (value) {
-  if (typeof value !== "string" || value.trim() === "") {
-    return false;
-  }
-  const sanitized = this.sanitizeInput(value);
-  // If sanitization changes the value, it means it had unsafe content
-  return sanitized === value.trim();
-};
-
 
 // Email validation
 Validator.prototype.isEmail = function (email) {
