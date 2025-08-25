@@ -139,67 +139,71 @@
          button.disabled = true;
       }
 
-      function startChat(toUserId) {
-         var util = new Validator();
-         if (!util.isSafe(userId)) return;
-         if (!util.isSafe(toUserId)) return;
+      function startChat(event) {
+         if (event.target) {
+            var toUserId = event.currentTarget.getAttribute("data-contactuserid");
+            var util = new Validator();
+            if (!util.isSafe(userId)) return;
+            if (!util.isSafe(toUserId)) return;
 
-         const url = `${ctx}/api/conversation/get-or-create/`
-            + encodeURIComponent(userId) + "/"
-            + encodeURIComponent(toUserId);
+            const url = `${ctx}/api/conversation/get-or-create/`
+               + encodeURIComponent(userId) + "/"
+               + encodeURIComponent(toUserId);
 
-         ajaxRequest(
-            url,
-            "GET",
-            null,
-            function (response) {
-               console.log("Conversation created/fetched successfully:", JSON.stringify(response));
-
-               if (response && response.data) {
-                  const conversationId = response.data;
-                  // After conversation is ready, load chat room view
-                  window.location.href = `${ctx}/chat-room/` + encodeURIComponent(conversationId) + "/" + encodeURIComponent(toUserId);
-               } else {
-                  console.log("Failed to create or fetch conversation. Please try again.");
+            ajaxRequest(
+               url,
+               "GET",
+               null,
+               function (response) {
+                  if (response && response.data) {
+                     const conversationId = response.data;
+                     // After conversation is ready, load chat room view
+                     window.location.href = `${ctx}/chat-room/` + encodeURIComponent(conversationId) + "/" + encodeURIComponent(toUserId);
+                  } else {
+                     console.log("Failed to create or fetch conversation. Please try again.");
+                  }
+               },
+               function (err) {
+                  console.error("Error while creating conversation:", err);
                }
-            },
-            function (err) {
-               console.error("Error while creating conversation:", err);
-            }
-         );
+            );
+         }
+
       }
 
+      function viewProfile(event) {
+         if (event.target) {
+            const userId = event.currentTarget.getAttribute("data-contactuserid");
+            const util = new Validator();
+            if (!util.isSafe(userId)) return;
 
+            // Show loading modal immediately
+            const modal = new bootstrap.Modal(document.getElementById('contactProfileModal'));
+            const profileContent = document.getElementById('profileContent');
+            profileContent.innerHTML = '<div class="text-center p-3"><i class="fas fa-spinner fa-spin"></i> Loading profile...</div>';
+            modal.show();
 
-      function viewProfile(userId) {
-         var util = new Validator();
-         if (!util.isSafe(userId)) return;
+            // Call API to get user details
+            ajaxRequest(
+               "${ctx}/api/user/" + encodeURIComponent(userId),
+               "GET",
+               null,
+               function (response) {
+                  console.log("User details loaded successfully:", response);
 
-         // Show loading modal immediately
-         const modal = new bootstrap.Modal(document.getElementById('contactProfileModal'));
-         const profileContent = document.getElementById('profileContent');
-         profileContent.innerHTML = '<div class="text-center p-3"><i class="fas fa-spinner fa-spin"></i> Loading profile...</div>';
-         modal.show();
-
-         // Call API to get user details
-         ajaxRequest(
-            "${ctx}/api/user/" + encodeURIComponent(userId),
-            "GET",
-            null,
-            function (response) {
-               console.log("User details loaded successfully:", response);
-
-               if (response && response.data && response.data.length > 0) {
-                  // Pass first user object to profile rendering
-                  renderProfileHtml(response.data[0]);
-               } else {
-                  profileContent.innerHTML = `<div class="text-center text-muted p-3">User not found</div>`;
+                  if (response && response.data && response.data.length > 0) {
+                     // Pass first user object to profile rendering
+                     renderProfileHtml(response.data[0]);
+                  } else {
+                     profileContent.innerHTML = `<div class="text-center text-muted p-3">User not found</div>`;
+                  }
+               },
+               function (err) {
+                  profileContent.innerHTML = `<div class="text-center text-danger p-3">Failed to load user details. Please try again.</div>`;
                }
-            },
-            function (err) {
-               profileContent.innerHTML = `<div class="text-center text-danger p-3">Failed to load user details. Please try again.</div>`;
-            }
-         );
+            );
+         }
+
       }
 
       function renderProfileHtml(user) {
@@ -262,11 +266,11 @@
       }
 
       function addContact(email) {
-         var util = new Validator();
-         if (!util.isEmail(email)) {
-            alert('Please enter a valid email address.');
-            return;
-         }
+         // var util = new Validator();
+         // if (!util.isEmail(email)) {
+         //    alert('Please enter a valid email address.');
+         //    return;
+         // }
 
          //request for add contact
          const addContactRequest = {
@@ -294,9 +298,10 @@
 
 
 
-      function removeContact(contactId) {
+      function removeContact(event) {
          if (confirm('Are you sure you want to remove this contact?')) {
-            var util = new Validator();
+            const util = new Validator();
+            const contactId = event.currentTarget.getAttribute("data-contactid");
             if (!util.isSafe(contactId)) return;
 
             ajaxRequest(
@@ -318,9 +323,8 @@
 
 
       function loadContacts() {
-         console.log("Loading contacts for userId: " + "${userid}");
          ajaxRequest(
-            "${ctx}/api/contact/${userid}", // Your backend endpoint
+            "${ctx}/api/contact/${userid}", //  spring mvc endpoint
             "GET",
             null,
             function (response) {
@@ -374,10 +378,10 @@
                if (contact.contactStatus == 'ADDED') {
                   // Actions
                   html += '<div class="btn-group">';
-                  html += '<button class="btn btn-primary btn-sm" onclick="startChat(\'' + contact.contactUserId + '\')" title="Start Chat">'
+                  html += '<button class="btn btn-primary btn-sm" data-contactuserid="' + contact.contactUserId + '" onclick="startChat(event)" title="Start Chat">'
                      + '<i class="fas fa-comment"></i>'
                      + '</button>';
-                  html += '<button class="btn btn-outline-secondary btn-sm" onclick="viewProfile(\'' + contact.contactUserId + '\')" title="View Profile">'
+                  html += '<button class="btn btn-outline-secondary btn-sm" data-contactuserid="' + contact.contactUserId + '" onclick="viewProfile(event)" title="View Profile">'
                      + '<i class="fas fa-eye"></i>'
                      + '</button>';
                }
@@ -392,7 +396,7 @@
                   // + '</a>'
                   // + '</li>'
                   + '<li>'
-                  + '<a class="dropdown-item text-danger" href="#" onclick="removeContact(\'' + contact.contactId + '\')">'
+                  + '<a class="dropdown-item text-danger" href="#" data-contactuserid="' + contact.contactId + '" onclick="removeContact()">'
                   + '<i class="fas fa-trash me-2"></i>Remove'
                   + '</a>'
                   + '</li>'

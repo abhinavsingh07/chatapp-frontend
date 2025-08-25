@@ -121,9 +121,9 @@ public class ApiRequestBuilderUtil {
         if (attr != null) {
             HttpServletRequest httpRequest = attr.getRequest();
             if (httpRequest.getCookies() != null) {
-                for (Cookie c : httpRequest.getCookies()) {
-                    if ("jwt".equals(c.getName())) {
-                        headers.setBearerAuth(c.getValue());
+                for (Cookie cookie : httpRequest.getCookies()) {
+                    if ("jwt".equals(cookie.getName())) {
+                        headers.setBearerAuth(cookie.getValue());
                     }
                 }
             }

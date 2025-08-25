@@ -35,7 +35,7 @@ public class ContactController {
     //Api endpoints
     @GetMapping("/api/contact/{userId}")
     @ResponseBody
-    public SuccessResponse<ContactUserDTO> getContactsByUserId(@PathVariable String userId) {
+    public SuccessResponse<ContactUserDTO> getContactsByUserId(@PathVariable(required=true) String userId) {
         logger.info("Fetching contact list for userId: {}", userId);
         SuccessResponse<ContactUserDTO> contacts = contactService.getContactsByUserId(userId);
         logger.info("Found {} contact(s) for userId: {}", contacts.getData().size(), userId);
