@@ -142,9 +142,9 @@
       function startChat(event) {
          if (event.target) {
             var toUserId = event.currentTarget.getAttribute("data-contactuserid");
-            var util = new Validator();
-            if (!util.isSafe(userId)) return;
-            if (!util.isSafe(toUserId)) return;
+            var validator = new Validator();
+            if (!validator.isSafe(userId)) return;
+            if (!validator.isSafe(toUserId)) return;
 
             const url = `${ctx}/api/conversation/get-or-create/`
                + encodeURIComponent(userId) + "/"
@@ -174,8 +174,8 @@
       function viewProfile(event) {
          if (event.target) {
             const userId = event.currentTarget.getAttribute("data-contactuserid");
-            const util = new Validator();
-            if (!util.isSafe(userId)) return;
+            const validator = new Validator();
+            if (!validator.isSafe(userId)) return;
 
             // Show loading modal immediately
             const modal = new bootstrap.Modal(document.getElementById('contactProfileModal'));
@@ -266,8 +266,8 @@
       }
 
       function addContact(email) {
-         // var util = new Validator();
-         // if (!util.isEmail(email)) {
+         // var validator = new Validator();
+         // if (!validator.isEmail(email)) {
          //    alert('Please enter a valid email address.');
          //    return;
          // }
@@ -300,9 +300,9 @@
 
       function removeContact(event) {
          if (confirm('Are you sure you want to remove this contact?')) {
-            const util = new Validator();
+            const validator = new Validator();
             const contactId = event.currentTarget.getAttribute("data-contactid");
-            if (!util.isSafe(contactId)) return;
+            if (!validator.isSafe(contactId)) return;
 
             ajaxRequest(
                "${ctx}/api/contact/" + contactId + "/remove",

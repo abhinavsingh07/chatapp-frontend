@@ -6,7 +6,10 @@ class ChatWebSocket {
         TYPING_START: "TYPING_START",
         TYPING_STOP: "TYPING_STOP",
         DISCONNECTED: "DISCONNECTED",
+        HEARTBEAT: "HEARTBEAT",
+        PRESENCE_UPDATE: "PRESENCE_UPDATE"
     };
+
 
     constructor(chatId, fromUserId, toUserId) {
         this.chatId = chatId;
@@ -20,7 +23,7 @@ class ChatWebSocket {
         this.messagesContainer = document.getElementById("messagesContainer");
         this.messageInput = document.getElementById("messageInput");
         this.typingIndicator = document.getElementById("typingIndicator");
-        this.typingUsersSpan = document.getElementById("typingUsers");
+        this.heartbeatInterval = null;
     }
 
     // ----------------- WebSocket Lifecycle -----------------
@@ -47,16 +50,36 @@ class ChatWebSocket {
     // ----------------- WebSocket Events -----------------
     onOpen() {
         console.log(`OPEN:: WebSocket connected for user: ${this.fromUserId}`);
+
+        // Clear any old interval before starting a new one
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+        }
+
+        // Start heartbeat after connection opens
+        this.heartbeatInterval = setInterval(() => {
+            if (this.socket?.readyState === WebSocket.OPEN) {
+                this.sendMessageViaSocket({
+                    wsStatus: ChatWebSocket.wsStatus.HEARTBEAT,
+                    fromUserId: this.fromUserId
+                });
+                console.log("Heartbeat sent");
+            }
+        }, 10000); // every 10s
+    }
+
+    onClose() {
+        console.log("ONCLOSE:: WebSocket disconnected");
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+            this.heartbeatInterval = null;
+        }
     }
 
     onMessage(event) {
         const data = JSON.parse(event.data);
         console.log("ONMESSAGE:: Received:", JSON.stringify(data));
         this.handleIncomingMessage(data);
-    }
-
-    onClose() {
-        console.log("ONCLOSE:: WebSocket disconnected for user2");
     }
 
     onError(err) {

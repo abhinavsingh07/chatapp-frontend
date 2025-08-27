@@ -16,6 +16,7 @@ public class EndpointRegistry {
             "auth.register", new ApiRequestBuilderUtil.ApiEndpoint("/auth/register", HttpMethod.POST),
             "user.getByUserId", new ApiRequestBuilderUtil.ApiEndpoint("/api/users/{userId}", HttpMethod.GET),
             "user.getAllUsers", new ApiRequestBuilderUtil.ApiEndpoint("/api/users/all", HttpMethod.GET),
+            "user.getUserLastActiveStatus", new ApiRequestBuilderUtil.ApiEndpoint("/api/users/lastActiveStatus", HttpMethod.GET),
             "message.getByConvId", new ApiRequestBuilderUtil.ApiEndpoint("/api/messages/conversation/{conversationId}", HttpMethod.GET),
             "conv.getOrCreateConv", new ApiRequestBuilderUtil.ApiEndpoint("/api/conversations/get-or-create/{fromUserId}/{toUserId}", HttpMethod.POST),
             "contact.add", new ApiRequestBuilderUtil.ApiEndpoint("/api/contacts", HttpMethod.POST),

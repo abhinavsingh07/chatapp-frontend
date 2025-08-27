@@ -3,6 +3,7 @@ package com.example.chatsphere.service.impl;
 import com.apiservice.client.ApiDispatcherService;
 import com.apiservice.client.ApiRequest;
 import com.example.chatsphere.dto.UserDTO;
+import com.example.chatsphere.dto.UserStatusDTO;
 import com.example.chatsphere.service.UserService;
 import com.example.chatsphere.util.ApiRequestBuilderUtil;
 import com.example.chatsphere.util.SuccessResponse;
@@ -71,6 +72,32 @@ public class UserServiceImpl implements UserService {
             logger.info("User details retrieved for userId: {}", userId);
         } else {
             logger.info("No user found for userId: {}", userId);
+        }
+
+        return response;
+    }
+
+    @Override
+    public SuccessResponse<UserStatusDTO> getUserLastActiveStatus(String userId) {
+        logger.info("Preparing to fetch last active status for userId: {}", userId);
+
+        // Prepare query parameters
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("userId", userId);
+
+        // Build API request
+        ApiRequest apiReq = apiRequestBuilderUtil.build("user.getUserLastActiveStatus", Collections.emptyMap(), queryParams);
+        logger.info("Fetching last active status via API path: {}", apiReq.getPath());
+
+        // Call the API
+        SuccessResponse<UserStatusDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserStatusDTO>>() {
+        });
+
+        // Log the result
+        if (response.getData() != null) {
+            logger.info("Successfully retrieved last active status for {} users", response.getData().size());
+        } else {
+            logger.info("No status data found");
         }
 
         return response;

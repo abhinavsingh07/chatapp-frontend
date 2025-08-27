@@ -23,20 +23,7 @@
                                     </c:otherwise>
                                 </c:choose>
                             </h6>
-                            <small class="text-light opacity-75">
-                                <c:choose>
-                                    <c:when test="${other_participants[0].online}">Online</c:when>
-                                    <c:otherwise>
-                                        Last seen:
-                                        <c:choose>
-                                            <c:when test="${not empty other_participants[0].last_seen}">
-                                                <fmt:formatDate value="${other_participants[0].last_seen}"
-                                                    pattern="HH:mm" />
-                                            </c:when>
-                                            <c:otherwise>Recently</c:otherwise>
-                                        </c:choose>
-                                    </c:otherwise>
-                                </c:choose>
+                            <small class="text-light opacity-75" id="user-presence-status">
                             </small>
                         </div>
 
@@ -86,15 +73,7 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </h6>
-                                <small class="text-muted">
-                                    <c:choose>
-                                        <c:when test="${other_participants[0].online}">Online</c:when>
-                                        <c:otherwise>
-                                            Last seen:
-                                            <fmt:formatDate value="${other_participants[0].last_seen}"
-                                                pattern="HH:mm" />
-                                        </c:otherwise>
-                                    </c:choose>
+                                <small class="text-muted" id="user-presence-status">
                                 </small>
                             </div>
                         </div>
@@ -164,7 +143,7 @@
                 <!-- Message Input -->
                 <div class="message-input bg-white border-top p-3">
                     <form id="messageForm" action="/submit" class="d-flex align-items-end gap-2">
-                        <input type="hidden" name="chat_id" value="${chat.id}">
+                        <input type="hidden" name="chat_id" value="<c:out value='${conversationId}'/>">
 
                         <!-- Attachment Button -->
                         <!-- <button type="button" class="btn btn-outline-secondary" onclick="showAttachmentOptions()">
@@ -208,6 +187,7 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             initSocket();
+            initUserPresencePoller()
             convertSentAtUTCtoUserTimeZone();
             // Auto-scroll to bottom
             scrollToBottom();
@@ -225,104 +205,104 @@
             sidebar.show();
         }
 
-        function startVideoCall() {
-            alert('Video call feature will be integrated with WebRTC service');
-        }
+        // function startVideoCall() {
+        //     alert('Video call feature will be integrated with WebRTC service');
+        // }
 
-        function startVoiceCall() {
-            alert('Voice call feature will be integrated with WebRTC service');
-        }
+        // function startVoiceCall() {
+        //     alert('Voice call feature will be integrated with WebRTC service');
+        // }
 
-        function showAttachmentOptions() {
-            // Create temporary file input
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.multiple = true;
-            input.accept = 'image/*,video/*,audio/*,.pdf,.doc,.docx';
+        // function showAttachmentOptions() {
+        //     // Create temporary file input
+        //     const input = document.createElement('input');
+        //     input.type = 'file';
+        //     input.multiple = true;
+        //     input.accept = 'image/*,video/*,audio/*,.pdf,.doc,.docx';
 
-            input.onchange = function (e) {
-                const files = Array.from(e.target.files);
-                files.forEach(file => {
-                    // In a real app, this would upload the file
-                    console.log('Would upload file:', file.name);
-                    // alert(`File upload for "${file.name}" will be integrated with file service`);
-                });
-            };
+        //     input.onchange = function (e) {
+        //         const files = Array.from(e.target.files);
+        //         files.forEach(file => {
+        //             // In a real app, this would upload the file
+        //             console.log('Would upload file:', file.name);
+        //             // alert(`File upload for "${file.name}" will be integrated with file service`);
+        //         });
+        //     };
 
-            input.click();
-        }
+        //     input.click();
+        // }
 
-        function showEmojiPicker() {
-            // Simple emoji picker (in production, use a proper emoji picker library)
-            const emojis = ['😀', '😂', '😍', '🤔', '👍', '👎', '❤️', '🎉', '😢', '😡'];
-            const messageInput = document.getElementById('messageInput');
+        // function showEmojiPicker() {
+        //     // Simple emoji picker (in production, use a proper emoji picker library)
+        //     const emojis = ['😀', '😂', '😍', '🤔', '👍', '👎', '❤️', '🎉', '😢', '😡'];
+        //     const messageInput = document.getElementById('messageInput');
 
-            const emojiMenu = emojis.map(emoji =>
-                `<button class="btn btn-sm btn-outline-secondary me-1 mb-1" onclick="addEmoji('${emoji}')">${emoji}</button>`
-            ).join('');
+        //     const emojiMenu = emojis.map(emoji =>
+        //         `<button class="btn btn-sm btn-outline-secondary me-1 mb-1" onclick="addEmoji('${emoji}')">${emoji}</button>`
+        //     ).join('');
 
-            const modal = `
-        <div class="modal fade" id="emojiModal" tabindex="-1">
-            <div class="modal-dialog modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h6 class="modal-title">Choose Emoji</h6>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                       ${emojiMenu}
-                    </div>
-                </div>
-            </div>
-        </div>`;
+        //     const modal = `
+        // <div class="modal fade" id="emojiModal" tabindex="-1">
+        //     <div class="modal-dialog modal-sm">
+        //         <div class="modal-content">
+        //             <div class="modal-header">
+        //                 <h6 class="modal-title">Choose Emoji</h6>
+        //                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        //             </div>
+        //             <div class="modal-body">
+        //                ${emojiMenu}
+        //             </div>
+        //         </div>
+        //     </div>
+        // </div>`;
 
-            document.body.insertAdjacentHTML('beforeend', modal);
-            const emojiModalEl = new bootstrap.Modal(document.getElementById('emojiModal'));
-            emojiModalEl.show();
+        //     document.body.insertAdjacentHTML('beforeend', modal);
+        //     const emojiModalEl = new bootstrap.Modal(document.getElementById('emojiModal'));
+        //     emojiModalEl.show();
 
-            // Clean up when modal is hidden
-            document.getElementById('emojiModal').addEventListener('hidden.bs.modal', function () {
-                this.remove();
-            });
-        }
+        //     // Clean up when modal is hidden
+        //     document.getElementById('emojiModal').addEventListener('hidden.bs.modal', function () {
+        //         this.remove();
+        //     });
+        // }
 
-        function addEmoji(emoji) {
-            const messageInput = document.getElementById('messageInput');
-            messageInput.value += emoji;
-            messageInput.focus();
+        // function addEmoji(emoji) {
+        //     const messageInput = document.getElementById('messageInput');
+        //     messageInput.value += emoji;
+        //     messageInput.focus();
 
-            // Close emoji modal
-            const emojiModal = bootstrap.Modal.getInstance(document.getElementById('emojiModal'));
-            if (emojiModal) {
-                emojiModal.hide();
-            }
-        }
+        //     // Close emoji modal
+        //     const emojiModal = bootstrap.Modal.getInstance(document.getElementById('emojiModal'));
+        //     if (emojiModal) {
+        //         emojiModal.hide();
+        //     }
+        // }
 
-        function clearChat() {
-            if (confirm('Are you sure you want to clear this chat? This action cannot be undone.')) {
-                alert('Clear chat functionality will be integrated with backend service');
-            }
-        }
+        // function clearChat() {
+        //     if (confirm('Are you sure you want to clear this chat? This action cannot be undone.')) {
+        //         alert('Clear chat functionality will be integrated with backend service');
+        //     }
+        // }
 
-        function leaveGroup() {
-            if (confirm('Are you sure you want to leave this group?')) {
-                alert('Leave group functionality will be integrated with backend service');
-            }
-        }
+        // function leaveGroup() {
+        //     if (confirm('Are you sure you want to leave this group?')) {
+        //         alert('Leave group functionality will be integrated with backend service');
+        //     }
+        // }
 
-        function searchInChat() {
-            alert('Search in chat functionality will be integrated');
-        }
+        // function searchInChat() {
+        //     alert('Search in chat functionality will be integrated');
+        // }
 
-        function viewSharedMedia() {
-            alert('Shared media view will be integrated');
-        }
+        // function viewSharedMedia() {
+        //     alert('Shared media view will be integrated');
+        // }
 
-        function blockUser() {
-            if (confirm('Are you sure you want to block this user?')) {
-                alert('Block user functionality will be integrated with backend service');
-            }
-        }
+        // function blockUser() {
+        //     if (confirm('Are you sure you want to block this user?')) {
+        //         alert('Block user functionality will be integrated with backend service');
+        //     }
+        // }
 
         function convertSentAtUTCtoUserTimeZone() {
             const dates = document.querySelectorAll("#sentAt");
@@ -347,5 +327,35 @@
             chatWs.bindFormEvents();
         }
 
+        function initUserPresencePoller() {
+            const poller = new UserPresencePoller([toUserId]);
+
+            poller.setUpdateCallback((response) => {
+                const data = response?.data;
+                if (!data || data.length === 0) {
+                    console.warn("No presence data received");
+                    return;
+                }
+
+                const { userId, online, lastActive } = data[0];
+                const statusElem = document.querySelector(".chat-header #user-presence-status");
+                if (!statusElem) return;
+
+                const validator = new Validator();
+                if (!validator.isSafe(userId)) return;
+
+                if (online) {
+                    statusElem.textContent = "Online";
+                } else if (lastActive) {
+                    const df = new DateFormatter();
+                    const formattedLastActive = df.formatUTCToLocalTimeZone(lastActive);
+                    statusElem.textContent = 'Last seen: '+formattedLastActive;
+                } else {
+                    statusElem.textContent = "Offline";
+                }
+                console.log("User presence status updated:", response);
+            });
+            poller.start();
+        }
 
     </script>
