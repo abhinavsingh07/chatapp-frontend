@@ -21,11 +21,13 @@ import java.util.Map;
 public class ContactServiceImpl implements ContactService {
     private static final Logger logger = LoggerFactory.getLogger(ContactServiceImpl.class);
 
-    @Autowired
-    private ApiDispatcherService apiDispatcherService;
+    private final ApiDispatcherService apiDispatcherService;
+    private final ApiRequestBuilderUtil apiRequestBuilderUtil;
 
-    @Autowired
-    private ApiRequestBuilderUtil apiRequestBuilderUtil;
+    public ContactServiceImpl(ApiDispatcherService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
+        this.apiDispatcherService = apiDispatcherService;
+        this.apiRequestBuilderUtil = apiRequestBuilderUtil;
+    }
 
     @Override
     public SuccessResponse<ContactUserDTO> getContactsByUserId(String userId) {
@@ -37,9 +39,8 @@ public class ContactServiceImpl implements ContactService {
         ApiRequest apiReq = apiRequestBuilderUtil.build("contacts.getByUserId", Collections.emptyMap(), queryParams);
         logger.info("Fetching contacts for userId: {}", apiReq.getPath());
 
-        SuccessResponse<ContactUserDTO> response = apiDispatcherService.call(apiReq,
-                new ParameterizedTypeReference<SuccessResponse<ContactUserDTO>>() {
-                });
+        SuccessResponse<ContactUserDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<ContactUserDTO>>() {
+        });
 
         logger.info("Retrieved {} contacts for userId: {}", response.getData().size(), userId);
         return response;
@@ -48,13 +49,21 @@ public class ContactServiceImpl implements ContactService {
     @Override
     public SuccessResponse<ContactUserDTO> addContact(ContactDTO contactDTO) {
         ApiRequest apiReq = apiRequestBuilderUtil.build("contact.add", contactDTO);
-        logger.info("Adding contact: {}", apiReq.getPath());
-        SuccessResponse<ContactUserDTO> responseEntity = apiDispatcherService.call(apiReq,
-                new ParameterizedTypeReference<SuccessResponse<ContactUserDTO>>() {
-                });
-        logger.info("Contact added successfully: {} for userId: {}", apiReq.getPath(), contactDTO.getUserId());
-        return responseEntity;
+
+        logger.info("Adding contact for userId: {}, email: {}", contactDTO.getUserId(), contactDTO.getEmail());
+        logger.debug("API path: {}", apiReq.getPath());
+
+        SuccessResponse<ContactUserDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<ContactUserDTO>>() {
+        });
+
+        if (response.getData() == null || response.getData().isEmpty()) {
+            logger.warn("Failed to add contact for userId: {}", contactDTO.getUserId());
+        } else {
+            logger.info("Contact added successfully for userId: {}, email: {}", contactDTO.getUserId(), contactDTO.getEmail());
+        }
+        return response;
     }
+
 
     @Override
     public SuccessResponse<String> removeContact(String contactId) {
@@ -63,9 +72,8 @@ public class ContactServiceImpl implements ContactService {
 
         ApiRequest apiReq = apiRequestBuilderUtil.build("contact.remove", pathParams, Collections.emptyMap());
         logger.info("Removing contact: {}", apiReq.getPath());
-        SuccessResponse<String> responseEntity = apiDispatcherService.call(apiReq,
-                new ParameterizedTypeReference<SuccessResponse<String>>() {
-                });
+        SuccessResponse<String> responseEntity = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<String>>() {
+        });
         logger.info("Contact removed successfully: {} for contactId: {}", apiReq.getPath(), contactId);
         return responseEntity;
     }

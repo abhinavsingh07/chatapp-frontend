@@ -24,13 +24,17 @@ import java.util.Arrays;
 @Controller
 public class LoginController {
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
-    @Autowired
-    private TokenStoreService tokenStoreService;
 
-    @Autowired
-    private LoginService loginService;
+    private final TokenStoreService tokenStoreService;
 
-    //Login page route
+    private final LoginService loginService;
+
+    public LoginController(TokenStoreService tokenStoreService, LoginService loginService) {
+        this.tokenStoreService = tokenStoreService;
+        this.loginService = loginService;
+    }
+
+    // Login page route
     @GetMapping({"/", "/login"})
     public String loginPage(Model model) {
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.LOGIN_VIEW);
@@ -49,12 +53,11 @@ public class LoginController {
     public String logout(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session != null) {
-            // Remove from concurrent hashmap
-            tokenStoreService.removeToken(session.getAttribute("userid").toString());
-            // Invalidate session
+            String userId = (String) session.getAttribute("userid");
+            tokenStoreService.removeToken(userId);
             session.invalidate();
+            logger.info("User with ID {} logged out successfully", userId);
         }
-        // Clear authentication context
         SecurityContextHolder.clearContext();
         return PageMappings.REDIRECT_LOGIN;
     }
@@ -65,67 +68,66 @@ public class LoginController {
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.ERROR_VIEW);
         if (message != null) {
             model.addAttribute("errorMessage", message);
+            logger.warn("Error encountered: {}", message);
         }
         return PageMappings.INDEX_PAGE;
     }
 
-
-    /**
-     * APIs Route
-     **/
+    // APIs Route
     @PostMapping("/authenticate")
     public String doLogin(@ModelAttribute AuthDTO authDTO, Model model, HttpSession session, HttpServletResponse response) {
-        logger.info("Attempting to authenticate user with phone/email: {}", authDTO.getPhoneNumberOrEmail());
+        logger.debug("Authenticating user with phone/email: {}", authDTO.getPhoneNumberOrEmail());
 
-        // Validate credentials → service will throw ApiException if invalid
         JwtResponse jwtResponse = loginService.validateCredentials(authDTO);
 
-        //  put JWT in HttpOnly cookie
         Cookie jwtCookie = new Cookie("jwt", jwtResponse.getJwtToken());
-        jwtCookie.setHttpOnly(true);      // prevent JS access
-        //jwtCookie.setSecure(true);        // send only over HTTPS for now commenting for dev
-        jwtCookie.setPath("/");           // valid across your app
-        //jwtCookie.setMaxAge(15 * 60);     // 15 min expiration to do using refesh tokens
-        jwtCookie.setAttribute("SameSite", "Strict"); // prevent CSRF
-        response.addCookie(jwtCookie);//add cookie in resposne
+        jwtCookie.setHttpOnly(false);
+        jwtCookie.setPath("/");
+        jwtCookie.setAttribute("SameSite", "Strict");
+        response.addCookie(jwtCookie);
 
-        // Still keep non-sensitive user details in session if you want
         session.setAttribute("username", jwtResponse.getName());
         session.setAttribute("userid", jwtResponse.getId());
 
-        return PageMappings.REDIRECT_HOME; // redirect user to home page
+        logger.info("User {} authenticated successfully", jwtResponse.getId());
+        return PageMappings.REDIRECT_HOME;
     }
-
 
     @PostMapping("/register")
     public String doRegister(@ModelAttribute UserDTO userDTO, Model model) {
-        logger.info("Attempting to register user with phone number or email: {}", userDTO.getEmail());
-        // Call the service to register the user
+        logger.debug("Registering user with email: {}", userDTO.getEmail());
+
         loginService.registerUser(userDTO);
-        // Redirect to login page after successful registration
+
         model.addAttribute("successMessage", "Registration successful! Please log in.");
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.REGISTER_VIEW);
+
+        logger.info("User registered successfully with email: {}", userDTO.getEmail());
         return PageMappings.INDEX_PAGE;
     }
-
 
     @PostMapping("/api/authenticate")
     @ResponseBody
     public SuccessResponse<JwtResponse> authenticate(@RequestBody AuthDTO authDTO, HttpSession session) {
-        logger.info("Attempting to authenticate user with phone number or email: {}", authDTO.getPhoneNumberOrEmail());
+        logger.debug("Authenticating API user with phone/email: {}", authDTO.getPhoneNumberOrEmail());
+
         JwtResponse jwtResponse = loginService.validateCredentials(authDTO);
-        // Storing userid plus jwtResponse in concurrent hashmap for centralized token and user details
         tokenStoreService.storeToken(jwtResponse.getId(), jwtResponse);
         session.setAttribute("userid", jwtResponse.getId());
+
+        logger.info("API authentication successful for user: {}", jwtResponse.getId());
         return new SuccessResponse<>("200", "Authentication successful", Arrays.asList(jwtResponse));
     }
 
     @PostMapping("/api/register")
     @ResponseBody
     public SuccessResponse<UserDTO> register(@RequestBody UserDTO userDTO) {
-        logger.info("Attempting to register user with phone number or email: {}", userDTO.getEmail());
-        // Call the service to register the user
+        logger.debug("Registering API user with email: {}", userDTO.getEmail());
+
         UserDTO userResponse = loginService.registerUser(userDTO);
+
+        logger.info("API registration successful for user: {}", userResponse.getEmail());
         return new SuccessResponse<>("200", "Registration successful! Please log in.", Arrays.asList(userResponse));
     }
 }
+

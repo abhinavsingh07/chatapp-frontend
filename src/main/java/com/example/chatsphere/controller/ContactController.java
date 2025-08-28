@@ -20,11 +20,14 @@ import com.example.chatsphere.util.SuccessResponse;
 
 @Controller
 public class ContactController {
-    // @ResponseBody is used to return JSON response
+
     private static final Logger logger = LoggerFactory.getLogger(ContactController.class);
 
-    @Autowired
-    private ContactService contactService;
+    private final ContactService contactService;
+
+    public ContactController(ContactService contactService) {
+        this.contactService = contactService;
+    }
 
     @GetMapping("/contact")
     public String contactPage(Model model) {
@@ -32,30 +35,52 @@ public class ContactController {
         return PageMappings.INDEX_PAGE;
     }
 
-    //Api endpoints
+    // API endpoints
     @GetMapping("/api/contact/{userId}")
     @ResponseBody
-    public SuccessResponse<ContactUserDTO> getContactsByUserId(@PathVariable(required=true) String userId) {
-        logger.info("Fetching contact list for userId: {}", userId);
+    public SuccessResponse<ContactUserDTO> getContactsByUserId(@PathVariable(required = true) String userId) {
+        logger.debug("Fetching contact list for userId={}", userId);
+
         SuccessResponse<ContactUserDTO> contacts = contactService.getContactsByUserId(userId);
-        logger.info("Found {} contact(s) for userId: {}", contacts.getData().size(), userId);
+
+        if (contacts.getData() == null || contacts.getData().isEmpty()) {
+            logger.info("No contacts found for userId={}", userId);
+        } else {
+            logger.info("Found {} contact(s) for userId={}", contacts.getData().size(), userId);
+        }
+
         return contacts;
     }
 
     @PostMapping("/api/contact/add")
     @ResponseBody
     public SuccessResponse<ContactUserDTO> addContact(@RequestBody ContactDTO contactDTO) {
-        logger.info("Attempting to add new contact for user: {}", contactDTO.getUserId());
+        logger.info("Adding new contact for userId={}", contactDTO.getUserId());
+
         SuccessResponse<ContactUserDTO> response = contactService.addContact(contactDTO);
+
+        if (response.getData() != null && !response.getData().isEmpty()) {
+            logger.info("Contact added successfully for userId={}", contactDTO.getUserId());
+        } else {
+            logger.warn("Failed to add contact for userId={}", contactDTO.getUserId());
+        }
+
         return response;
     }
 
     @DeleteMapping("/api/contact/{contactId}/remove")
     @ResponseBody
     public SuccessResponse<String> removeContact(@PathVariable("contactId") String contactId) {
-        logger.info("Attempting to remove contact with ID: {}", contactId);
+        logger.info("Removing contact with ID={}", contactId);
+
         SuccessResponse<String> response = contactService.removeContact(contactId);
+
+        if (response.getData() != null && !response.getData().isEmpty()) {
+            logger.info("Contact removed successfully with ID={}", contactId);
+        } else {
+            logger.warn("Failed to remove contact with ID={}", contactId);
+        }
+
         return response;
     }
-
 }

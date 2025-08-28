@@ -43,8 +43,10 @@ import java.util.stream.Collectors;
 public class ApiRequestBuilderUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiRequestBuilderUtil.class);
+
     @Autowired
     private EndpointRegistry endpointRegistry;
+
     @Autowired
     private TokenStoreService tokenStoreService;
 
@@ -54,34 +56,16 @@ public class ApiRequestBuilderUtil {
         if (endpoint == null) {
             throw new IllegalArgumentException("No endpoint mapping found for key: " + key);
         }
-        // builder pattern for ApiRequest
-        return ApiRequest.builder().withPath(endpoint.getPath()).withMethod(endpoint.getMethod()).withBody(body)// DTO class Make sure body has getters and setters for serialization
-                .withHeaders(getDefaultHeaders(endpoint)); // should set Content-Type to JSON. getDefaultHeaders Our
-        // custom headers utility method
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Building API request for key={} with body={}", key, body);
+        }
+
+        return ApiRequest.builder().withPath(endpoint.getPath()).withMethod(endpoint.getMethod()).withBody(body).withHeaders(getDefaultHeaders(endpoint));
     }
 
-    /**
-     * Overloaded build method to support GET or other HTTP requests with both
-     * path parameters (placeholders in the endpoint path) and query parameters.
-     * <p>
-     * Example:
-     * Endpoint path: "/api/contact/{contactId}"
-     * pathParams: { "contactId": "12345" }
-     * queryParams: { "status": "active", "sort": "asc" }
-     * Result: "/api/contact/12345?status=active&sort=asc"
-     *
-     * @param key         The endpoint key in the registry
-     * @param pathParams  Map of path parameters (placeholder → value) to replace in
-     *                    the endpoint path
-     * @param queryParams Map of query parameters (name → value) to append after '?'
-     * @return ApiRequest Built API request with placeholders replaced and query
-     * string appended
-     * @throws IllegalArgumentException If no endpoint mapping is found for the
-     *                                  given key
-     */
     public ApiRequest build(String key, Map<String, String> pathParams, Map<String, String> queryParams) {
         ApiEndpoint endpoint = endpointRegistry.get(key);
-        logger.info("Building API request for key: {} & pathParams: {} & queryParams: {}", key, pathParams, queryParams);
 
         if (endpoint == null) {
             throw new IllegalArgumentException("No endpoint mapping found for key: " + key);
@@ -89,34 +73,34 @@ public class ApiRequestBuilderUtil {
 
         String pathWithParams = endpoint.getPath();
 
-        // Replace path parameters like /users/{userId} with actual encoded values
         if (pathParams != null && !pathParams.isEmpty()) {
             for (Map.Entry<String, String> entry : pathParams.entrySet()) {
-                String placeholder = "{" + entry.getKey() + "}";//this should passed in pathParams map
+                String placeholder = "{" + entry.getKey() + "}";
                 String encodedValue = UriUtils.encodePathSegment(entry.getValue(), StandardCharsets.UTF_8);
-                pathWithParams = pathWithParams.replace(placeholder, encodedValue);//url also contains that placeholder.
+                pathWithParams = pathWithParams.replace(placeholder, encodedValue);
             }
         }
 
-        // Append query parameters if provided, properly encoding each value
         if (queryParams != null && !queryParams.isEmpty()) {
             String queryString = queryParams.entrySet().stream().map(entry -> entry.getKey() + "=" + UriUtils.encodeQueryParam(entry.getValue(), StandardCharsets.UTF_8)).collect(Collectors.joining("&"));
             pathWithParams += "?" + queryString;
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Built path for key={}, finalPath={}", key, pathWithParams);
         }
 
         return ApiRequest.builder().withPath(pathWithParams).withMethod(endpoint.getMethod()).withHeaders(getDefaultHeaders(endpoint));
     }
 
     public HttpHeaders getDefaultHeaders(ApiEndpoint apiEndpoint) {
-        logger.info("Building default headers for API endpoint: {}", apiEndpoint.getPath());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // Skip adding token for authenticate & register APIs
         if (apiEndpoint.getPath().contains("/authenticate") || apiEndpoint.getPath().contains("/register")) {
             return headers;
         }
-        // Get current http request
+
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attr != null) {
             HttpServletRequest httpRequest = attr.getRequest();
@@ -124,6 +108,9 @@ public class ApiRequestBuilderUtil {
                 for (Cookie cookie : httpRequest.getCookies()) {
                     if ("jwt".equals(cookie.getName())) {
                         headers.setBearerAuth(cookie.getValue());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("JWT token added to headers for path={}", apiEndpoint.getPath());
+                        }
                     }
                 }
             }
@@ -132,7 +119,6 @@ public class ApiRequestBuilderUtil {
         return headers;
     }
 
-    // Helper DTO to represent endpoint info
     public static class ApiEndpoint {
         private final String path;
         private final HttpMethod method;
@@ -151,3 +137,4 @@ public class ApiRequestBuilderUtil {
         }
     }
 }
+

@@ -17,14 +17,17 @@ import com.example.chatsphere.util.SuccessResponse;
 public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/api/user/all")
     @ResponseBody
     public SuccessResponse<UserDTO> getAllUsers() {
-        logger.info("Fetching all users");
+        // Debug-level log to avoid clutter in production
+        logger.debug("Fetching all users");
         SuccessResponse<UserDTO> userResponse = userService.getAllUsers();
         logger.info("Total users fetched: {}", userResponse.getData().size());
         return userResponse;
@@ -33,18 +36,24 @@ public class UserController {
     @GetMapping("/api/user/{userId}")
     @ResponseBody
     public SuccessResponse<UserDTO> getByUserId(@PathVariable("userId") String userId) {
-        logger.info("Fetching user details for userId: {}", userId);
+        logger.debug("Fetching user details for userId={}", userId);
         SuccessResponse<UserDTO> userResponse = userService.getByUserId(userId);
-        logger.info("User fetch result for userId {}: {}", userId, userResponse.getData() != null ? "Found" : "Not Found");
+
+        if (userResponse.getData() != null && !userResponse.getData().isEmpty()) {
+            logger.info("User found for userId={}", userId);
+        } else {
+            logger.warn("User not found for userId={}", userId);
+        }
+
         return userResponse;
     }
-    
+
     @GetMapping("/api/user/lastActiveStatus")
     @ResponseBody
     public SuccessResponse<UserStatusDTO> getUserLastActiveStatus(@RequestParam("userId") String userId) {
-        logger.info("Fetching last active status for userIds: {}", userId);
+        logger.debug("Fetching last active status for userId={}", userId);
         SuccessResponse<UserStatusDTO> statusResponse = userService.getUserLastActiveStatus(userId);
-        logger.info("Last active status fetched for {} users", statusResponse.getData().size());
+        logger.info("Last active status fetched for {} user(s)", statusResponse.getData().size());
         return statusResponse;
     }
 }

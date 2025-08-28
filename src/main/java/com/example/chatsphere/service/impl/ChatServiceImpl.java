@@ -23,10 +23,13 @@ import org.springframework.stereotype.Service;
 public class ChatServiceImpl implements ChatService {
 
     private static final Logger logger = LoggerFactory.getLogger(ChatServiceImpl.class);
-    @Autowired
-    private ApiDispatcherService apiDispatcherService;
-    @Autowired
-    private ApiRequestBuilderUtil apiRequestBuilderUtil;
+    private final ApiDispatcherService apiDispatcherService;
+    private final ApiRequestBuilderUtil apiRequestBuilderUtil;
+
+    public ChatServiceImpl(ApiDispatcherService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
+        this.apiDispatcherService = apiDispatcherService;
+        this.apiRequestBuilderUtil = apiRequestBuilderUtil;
+    }
 
     @Override
     public String getOrCreateConversationId(String fromUserId, String toUserId) {
@@ -43,9 +46,9 @@ public class ChatServiceImpl implements ChatService {
         List<String> conversationIds = response.getData();
         if (conversationIds == null || conversationIds.isEmpty()) {
             logger.error("No conversation ID returned for users: {} and {}", fromUserId, toUserId);
-           return null;
+            return null;
         }
-        
+
         String conversationId = conversationIds.get(0);
         logger.info("Fetched/Created conversation ID: {} for users: {} and {}", conversationId, fromUserId, toUserId);
 
@@ -73,5 +76,4 @@ public class ChatServiceImpl implements ChatService {
         logger.info("Fetched {} messages for conversation ID: {}", messages.size(), conversationId);
         return messages;
     }
-
 }

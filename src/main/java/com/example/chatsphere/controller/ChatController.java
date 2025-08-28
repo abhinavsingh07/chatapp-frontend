@@ -22,67 +22,69 @@ import com.example.chatsphere.util.SuccessResponse;
 
 @Controller
 public class ChatController {
+
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
-    @Autowired
-    private ChatService chatService;
+    private final ChatService chatService;
+    private final UserService userService;
 
-    @Autowired
-    private UserService userService;
 
-   @GetMapping("/chat-room/{conversationId}/{toUserId}")
-    public String openChatRoom(@PathVariable(required=true) String conversationId,@PathVariable(required=true) String toUserId, Model model) {
-    logger.info("Opening chat room for conversationId: {}", conversationId);
-
-    if (conversationId == null || conversationId.isBlank()) {
-        logger.error("Conversation ID is missing in request");
-        model.addAttribute("error", "Invalid conversation");
-        model.addAttribute("conversationId", null);
-        model.addAttribute("messages", Collections.emptyList());
-    } else {
-        // Fetch messages for the conversation
-        List<MessageDTO> messages = chatService.getMessagesByConversationId(conversationId);
-        model.addAttribute("conversationId", conversationId);
-        model.addAttribute("toUserId",toUserId);
-        model.addAttribute("messages", messages);
-        //fetch user details from touserid
-         SuccessResponse<UserDTO> userResponse = userService.getByUserId(toUserId);
-         if(userResponse.getData() != null && !userResponse.getData().isEmpty()) {
-             model.addAttribute("toUserDetails", userResponse.getData().get(0));
-         } else {
-             model.addAttribute("toUserDetails", null);
-         }
-        logger.info("Loaded {} messages for conversationId {}", messages.size(), conversationId);
+    public ChatController(ChatService chatService, UserService userService) {
+        this.chatService = chatService;
+        this.userService = userService;
     }
 
-    // always set the placeholder for layout
-    model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.CHAT_PAGE_VIEW);
+    @GetMapping("/chat-room/{conversationId}/{toUserId}")
+    public String openChatRoom(@PathVariable String conversationId,
+                               @PathVariable String toUserId,
+                               Model model) {
+        if (conversationId == null || conversationId.isBlank()) {
+            logger.warn("Conversation ID missing in chat-room request");
+            model.addAttribute("error", "Invalid conversation");
+            model.addAttribute("conversationId", null);
+            model.addAttribute("messages", Collections.emptyList());
+        } else {
+            List<MessageDTO> messages = chatService.getMessagesByConversationId(conversationId);
+            model.addAttribute("conversationId", conversationId);
+            model.addAttribute("toUserId", toUserId);
+            model.addAttribute("messages", messages);
 
-    return PageMappings.INDEX_PAGE;
-}
+            SuccessResponse<UserDTO> userResponse = userService.getByUserId(toUserId);
+            if (userResponse.getData() != null && !userResponse.getData().isEmpty()) {
+                model.addAttribute("toUserDetails", userResponse.getData().get(0));
+            } else {
+                logger.debug("No user details found for toUserId={}", toUserId);
+                model.addAttribute("toUserDetails", null);
+            }
 
+            logger.debug("Loaded {} messages for conversationId={}", messages.size(), conversationId);
+        }
 
+        // always set placeholder for layout
+        model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.CHAT_PAGE_VIEW);
+        return PageMappings.INDEX_PAGE;
+    }
 
     @GetMapping("/api/conversation/get-or-create/{fromUserId}/{toUserId}")
     @ResponseBody
-    public SuccessResponse<String> getOrCreateConversationId(@PathVariable(required=true) String fromUserId, @PathVariable(required=true) String toUserId) {
-
-        logger.info("Request to get or create conversation between {} and {}", fromUserId, toUserId);
+    public SuccessResponse<String> getOrCreateConversationId(@PathVariable String fromUserId,
+                                                             @PathVariable String toUserId) {
+        logger.debug("Fetching/creating conversation between fromUserId={} and toUserId={}", fromUserId, toUserId);
 
         String conversationId = chatService.getOrCreateConversationId(fromUserId, toUserId);
-
-        return new SuccessResponse<>("200", "Conversation fetched/created successfully", Arrays.asList(conversationId));
+        return new SuccessResponse<>("200", "Conversation fetched/created successfully",
+                Arrays.asList(conversationId));
     }
 
     @GetMapping("/api/messages/conversation/{conversationId}")
     @ResponseBody
-    public SuccessResponse<MessageDTO> getMessagesByConversationId(@PathVariable(required=true) String conversationId) {
-
-        logger.info("Request to fetch messages for conversationId: {}", conversationId);
+    public SuccessResponse<MessageDTO> getMessagesByConversationId(@PathVariable String conversationId) {
+        logger.debug("Fetching messages for conversationId={}", conversationId);
 
         List<MessageDTO> messages = chatService.getMessagesByConversationId(conversationId);
-
-        String message = messages.isEmpty() ? "No messages found for this conversation" : "Messages fetched successfully";
+        String message = messages.isEmpty()
+                ? "No messages found for this conversation"
+                : "Messages fetched successfully";
 
         return new SuccessResponse<>("200", message, messages);
     }

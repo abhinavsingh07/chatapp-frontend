@@ -15,11 +15,13 @@ import com.apiservice.client.ApiDispatcherService;
 @Service
 public class LoginServiceImpl implements LoginService {
     private static final Logger logger = LoggerFactory.getLogger(LoginServiceImpl.class);
-    @Autowired
-    private ApiDispatcherService apiDispatcherService;
+    private final ApiDispatcherService apiDispatcherService;
+    private final ApiRequestBuilderUtil apiRequestBuilderUtil;
 
-    @Autowired
-    private ApiRequestBuilderUtil apiRequestBuilderUtil;
+    public LoginServiceImpl(ApiDispatcherService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
+        this.apiDispatcherService = apiDispatcherService;
+        this.apiRequestBuilderUtil = apiRequestBuilderUtil;
+    }
 
     @Override
     public JwtResponse validateCredentials(AuthDTO authDTO) {

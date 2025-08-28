@@ -22,84 +22,64 @@ public class UserServiceImpl implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    @Autowired
-    private ApiDispatcherService apiDispatcherService;
+    private final ApiDispatcherService apiDispatcherService;
+    private final ApiRequestBuilderUtil apiRequestBuilderUtil;
 
-    @Autowired
-    private ApiRequestBuilderUtil apiRequestBuilderUtil;
+    public UserServiceImpl(ApiDispatcherService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
+        this.apiDispatcherService = apiDispatcherService;
+        this.apiRequestBuilderUtil = apiRequestBuilderUtil;
+    }
 
     @Override
     public SuccessResponse<UserDTO> getAllUsers() {
-
-        logger.info("Preparing to fetch all users");
-
-        // Build API request
         ApiRequest apiReq = apiRequestBuilderUtil.build("user.getAllUsers", Collections.emptyMap(), Collections.emptyMap());
         logger.info("Fetching all users via API path: {}", apiReq.getPath());
 
-        // Call the API
         SuccessResponse<UserDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserDTO>>() {
         });
 
-        // Log the result
-        if (response.getData() != null) {
-            logger.info("Successfully retrieved {} users", response.getData().size());
+        if (response.getData() != null && !response.getData().isEmpty()) {
+            logger.info("Retrieved {} users", response.getData().size());
         } else {
             logger.info("No users found");
         }
-
         return response;
     }
 
     @Override
     public SuccessResponse<UserDTO> getByUserId(String userId) {
-        logger.info("Preparing to fetch user details for userId: {}", userId);
+        Map<String, String> pathParams = Map.of("userId", userId);
 
-        // Prepare path parameters
-        Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("userId", userId);
-
-        // Build API request
         ApiRequest apiReq = apiRequestBuilderUtil.build("user.getByUserId", pathParams, Collections.emptyMap());
-        logger.info("Fetching user details for userId via API path: {}", apiReq.getPath());
+        logger.info("Fetching user details for userId: {} via API path: {}", userId, apiReq.getPath());
 
-        // Call the API
         SuccessResponse<UserDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserDTO>>() {
         });
 
-        // Log the result
         if (response.getData() != null) {
             logger.info("User details retrieved for userId: {}", userId);
         } else {
             logger.info("No user found for userId: {}", userId);
         }
-
         return response;
     }
 
     @Override
     public SuccessResponse<UserStatusDTO> getUserLastActiveStatus(String userId) {
-        logger.info("Preparing to fetch last active status for userId: {}", userId);
+        Map<String, String> queryParams = Map.of("userId", userId);
 
-        // Prepare query parameters
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("userId", userId);
-
-        // Build API request
         ApiRequest apiReq = apiRequestBuilderUtil.build("user.getUserLastActiveStatus", Collections.emptyMap(), queryParams);
-        logger.info("Fetching last active status via API path: {}", apiReq.getPath());
+        logger.info("Fetching last active status for userId: {} via API path: {}", userId, apiReq.getPath());
 
-        // Call the API
         SuccessResponse<UserStatusDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserStatusDTO>>() {
         });
 
-        // Log the result
-        if (response.getData() != null) {
-            logger.info("Successfully retrieved last active status for {} users", response.getData().size());
+        if (response.getData() != null && !response.getData().isEmpty()) {
+            logger.info("Retrieved last active status for {} users", response.getData().size());
         } else {
-            logger.info("No status data found");
+            logger.info("No status data found for userId: {}", userId);
         }
-
         return response;
     }
 }
+
