@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.example.chatsphere.dto.ConversationLastMsgDTO;
 import com.example.chatsphere.dto.MessageDTO;
 import com.example.chatsphere.dto.UserDTO;
 import com.example.chatsphere.service.ChatService;
@@ -35,9 +36,7 @@ public class ChatController {
     }
 
     @GetMapping("/chat-room/{conversationId}/{toUserId}")
-    public String openChatRoom(@PathVariable String conversationId,
-                               @PathVariable String toUserId,
-                               Model model) {
+    public String openChatRoom(@PathVariable String conversationId, @PathVariable String toUserId, Model model) {
         if (conversationId == null || conversationId.isBlank()) {
             logger.warn("Conversation ID missing in chat-room request");
             model.addAttribute("error", "Invalid conversation");
@@ -67,13 +66,11 @@ public class ChatController {
 
     @GetMapping("/api/conversation/get-or-create/{fromUserId}/{toUserId}")
     @ResponseBody
-    public SuccessResponse<String> getOrCreateConversationId(@PathVariable String fromUserId,
-                                                             @PathVariable String toUserId) {
+    public SuccessResponse<String> getOrCreateConversationId(@PathVariable String fromUserId, @PathVariable String toUserId) {
         logger.debug("Fetching/creating conversation between fromUserId={} and toUserId={}", fromUserId, toUserId);
 
         String conversationId = chatService.getOrCreateConversationId(fromUserId, toUserId);
-        return new SuccessResponse<>("200", "Conversation fetched/created successfully",
-                Arrays.asList(conversationId));
+        return new SuccessResponse<>("200", "Conversation fetched/created successfully", Arrays.asList(conversationId));
     }
 
     @GetMapping("/api/messages/conversation/{conversationId}")
@@ -82,10 +79,20 @@ public class ChatController {
         logger.debug("Fetching messages for conversationId={}", conversationId);
 
         List<MessageDTO> messages = chatService.getMessagesByConversationId(conversationId);
-        String message = messages.isEmpty()
-                ? "No messages found for this conversation"
-                : "Messages fetched successfully";
+        String message = messages.isEmpty() ? "No messages found for this conversation" : "Messages fetched successfully";
 
         return new SuccessResponse<>("200", message, messages);
     }
+
+    @GetMapping("/api/messages/last-messages/user/{userId}")
+    @ResponseBody
+    public SuccessResponse<ConversationLastMsgDTO> getLastMessageByLoggedInUserId(@PathVariable String userId) {
+        logger.debug("Fetching last messages for logged-in userId={}", userId);
+
+        List<ConversationLastMsgDTO> lastMessages = chatService.getLastMessageByLoggedInUserId(userId);
+        String message = lastMessages.isEmpty() ? "No last messages found for this user" : "Last messages fetched successfully";
+
+        return new SuccessResponse<>("200", message, lastMessages);
+    }
+
 }

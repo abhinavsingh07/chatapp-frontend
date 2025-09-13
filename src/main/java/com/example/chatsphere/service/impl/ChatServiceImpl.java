@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.apiservice.client.ApiDispatcherService;
 import com.apiservice.client.ApiRequest;
+import com.example.chatsphere.dto.ConversationLastMsgDTO;
 import com.example.chatsphere.dto.MessageDTO;
 import com.example.chatsphere.service.ChatService;
 import com.example.chatsphere.util.ApiRequestBuilderUtil;
@@ -76,4 +77,27 @@ public class ChatServiceImpl implements ChatService {
         logger.info("Fetched {} messages for conversation ID: {}", messages.size(), conversationId);
         return messages;
     }
+
+    @Override
+    public List<ConversationLastMsgDTO> getLastMessageByLoggedInUserId(String userId) {
+        logger.info("Fetching last messages for logged-in user ID: {}", userId);
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("userId", userId);
+        // Build API request - assuming the API key for this is "conversation.getLastMessagesByUser"
+        ApiRequest apiRequest = apiRequestBuilderUtil.build("conv.getLastConversationByLoggedInUser", pathParams, Collections.emptyMap());
+        // Dispatch API call
+        SuccessResponse<ConversationLastMsgDTO> response = apiDispatcherService.call(apiRequest, new ParameterizedTypeReference<SuccessResponse<ConversationLastMsgDTO>>() {
+        });
+
+        // Validate response
+        List<ConversationLastMsgDTO> lastMessages = response.getData();
+        if (lastMessages == null || lastMessages.isEmpty()) {
+            logger.warn("No last messages found for logged-in user ID: {}", userId);
+            return Collections.emptyList();
+        }
+
+        logger.info("Fetched {} last messages for logged-in user ID: {}", lastMessages.size(), userId);
+        return lastMessages;
+    }
+
 }

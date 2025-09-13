@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.Collections;
 
 import com.example.chatsphere.dto.ContactDTO;
 import com.example.chatsphere.dto.ContactUserDTO;
@@ -29,7 +30,7 @@ public class ContactController {
         this.contactService = contactService;
     }
 
-    @GetMapping("/contact")
+    @GetMapping("/contacts")
     public String contactPage(Model model) {
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.CONTACTS_VIEW);
         return PageMappings.INDEX_PAGE;

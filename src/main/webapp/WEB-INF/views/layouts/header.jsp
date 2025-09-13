@@ -17,7 +17,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'contacts' %}active{% endif %}" href="${pageContext.request.contextPath}/contact">
+                        <a class="nav-link {% if request.endpoint == 'contacts' %}active{% endif %}" href="${pageContext.request.contextPath}/contacts">
                             <i class="fas fa-users me-1"></i>Contacts
                         </a>
                     </li>
@@ -37,8 +37,8 @@
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="fas fa-user-circle me-1"></i>
-                        <c:if test="${not empty sessionScope.username}">
-                            <span>Hello! ${sessionScope.username}!</span>
+                        <c:if test="${not empty username}">
+                            <span>Hello! ${username}!</span>
                         </c:if>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">

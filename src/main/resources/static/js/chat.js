@@ -10,6 +10,7 @@ class ChatWebSocket {
         PRESENCE_UPDATE: "PRESENCE_UPDATE"
     };
 
+        
 
     constructor(chatId, fromUserId, toUserId) {
         this.chatId = chatId;
@@ -31,7 +32,7 @@ class ChatWebSocket {
         const wsUrl = `ws://localhost:8080/synk/ws/chat`;
         // Check if socket exists and is still open or connecting
         if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
-            console.log("WebSocket is already connected or connecting");
+            //console.log("WebSocket is already connected or connecting");
             return;
         }
         this.socket = new WebSocket(wsUrl);
@@ -49,7 +50,7 @@ class ChatWebSocket {
 
     // ----------------- WebSocket Events -----------------
     onOpen() {
-        console.log(`OPEN:: WebSocket connected for user: ${this.fromUserId}`);
+        //console.log(`OPEN:: WebSocket connected for user: ${this.fromUserId}`);
 
         // Clear any old interval before starting a new one
         if (this.heartbeatInterval) {
@@ -63,13 +64,13 @@ class ChatWebSocket {
                     wsStatus: ChatWebSocket.wsStatus.HEARTBEAT,
                     fromUserId: this.fromUserId
                 });
-                console.log("Heartbeat sent");
+                //console.log("Heartbeat sent");
             }
-        }, 10000); // every 10s
+        }, 3000); // every 3s
     }
 
     onClose() {
-        console.log("ONCLOSE:: WebSocket disconnected");
+        //console.log("ONCLOSE:: WebSocket disconnected");
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
             this.heartbeatInterval = null;
@@ -78,12 +79,12 @@ class ChatWebSocket {
 
     onMessage(event) {
         const data = JSON.parse(event.data);
-        console.log("ONMESSAGE:: Received:", JSON.stringify(data));
+        //console.log("ONMESSAGE:: Received:", JSON.stringify(data));
         this.handleIncomingMessage(data);
     }
 
     onError(err) {
-        console.error("ONERROR:: WebSocket error for user2:", err);
+        //console.error("ONERROR:: WebSocket error for user2:", err);
     }
 
     // ----------------- Sending Messages -----------------
@@ -124,13 +125,13 @@ class ChatWebSocket {
                 this.hideTypingIndicator();
                 break;
             case ChatWebSocket.wsStatus.CONNECTED:
-                console.log(`${data.fromUserId} joined the chat`);
+                //console.log(`${data.fromUserId} joined the chat`);
                 break;
             case ChatWebSocket.wsStatus.DISCONNECTED:
-                console.log(`${data.fromUserId} left the chat`);
+                //console.log(`${data.fromUserId} left the chat`);
                 break;
             default:
-                console.warn("Unknown message type:", data);
+                //console.warn("Unknown message type:", data);
         }
     }
 
@@ -197,6 +198,7 @@ class ChatWebSocket {
 
     showTypingIndicator() {
         this.typingIndicator.classList.remove("d-none");
+        this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
         // Auto scroll
         //this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     }
@@ -262,7 +264,7 @@ class ChatWebSocket {
 
 // ----------------- Usage -----------------
 // document.addEventListener("DOMContentLoaded", () => {
-//     console.log("DOM fully loaded and parsed");
+//     //console.log("DOM fully loaded and parsed");
 
 //     const chatId = "ccc62744-ed5c-40f3-87ef-0d2306cf64db_CONV";
 //     const fromUserId = "64e56c5e-0b32-40db-a5b5-44fc0890f760_USER";

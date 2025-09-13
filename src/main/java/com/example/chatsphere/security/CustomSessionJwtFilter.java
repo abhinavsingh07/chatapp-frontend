@@ -1,6 +1,7 @@
 package com.example.chatsphere.security;
 
 import com.example.chatsphere.service.TokenStoreService;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -34,6 +35,7 @@ public class CustomSessionJwtFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(CustomSessionJwtFilter.class);
 
 
+    @Autowired
     private JwtUtil jwtUtil;
 
     private static final List<String> EXCLUDED_PATHS = List.of(
@@ -71,6 +73,17 @@ public class CustomSessionJwtFilter extends OncePerRequestFilter {
                 if ("jwt".equals(cookie.getName())) {
                     token = cookie.getValue();
                 }
+            }
+        }
+        //append userid and username in request attribute for further use in controller
+        if (token != null) {
+            try {
+                String userid= jwtUtil.extractId(token);
+                String username= jwtUtil.extractName(token);
+                request.setAttribute("userId", userid);
+                request.setAttribute("username", username);
+            } catch (Exception e) {
+                logger.error("Invalid JWT", e);
             }
         }
         //if user is not authenticated it can give 404 for page even if page is correctly returned from controller.

@@ -1,4 +1,9 @@
 <%@ include file="/WEB-INF/views/common.jsp" %>
+   <style type="text/css">
+      .mutual-button:disabled {
+         pointer-events: auto;
+      }
+   </style>
    <div class="container mt-4">
       <div class="row">
          <!-- Contacts List -->
@@ -378,13 +383,21 @@
                if (contact.contactStatus == 'ADDED') {
                   // Actions
                   html += '<div class="btn-group">';
-                  html += '<button class="btn btn-primary btn-sm" data-contactuserid="' + contact.contactUserId + '" onclick="startChat(event)" title="Start Chat">'
-                     + '<i class="fas fa-comment"></i>'
-                     + '</button>';
+                  if (contact.mutual == 'true' || contact.mutual == true) {
+                     html += '<button class="btn btn-primary btn-sm" data-contactuserid="' + contact.contactUserId + '" onclick="startChat(event)" title="Start Chat">'
+                        + '<i class="fas fa-comment"></i>'
+                        + '</button>';
+                  } else if (contact.mutual == 'false' || contact.mutual == false) {
+                     html += '<button class="btn btn-sm mutual-button" disabled title="Mutual contact required to chat">'
+                        + '<i class="fas fa-hourglass-half"></i>'
+                        + '</button>';
+                  }
+
                   html += '<button class="btn btn-outline-secondary btn-sm" data-contactuserid="' + contact.contactUserId + '" onclick="viewProfile(event)" title="View Profile">'
                      + '<i class="fas fa-eye"></i>'
                      + '</button>';
                }
+
                html += '<div class="dropdown">'
                   + '<button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">'
                   + '<i class="fas fa-ellipsis-v"></i>'

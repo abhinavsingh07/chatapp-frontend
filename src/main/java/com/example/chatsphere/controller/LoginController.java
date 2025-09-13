@@ -85,9 +85,10 @@ public class LoginController {
         jwtCookie.setPath("/");
         jwtCookie.setAttribute("SameSite", "Strict");
         response.addCookie(jwtCookie);
-
-        session.setAttribute("username", jwtResponse.getName());
-        session.setAttribute("userid", jwtResponse.getId());
+        //dont need session as all details is in token.
+        //on jwt filter we are adding userid and username with every request.
+        //session.setAttribute("username", jwtResponse.getName());
+        //session.setAttribute("userid", jwtResponse.getId());
 
         logger.info("User {} authenticated successfully", jwtResponse.getId());
         return PageMappings.REDIRECT_HOME;

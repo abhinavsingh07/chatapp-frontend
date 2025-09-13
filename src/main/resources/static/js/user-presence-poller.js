@@ -6,7 +6,7 @@ class UserPresencePoller {
     }
 
     start() {
-        this.interval = setInterval(() => this.fetchUserPresence(), 15000);
+        this.interval = setInterval(() => this.fetchUserPresence(), 5000); // poll every 5 seconds
         this.fetchUserPresence(); // run immediately once
     }
 

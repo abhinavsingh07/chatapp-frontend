@@ -52,6 +52,8 @@ public class ContactUserDTO {
 
     private String contactEmail;
 
+    private boolean mutual;
+
     /**
      * No-args constructor
      */
@@ -61,7 +63,7 @@ public class ContactUserDTO {
     /**
      * All-args constructor
      */
-    public ContactUserDTO(String contactId, String contactStatus, String emailStatus, String contactUserId, String name, String phoneNumber, String email, String profilePictureUrl, String status) {
+    public ContactUserDTO(String contactId, String contactStatus, String emailStatus, String contactUserId, String name, String phoneNumber, String email, String profilePictureUrl, String status,boolean mutual) {
         this.contactId = contactId;
         this.contactStatus = contactStatus;
         this.emailStatus = emailStatus;
@@ -71,6 +73,7 @@ public class ContactUserDTO {
         this.email = email;
         this.profilePictureUrl = profilePictureUrl;
         this.status = status;
+        this.mutual = mutual;
     }
 
     // Getters and Setters
@@ -154,5 +157,10 @@ public class ContactUserDTO {
         this.contactEmail = contactEmail;
     }
 
-
+    public boolean isMutual() {
+        return mutual;
+    }
+    public void setMutual(boolean mutual) {
+        this.mutual = mutual;
+    }
 }

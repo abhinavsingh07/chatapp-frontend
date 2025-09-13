@@ -169,12 +169,67 @@
                     </form>
                 </div>
 
-                <!-- Optional UI Elements You Can Add -->
-                <!-- Quick Actions: Call, Video Call -->
-                <!-- Reactions: Like, Heart for messages -->
-                <!-- Message Options: Edit, Delete -->
-                <!-- Scroll-to-bottom Button when new messages arrive -->
 
+                <!-- Chat Info Sidebar (Hidden by default) -->
+                <div class="offcanvas offcanvas-end" tabindex="-1" id="chatInfoSidebar">
+                    <div class="offcanvas-header border-bottom">
+                        <h5 class="offcanvas-title">Chat Info</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                    </div>
+                    <div class="offcanvas-body p-0">
+                        <!-- Chat/User Info Content -->
+                        <div class="p-4 text-center border-bottom">
+                            <!-- Group Chat -->
+                            <!-- One-to-One Chat -->
+                            <c:set var="other_user" value="${not empty toUserDetails ? toUserDetails : null}" />
+                            <c:if test="${not empty other_user}">
+                                <c:choose>
+                                    <c:when test="${not empty other_user.profilePictureUrl}">
+                                        <img src="<c:out value='${other_user.profilePictureUrl}'/>"  alt="Avatar"
+                                            class="rounded-circle mb-3"
+                                            style="width: 80px; height: 80px; object-fit: cover;">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="avatar bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                            style="width: 80px; height: 80px;">
+                                            <i class="fas fa-user fa-2x"></i>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                                <h5><c:out value="${other_user.name}"/></h5>
+                                <p class="text-muted">@<c:out value="${other_user.name}"/></p>
+                                <c:if test="${not empty other_user.about}">
+                                    <p class="small"><c:out value="${other_user.about}"/></p>
+                                </c:if>
+                            </c:if>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="list-group list-group-flush">
+                            <button class="list-group-item list-group-item-action" onclick="searchInChat()">
+                                <i class="fas fa-search me-3"></i>Search in Chat
+                            </button>
+                            <!-- <button class="list-group-item list-group-item-action" onclick="viewSharedMedia()">
+                                <i class="fas fa-images me-3"></i>Shared Media
+                            </button> -->
+                            <!-- <c:if test="${!chat.group}">
+                                <button class="list-group-item list-group-item-action" onclick="blockUser()">
+                                    <i class="fas fa-ban me-3 text-danger"></i>Block User
+                                </button>
+                            </c:if> -->
+                            <!-- <button class="list-group-item list-group-item-action text-danger" onclick="clearChat()">
+                                <i class="fas fa-trash me-3"></i>Clear Chat
+                            </button> -->
+                            <!-- <c:if test="${chat.group}">
+                                <button class="list-group-item list-group-item-action text-danger"
+                                    onclick="leaveGroup()">
+                                    <i class="fas fa-sign-out-alt me-3"></i>Leave Group
+                                </button>
+                            </c:if> -->
+                        </div>
+                        <!-- Group Participants -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -349,7 +404,7 @@
                 } else if (lastActive) {
                     const df = new DateFormatter();
                     const formattedLastActive = df.formatUTCToLocalTimeZone(lastActive);
-                    statusElem.textContent = 'Last seen: '+formattedLastActive;
+                    statusElem.textContent = 'Last seen: ' + formattedLastActive;
                 } else {
                     statusElem.textContent = "Offline";
                 }
