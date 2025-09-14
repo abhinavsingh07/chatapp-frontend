@@ -408,7 +408,7 @@
                 } else {
                     statusElem.textContent = "Offline";
                 }
-                console.log("User presence status updated:", response);
+                //console.log("User presence status updated:", response);
             });
             poller.start();
         }

@@ -10,7 +10,7 @@ class ChatWebSocket {
         PRESENCE_UPDATE: "PRESENCE_UPDATE"
     };
 
-        
+
 
     constructor(chatId, fromUserId, toUserId) {
         this.chatId = chatId;
@@ -24,6 +24,7 @@ class ChatWebSocket {
         this.messagesContainer = document.getElementById("messagesContainer");
         this.messageInput = document.getElementById("messageInput");
         this.typingIndicator = document.getElementById("typingIndicator");
+        this.messageForm = document.getElementById("messageForm");
         this.heartbeatInterval = null;
     }
 
@@ -131,7 +132,7 @@ class ChatWebSocket {
                 //console.log(`${data.fromUserId} left the chat`);
                 break;
             default:
-                //console.warn("Unknown message type:", data);
+            //console.warn("Unknown message type:", data);
         }
     }
 
@@ -176,7 +177,7 @@ class ChatWebSocket {
         // Auto scroll
         this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
         //hide no messages placeholder if visible
-        if (document.querySelectorAll('.message-wrapper').length > 0) {
+        if (document.querySelectorAll('.message-wrapper').length > 0 && document.getElementById("noMessagesPlaceholder")) {
             document.getElementById("noMessagesPlaceholder").classList.add("d-none");
         }
 
@@ -198,9 +199,8 @@ class ChatWebSocket {
 
     showTypingIndicator() {
         this.typingIndicator.classList.remove("d-none");
-        this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
         // Auto scroll
-        //this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+        this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     }
 
     hideTypingIndicator() {
@@ -229,10 +229,17 @@ class ChatWebSocket {
     }
 
     bindFormEvents() {
-        const form = document.getElementById("messageForm");
+        const form = this.messageForm;
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             this.sendChatMessage(this.messageInput.value);
+            this.messageInput.value = "";
+        });
+        this.messageInput.addEventListener("keydown", function (event) {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault(); // prevent newline
+                form.requestSubmit();   // trigger submit
+            }
         });
     }
 

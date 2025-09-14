@@ -249,15 +249,9 @@
          dates.forEach(function (el) {
             var date1 = el.dataset.date + "Z";
             const date = new Date(date1); // parse UTC
-            el.textContent= date.toLocaleString(undefined, {
-               year: "numeric",
-               month: "short",
-               day: "numeric",
-               hour: "2-digit",
-               minute: "2-digit",
-               hour12: true
-            });
-            console.log(date1);
+            const df = new DateFormatter();
+            const formattedUTCDateTime = df.formatUTCToLocalTimeZone(date);
+            el.textContent = formattedUTCDateTime;
          })
       }
 
