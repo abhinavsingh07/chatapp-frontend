@@ -235,8 +235,8 @@
     </div>
 
     <script>
-        const ctx = "<c:out value='${ctx}'/>";
-        const userId = "<c:out value='${userid}'/>";
+        const ctx = "<c:out value='${ctx}'/>";//getting from commons.jsp
+        const userId = "<c:out value='${userid}'/>"; //getting from commons.jsp
         const conversationId = "<c:out value='${conversationId}'/>";
         const toUserId = "<c:out value='${toUserId}'/>";
 

@@ -22,7 +22,7 @@ function ajaxRequest(url, method, data, onSuccess, onError) {
             }
         },
         error: function (xhr, status, error) {
-            console.error("AJAX Error:", status, error, xhr.responseText);
+            //console.error("AJAX Error:", status, error, xhr.responseText);
             if (typeof onError === "function") {
                 onError(xhr, status, error);
             }

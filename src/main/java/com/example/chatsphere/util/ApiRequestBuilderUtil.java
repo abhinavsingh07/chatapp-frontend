@@ -50,6 +50,7 @@ public class ApiRequestBuilderUtil {
     @Autowired
     private TokenStoreService tokenStoreService;
 
+    //Builds api request
     public ApiRequest build(String key, Object body) {
         ApiEndpoint endpoint = endpointRegistry.get(key);
 
@@ -61,7 +62,11 @@ public class ApiRequestBuilderUtil {
             logger.debug("Building API request for key={} with body={}", key, body);
         }
 
-        return ApiRequest.builder().withPath(endpoint.getPath()).withMethod(endpoint.getMethod()).withBody(body).withHeaders(getDefaultHeaders(endpoint));
+        return ApiRequest.builder()
+                .withPath(endpoint.getPath())
+                .withMethod(endpoint.getMethod())
+                .withBody(body)
+                .withHeaders(getDefaultHeaders(endpoint));
     }
 
     public ApiRequest build(String key, Map<String, String> pathParams, Map<String, String> queryParams) {
@@ -100,7 +105,7 @@ public class ApiRequestBuilderUtil {
         if (apiEndpoint.getPath().contains("/authenticate") || apiEndpoint.getPath().contains("/register")) {
             return headers;
         }
-
+        //setting auth token from cookie if present
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attr != null) {
             HttpServletRequest httpRequest = attr.getRequest();

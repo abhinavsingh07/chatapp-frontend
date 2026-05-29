@@ -44,8 +44,11 @@ class ChatWebSocket {
     }
 
     disconnect() {
-        if (this.socket?.readyState === WebSocket.OPEN) {
+        // Allow closing during CONNECTING or OPEN states
+        if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+            console.log("Disconnecting WebSocket...");
             this.socket.close(1000, "User left chat");
+            this.socket = null; // Clear immediately
         }
     }
 
@@ -71,6 +74,7 @@ class ChatWebSocket {
     }
 
     onClose() {
+        this.socket = null;
         //console.log("ONCLOSE:: WebSocket disconnected");
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
@@ -284,3 +288,5 @@ class ChatWebSocket {
 //     chatWs.bindInputEvents();
 // });
 
+//info***
+// Your WebSocket disconnects because web browsers automatically destroy the JavaScript runtime environment of a page when you navigate away

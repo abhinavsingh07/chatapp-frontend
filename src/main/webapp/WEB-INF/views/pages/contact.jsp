@@ -129,6 +129,7 @@
       </div>
    </div>
    <script>
+      //these values coming from commons.jsp which is included at the top of this file. commons.jsp is used to set common variables like ctx and userid for all jsp files.
       const ctx = "<c:out value='${ctx}'/>";
       const userId = "<c:out value='${userid}'/>";
 
@@ -383,15 +384,9 @@
                if (contact.contactStatus == 'ADDED') {
                   // Actions
                   html += '<div class="btn-group">';
-                  if (contact.mutual == 'true' || contact.mutual == true) {
-                     html += '<button class="btn btn-primary btn-sm" data-contactuserid="' + contact.contactUserId + '" onclick="startChat(event)" title="Start Chat">'
+                  html += '<button class="btn btn-primary btn-sm" data-contactuserid="' + contact.contactUserId + '" onclick="startChat(event)" title="Start Chat">'
                         + '<i class="fas fa-comment"></i>'
                         + '</button>';
-                  } else if (contact.mutual == 'false' || contact.mutual == false) {
-                     html += '<button class="btn btn-sm mutual-button" disabled title="Mutual contact required to chat">'
-                        + '<i class="fas fa-hourglass-half"></i>'
-                        + '</button>';
-                  }
 
                   html += '<button class="btn btn-outline-secondary btn-sm" data-contactuserid="' + contact.contactUserId + '" onclick="viewProfile(event)" title="View Profile">'
                      + '<i class="fas fa-eye"></i>'

@@ -45,9 +45,9 @@
                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/profile">
                             <i class="fas fa-user me-2"></i>Profile
                         </a></li>
-                       <!-- <li><a class="dropdown-item" href="${pageContext.request.contextPath}/settings">
+                       <li><a class="dropdown-item" href="${pageContext.request.contextPath}/settings">
                             <i class="fas fa-cog me-2"></i>Settings
-                        </a></li>-->
+                        </a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/logout">
                             <i class="fas fa-sign-out-alt me-2"></i>Logout
