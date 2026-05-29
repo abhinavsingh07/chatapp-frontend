@@ -91,11 +91,11 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <!--custom jar Email service-->
-        <dependency>
-            <groupId>com.emailservice</groupId>
-            <artifactId>emailservice</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.emailservice</groupId>-->
+<!--            <artifactId>emailservice</artifactId>-->
+<!--            <version>0.0.1-SNAPSHOT</version>-->
+<!--        </dependency>-->
         <!-- JWT (JJWT with Jackson for JSON handling) -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
