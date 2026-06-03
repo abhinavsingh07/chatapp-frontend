@@ -29,6 +29,22 @@
 
             <!-- Notification Status Display -->
             <div id="notificationStatus"></div>
+
+            <!-- Message Preview Toggle -->
+            <div class="settings-item">
+                <div class="settings-item-info">
+                    <h3>Message Preview in Notifications</h3>
+                    <p>Show full message body in notification popups</p>
+                </div>
+                <div class="settings-item-action">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="messagePreviewToggle">
+                        <label class="form-check-label" for="messagePreviewToggle"></label>
+                    </div>
+                </div>
+            </div>
+            <!-- Hidden input to store message preview preference -->
+            <input type="hidden" id="showFullMsgInBodyValue" value="false">
         </div>
 
         <!-- Other Settings Sections (for future use) -->
@@ -63,11 +79,28 @@
         </div> -->
     </div>
 </div>
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const button = document.getElementById('enableNotificationBtn');
         const statusDiv = document.getElementById('notificationStatus');
+        const messagePreviewToggle = document.getElementById('messagePreviewToggle');
+        const showFullMsgInBodyValue = document.getElementById('showFullMsgInBodyValue');
+
+        // Load saved message preview preference from localStorage
+        const savedPreference = localStorage.getItem('showFullMsgInBody');
+        if (savedPreference !== null) {
+            const isEnabled = savedPreference === 'true';
+            messagePreviewToggle.checked = isEnabled;
+            showFullMsgInBodyValue.value = isEnabled.toString();
+        }
+
+        // Handle message preview toggle change
+        messagePreviewToggle.addEventListener('change', function () {
+            const isChecked = this.checked;
+            showFullMsgInBodyValue.value = isChecked.toString();
+            localStorage.setItem('showFullMsgInBody', isChecked.toString());
+            console.log('Message preview setting saved:', isChecked);
+        });
 
         // Check current notification permission status on page load
         checkNotificationStatus();

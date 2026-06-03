@@ -16,6 +16,7 @@ class ChatWebSocket {
         this.chatId = chatId;
         this.fromUserId = fromUserId;
         this.toUserId = toUserId;
+        this.fromUserName = `${username}`; // Initialize fromUserName
 
         this.socket = null;
         this.typingTimeout = null;
@@ -105,13 +106,13 @@ class ChatWebSocket {
         // if (this.socket?.readyState === WebSocket.OPEN) {
         //     this.socket.send(JSON.stringify(payload));
         // }
-
         // using globalWorkerPort to send message to shared worker thread which will blast it over the active websocket connection to server and also to all connected tabs of same user.
+
         if (globalWorkerPort) {
             // Pass payload up to the Shared Worker thread to blast over the active WebSocket socket
             globalWorkerPort.postMessage({
                 type: 'CHAT_MESSAGE',
-                data: payload
+                data: payload,
             });
         }
     }
@@ -125,7 +126,8 @@ class ChatWebSocket {
             conversationId: this.chatId,
             fromUserId: this.fromUserId,
             toUserId: this.toUserId,
-            body: trimmed
+            body: trimmed,
+            fromUserName: this.fromUserName // Include sender's name in the message payload 
         }
 
         this.sendMessageViaSocket(msg);
@@ -207,7 +209,8 @@ class ChatWebSocket {
     sendTypingEvent(typingType) {
         var msg = {
             conversationId: this.chatId,
-            toUserId: this.toUserId
+            toUserId: this.toUserId,
+            fromUserName: this.fromUserName
         }
         if (typingType == ChatWebSocket.wsStatus.TYPING_START) {
             msg.wsStatus = ChatWebSocket.wsStatus.TYPING_START;

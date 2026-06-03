@@ -81,7 +81,7 @@ class chatWebSocketManager {
         try {
 
             const payload = JSON.parse(event.data);
-            console.log("[Worker] Received message from WebSocket onMessage event::" + event.data);
+            console.log("[Worker] Received message from WebSocket onMessage event::" + event.data + " broadcasting to jsp pages...");
             // Broadcast the incoming message payload to ALL active JSP pages/tabs
             connectedPorts.forEach(port => {
                 port.postMessage({ type: 'CHAT_MESSAGE', data: payload });
