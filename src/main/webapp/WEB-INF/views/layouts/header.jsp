@@ -92,7 +92,7 @@
         if (window.SharedWorker) {
             // Resolve absolute path using context path
             const workerPath = "${pageContext.request.contextPath}/js/app/ws-worker.js";
-            const myWorker = new SharedWorker(workerPath,"app-websocket-worker");
+            const myWorker = new SharedWorker(workerPath, "app-websocket-worker");
 
             globalWorkerPort = myWorker.port;
             globalWorkerPort.start();
@@ -103,7 +103,7 @@
             globalWorkerPort.onmessage = function (event) {
                 const messageType = event.data.type;
                 const payload = event.data.data;
-                const { wsStatus, fromUserName, conversationId, toUserId, body } = payload;
+                const { wsStatus, fromUserName, conversationId, toUserId, fromUserId, body } = payload;
 
                 console.log("[Main Thread] Received message from worker globalWorkerPort.onmessage event.data::" + JSON.stringify(event.data));
                 if (messageType === 'CHAT_MESSAGE') {
@@ -130,7 +130,7 @@
 
                         if (wsStatus == "CHAT") {
                             //for notification payload construction
-                            const redirecturl = `${ctx}/chat-room/` + conversationId + `/` + toUserId;
+                            const redirecturl = `${ctx}/chat-room/` + conversationId + `/` + fromUserId;
                             const notificationTitle = "New message from " + fromUserName;
                             const notificationBody = body.length > 50 ? body.substring(0, 47) + "..." : body;
                             //not on chat screen trigger notification for new incoming message

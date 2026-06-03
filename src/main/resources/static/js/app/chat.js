@@ -209,8 +209,7 @@ class ChatWebSocket {
     sendTypingEvent(typingType) {
         var msg = {
             conversationId: this.chatId,
-            toUserId: this.toUserId,
-            fromUserName: this.fromUserName
+            toUserId: this.toUserId
         }
         if (typingType == ChatWebSocket.wsStatus.TYPING_START) {
             msg.wsStatus = ChatWebSocket.wsStatus.TYPING_START;
