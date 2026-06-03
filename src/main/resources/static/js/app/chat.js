@@ -28,8 +28,13 @@ class ChatWebSocket {
         this.heartbeatInterval = null;
     }
 
+    // not calling WebSocket Lifecycle from chatroom directly, instead calling from shared worker 
+    // to utilize the active websocket connection and avoid multiple 
+    // connections issue when multiple tabs are open for same user.    
     // ----------------- WebSocket Lifecycle -----------------
+
     connect() {
+        //and jwt goes with cookie, so no need to send it explicitly in the WebSocket connection URL or headers. The server can extract the JWT from the cookie during the WebSocket handshake and use it for authentication and authorization.
         const wsUrl = `ws://localhost:8080/synk/ws/chat`;
         // Check if socket exists and is still open or connecting
         if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
@@ -94,8 +99,20 @@ class ChatWebSocket {
 
     // ----------------- Sending Messages -----------------
     sendMessageViaSocket(payload) {
-        if (this.socket?.readyState === WebSocket.OPEN) {
-            this.socket.send(JSON.stringify(payload));
+        // Now sending via worker to utilize the
+        // active websocket connection and avoid multiple connections issue
+        // when multiple tabs are open for same user.
+        // if (this.socket?.readyState === WebSocket.OPEN) {
+        //     this.socket.send(JSON.stringify(payload));
+        // }
+
+        // using globalWorkerPort to send message to shared worker thread which will blast it over the active websocket connection to server and also to all connected tabs of same user.
+        if (globalWorkerPort) {
+            // Pass payload up to the Shared Worker thread to blast over the active WebSocket socket
+            globalWorkerPort.postMessage({
+                type: 'CHAT_MESSAGE',
+                data: payload
+            });
         }
     }
 
@@ -289,4 +306,5 @@ class ChatWebSocket {
 // });
 
 //info***
-// Your WebSocket disconnects because web browsers automatically destroy the JavaScript runtime environment of a page when you navigate away
+// Your WebSocket disconnects because web browsers automatically destroy
+// the JavaScript runtime environment of a page when you navigate away

@@ -711,3 +711,127 @@ body {
     width: 800px;
     margin: 0 auto;
 }
+
+/* settings page css */
+.settings-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.settings-header {
+    margin-bottom: 30px;
+}
+
+.settings-header h1 {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.settings-header p {
+    color: #666;
+    font-size: 14px;
+}
+
+.settings-section {
+    background-color: white;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border-left: 4px solid #007bff;
+}
+
+.settings-section h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.settings-item:last-child {
+    border-bottom: none;
+}
+
+.settings-item-info h3 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.settings-item-info p {
+    font-size: 13px;
+    color: #999;
+    margin: 0;
+}
+
+.settings-item-action {
+    display: flex;
+    gap: 10px;
+}
+
+#enableNotificationBtn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+#enableNotificationBtn:hover {
+    background-color: #0056b3;
+}
+
+#enableNotificationBtn:disabled {
+    background-color: #28a745;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.notification-status {
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.notification-status.granted {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.notification-status.denied {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.back-link {
+    margin-bottom: 20px;
+}
+
+.back-link a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.back-link a:hover {
+    text-decoration: underline;
+}

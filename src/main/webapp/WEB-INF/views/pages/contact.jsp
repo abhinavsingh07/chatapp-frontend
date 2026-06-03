@@ -130,8 +130,9 @@
    </div>
    <script>
       //these values coming from commons.jsp which is included at the top of this file. commons.jsp is used to set common variables like ctx and userid for all jsp files.
-      const ctx = "<c:out value='${ctx}'/>";
-      const userId = "<c:out value='${userid}'/>";
+      //init in header.jsp
+      // const ctx = "<c:out value='${ctx}'/>";
+      // const userId = "<c:out value='${userid}'/>";
 
       function sendContactRequest(userId) {
          // Simulate sending contact request

@@ -32,4 +32,11 @@ public class HomeController {
         return PageMappings.INDEX_PAGE;
     }
 
+    // Settings page route
+    @GetMapping("/settings")
+    public String settingsPage(Model model) {
+        model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.SETTINGS_VIEW);
+        return PageMappings.INDEX_PAGE;
+    }
+
 }

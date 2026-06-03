@@ -235,14 +235,15 @@
     </div>
 
     <script>
-        const ctx = "<c:out value='${ctx}'/>";//getting from commons.jsp
-        const userId = "<c:out value='${userid}'/>"; //getting from commons.jsp
+        //init in header.jsp
+        // const ctx = "<c:out value='${ctx}'/>";//getting from commons.jsp
+        // const userId = "<c:out value='${userid}'/>"; //getting from commons.jsp
         const conversationId = "<c:out value='${conversationId}'/>";
         const toUserId = "<c:out value='${toUserId}'/>";
 
         document.addEventListener('DOMContentLoaded', function () {
             initSocket();
-            initUserPresencePoller()
+            //initUserPresencePoller()//for online status and last seen(update not needed poller now for this)
             convertSentAtUTCtoUserTimeZone();
             // Auto-scroll to bottom
             scrollToBottom();
@@ -377,7 +378,7 @@
         function initSocket() {
             const chatWs = new ChatWebSocket(conversationId, userId, toUserId);
             //token goes with cookie
-            chatWs.connect();
+            // chatWs.connect();
             chatWs.bindInputEvents();
             chatWs.bindFormEvents();
         }
