@@ -63,10 +63,10 @@ public class LoginController {
         // remove jwt cookie
         // 1. Create a matching cookie with maxAge(0) to delete it
         ResponseCookie deleteCookie = ResponseCookie.from("jwt", "")
-                .path("/") // MUST match the path of the original cookie exactly
+                .path("/chat") // MUST match the path of the original cookie exactly
                 .maxAge(0) // Tells the browser to delete the cookie immediately
                 .httpOnly(true)
-                .secure(true) // Keep true for HTTPS production (false for local HTTP)
+                .secure(false) // Keep true for HTTPS production (false for local HTTP)
                 .sameSite("Strict")
                 .build();
 
@@ -96,9 +96,9 @@ public class LoginController {
 
         JwtResponse jwtResponse = loginService.validateCredentials(authDTO);
         ResponseCookie cookie = ResponseCookie.from("jwt", jwtResponse.getJwtToken())
-                .path("/") // Sets the path (usually "/" for global site access)
+                .path("/chat") // Sets the path (usually "/" for global site access)
                 .httpOnly(true) // Protects against XSS attacks
-                .secure(true) // Required for HTTPS (set to false ONLY for local HTTP testing)
+                .secure(false) // Required for HTTPS (set to false ONLY for local HTTP testing)
                 .sameSite("Strict") // Protects against CSRF attacks
                 .maxAge(-1) // Session cookie (deletes when browser closes)
                 .build();
@@ -109,7 +109,7 @@ public class LoginController {
         // on jwt filter we are adding userid and username with every request.
         // session.setAttribute("username", jwtResponse.getName());
         // session.setAttribute("userid", jwtResponse.getId());
-
+        //both login and logout cookie should match every param to logout properly       
         logger.info("User {} authenticated successfully", jwtResponse.getId());
         return PageMappings.REDIRECT_HOME;
     }
