@@ -89,10 +89,10 @@
         // 2. Shared Worker Integration Setup
         let globalWorkerPort = null;
 
-        if (!!window.SharedWorker) {
+        if (window.SharedWorker) {
             // Resolve absolute path using context path
             const workerPath = "${pageContext.request.contextPath}/js/app/ws-worker.js";
-            const myWorker = new SharedWorker(workerPath);
+            const myWorker = new SharedWorker(workerPath,"app-websocket-worker");
 
             globalWorkerPort = myWorker.port;
             globalWorkerPort.start();
@@ -146,7 +146,7 @@
 
             // Prompt worker to clean up active port allocation right before page reloads/navigates
             window.addEventListener('beforeunload', () => {
-                globalWorkerPort.postMessage({ type: 'DISCONNECT' });
+                globalWorkerPort.postMessage({ type: 'PORT_UNLOAD' });
             });
 
             // Request notification permissions gracefully via UI actions elsewhere

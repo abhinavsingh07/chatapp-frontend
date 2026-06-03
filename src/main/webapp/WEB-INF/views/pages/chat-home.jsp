@@ -272,5 +272,5 @@
       }
 
       // Simulate real-time updates
-      setInterval(updateChatList, 30000); // Check every 30 seconds
+      //setInterval(updateChatList, 30000); // Check every 30 seconds
    </script>
