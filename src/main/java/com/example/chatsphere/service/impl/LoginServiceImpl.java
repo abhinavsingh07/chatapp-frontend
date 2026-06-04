@@ -3,7 +3,7 @@ package com.example.chatsphere.service.impl;
 import com.apiservice.client.ApiRequest;
 import com.example.chatsphere.dto.AuthDTO;
 import com.example.chatsphere.dto.UserDTO;
-import com.example.chatsphere.security.JwtResponse;
+import com.example.chatsphere.util.JwtResponse;
 import com.example.chatsphere.service.LoginService;
 import com.example.chatsphere.util.ApiRequestBuilderUtil;
 import org.slf4j.Logger;
