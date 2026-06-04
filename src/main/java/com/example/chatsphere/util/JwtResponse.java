@@ -1,4 +1,4 @@
-package com.example.chatsphere.security;
+package com.example.chatsphere.util;
 
 public class JwtResponse {
 
