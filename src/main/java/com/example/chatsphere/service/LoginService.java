@@ -2,7 +2,7 @@ package com.example.chatsphere.service;
 
 import com.example.chatsphere.dto.AuthDTO;
 import com.example.chatsphere.dto.UserDTO;
-import com.example.chatsphere.security.JwtResponse;
+import com.example.chatsphere.util.JwtResponse;
 
 public interface LoginService {
     /**

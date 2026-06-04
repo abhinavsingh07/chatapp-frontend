@@ -2,12 +2,8 @@ package com.example.chatsphere.util;
 
 import com.apiservice.client.ApiRequest;
 import com.example.chatsphere.mappings.EndpointRegistry;
-import com.example.chatsphere.security.JwtResponse;
-import com.example.chatsphere.service.TokenStoreService;
-import com.example.chatsphere.service.impl.LoginServiceImpl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +42,6 @@ public class ApiRequestBuilderUtil {
 
     @Autowired
     private EndpointRegistry endpointRegistry;
-
-    @Autowired
-    private TokenStoreService tokenStoreService;
 
     //Builds api request
     public ApiRequest build(String key, Object body) {
@@ -102,7 +95,8 @@ public class ApiRequestBuilderUtil {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        if (apiEndpoint.getPath().contains("/authenticate") || apiEndpoint.getPath().contains("/register")) {
+        if (apiEndpoint.getPath().contains("/authenticate")
+             || apiEndpoint.getPath().contains("/register")) {
             return headers;
         }
         //setting auth token from cookie if present

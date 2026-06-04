@@ -9,6 +9,7 @@ public class JwtResponse {
     private String name;
     private String profilePictureUrl;
     private String email;
+    private String refreshToken;
 
     //All getters and setters needed for jackson automatic serialization/deserialization
     public String getId() {
@@ -65,5 +66,13 @@ public class JwtResponse {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }
