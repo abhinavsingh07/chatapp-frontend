@@ -4,7 +4,8 @@ import com.apiservice.client.ApiRequest;
 import com.example.chatsphere.dto.AuthDTO;
 import com.example.chatsphere.dto.UserDTO;
 import com.example.chatsphere.util.JwtResponse;
-import com.example.chatsphere.service.LoginService;
+import com.example.chatsphere.util.RefreshTokenRequest;
+import com.example.chatsphere.service.AuthService;
 import com.example.chatsphere.util.ApiRequestBuilderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,12 +13,12 @@ import org.springframework.stereotype.Service;
 import com.apiservice.client.ApiDispatcherService;
 
 @Service
-public class LoginServiceImpl implements LoginService {
-    private static final Logger logger = LoggerFactory.getLogger(LoginServiceImpl.class);
+public class AuthServiceImpl implements AuthService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
     private final ApiDispatcherService apiDispatcherService;
     private final ApiRequestBuilderUtil apiRequestBuilderUtil;
 
-    public LoginServiceImpl(ApiDispatcherService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
+    public AuthServiceImpl(ApiDispatcherService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
         this.apiDispatcherService = apiDispatcherService;
         this.apiRequestBuilderUtil = apiRequestBuilderUtil;
     }
@@ -38,6 +39,15 @@ public class LoginServiceImpl implements LoginService {
         logger.info("Registering user with phone number or email: {}",  apiReq.getPath());
         UserDTO responseEntity = apiDispatcherService.call(apiReq, UserDTO.class);
         logger.info("User registration successful for: {}",  apiReq.getPath());
+        return responseEntity;
+    }
+
+    @Override
+    public JwtResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+        ApiRequest apiReq = apiRequestBuilderUtil.build("auth.refresh", refreshTokenRequest);
+        logger.info("Refreshing token with endpoint: {}", apiReq.getPath());
+        JwtResponse responseEntity = apiDispatcherService.call(apiReq, JwtResponse.class);
+        logger.info("Token refreshed successfully");
         return responseEntity;
     }
 }

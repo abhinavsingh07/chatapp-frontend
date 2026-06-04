@@ -14,6 +14,7 @@ public class EndpointRegistry {
     private final Map<String, ApiRequestBuilderUtil.ApiEndpoint> endpoints = Map.ofEntries(
             Map.entry("auth.login", new ApiRequestBuilderUtil.ApiEndpoint("/auth/authenticate", HttpMethod.POST)),
             Map.entry("auth.register", new ApiRequestBuilderUtil.ApiEndpoint("/auth/register", HttpMethod.POST)),
+            Map.entry("auth.refresh", new ApiRequestBuilderUtil.ApiEndpoint("/auth/refresh", HttpMethod.POST)),
             Map.entry("user.getByUserId", new ApiRequestBuilderUtil.ApiEndpoint("/api/users/{userId}", HttpMethod.GET)),
             Map.entry("user.getAllUsers", new ApiRequestBuilderUtil.ApiEndpoint("/api/users/all", HttpMethod.GET)),
             Map.entry("user.getUserLastActiveStatus", new ApiRequestBuilderUtil.ApiEndpoint("/api/users/lastActiveStatus", HttpMethod.GET)),

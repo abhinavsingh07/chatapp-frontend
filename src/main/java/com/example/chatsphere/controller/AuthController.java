@@ -3,9 +3,10 @@ package com.example.chatsphere.controller;
 import com.example.chatsphere.dto.AuthDTO;
 import com.example.chatsphere.dto.UserDTO;
 import com.example.chatsphere.mappings.PageMappings;
-import com.example.chatsphere.service.LoginService;
+import com.example.chatsphere.service.AuthService;
 import com.example.chatsphere.service.TokenCookieService;
 import com.example.chatsphere.util.JwtResponse;
+import com.example.chatsphere.util.RefreshTokenRequest;
 import com.example.chatsphere.util.SuccessResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -18,14 +19,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 
 @Controller
-public class LoginController {
-    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+public class AuthController {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-    private final LoginService loginService;
+    private final AuthService loginService;
 
     private final TokenCookieService tokenCookieService;
 
-    public LoginController(LoginService loginService, TokenCookieService tokenCookieService) {
+    public AuthController(AuthService loginService, TokenCookieService tokenCookieService) {
         this.loginService = loginService;
         this.tokenCookieService = tokenCookieService;
     }
@@ -64,7 +65,7 @@ public class LoginController {
         return PageMappings.INDEX_PAGE;
     }
 
-    // APIs Route
+  
     @PostMapping("/authenticate")
     public String doLogin(@ModelAttribute AuthDTO authDTO, Model model, HttpSession session,
             HttpServletResponse response) {
@@ -91,6 +92,7 @@ public class LoginController {
         return PageMappings.INDEX_PAGE;
     }
 
+    // APIs Route
     @PostMapping("/api/authenticate")
     @ResponseBody
     public SuccessResponse<JwtResponse> authenticate(@RequestBody AuthDTO authDTO) {
@@ -111,5 +113,17 @@ public class LoginController {
 
         logger.info("API registration successful for user: {}", userResponse.getEmail());
         return new SuccessResponse<>("200", "Registration successful! Please log in.", Arrays.asList(userResponse));
+    }
+
+    @PostMapping("/api/tokenrefresh")
+    @ResponseBody
+    public SuccessResponse<JwtResponse> refreshAccessToken(@RequestBody RefreshTokenRequest refreshTokenRequest, HttpServletResponse response) {
+        logger.debug("Refreshing access token");
+
+        JwtResponse jwtResponse = loginService.refreshToken(refreshTokenRequest);
+        tokenCookieService.writeTokenCookies(response, jwtResponse);
+
+        logger.info("Access token refreshed successfully for user: {}", jwtResponse.getId());
+        return new SuccessResponse<>("200", "Token refreshed successfully", java.util.Arrays.asList(jwtResponse));
     }
 }
