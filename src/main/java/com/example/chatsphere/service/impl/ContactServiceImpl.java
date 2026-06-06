@@ -20,11 +20,11 @@ import java.util.Map;
 public class ContactServiceImpl implements ContactService {
     private static final Logger logger = LoggerFactory.getLogger(ContactServiceImpl.class);
 
-    private final AuthenticatedApiService apiDispatcherService;
+    private final AuthenticatedApiService authenticatedApiService;
     private final ApiRequestBuilderUtil apiRequestBuilderUtil;
 
-    public ContactServiceImpl(AuthenticatedApiService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
-        this.apiDispatcherService = apiDispatcherService;
+    public ContactServiceImpl(AuthenticatedApiService authenticatedApiService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
+        this.authenticatedApiService = authenticatedApiService;
         this.apiRequestBuilderUtil = apiRequestBuilderUtil;
     }
 
@@ -36,9 +36,9 @@ public class ContactServiceImpl implements ContactService {
         queryParams.put("userId", userId);
 
         ApiRequest apiReq = apiRequestBuilderUtil.build("contacts.getByUserId", Collections.emptyMap(), queryParams);
-        logger.info("Fetching contacts for userId: {}", apiReq.getPath());
+        logger.info("Fetching contacts for userId: {}",userId);
 
-        SuccessResponse<ContactUserDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<ContactUserDTO>>() {
+        SuccessResponse<ContactUserDTO> response = authenticatedApiService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<ContactUserDTO>>() {
         });
 
         logger.info("Retrieved {} contacts for userId: {}", response.getData().size(), userId);
@@ -50,9 +50,8 @@ public class ContactServiceImpl implements ContactService {
         ApiRequest apiReq = apiRequestBuilderUtil.build("contact.add", contactDTO);
 
         logger.info("Adding contact for userId: {}, email: {}", contactDTO.getUserId(), contactDTO.getEmail());
-        logger.debug("API path: {}", apiReq.getPath());
 
-        SuccessResponse<ContactUserDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<ContactUserDTO>>() {
+        SuccessResponse<ContactUserDTO> response = authenticatedApiService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<ContactUserDTO>>() {
         });
 
         if (response.getData() == null || response.getData().isEmpty()) {
@@ -70,8 +69,8 @@ public class ContactServiceImpl implements ContactService {
         pathParams.put("contactId", contactId);
 
         ApiRequest apiReq = apiRequestBuilderUtil.build("contact.remove", pathParams, Collections.emptyMap());
-        logger.info("Removing contact: {}", apiReq.getPath());
-        SuccessResponse<String> responseEntity = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<String>>() {
+        logger.info("Removing contact Id: {}",contactId);
+        SuccessResponse<String> responseEntity = authenticatedApiService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<String>>() {
         });
         logger.info("Contact removed successfully: {} for contactId: {}", apiReq.getPath(), contactId);
         return responseEntity;

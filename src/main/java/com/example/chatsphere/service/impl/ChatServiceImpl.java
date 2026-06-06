@@ -22,11 +22,11 @@ import org.springframework.stereotype.Service;
 public class ChatServiceImpl implements ChatService {
 
     private static final Logger logger = LoggerFactory.getLogger(ChatServiceImpl.class);
-    private final AuthenticatedApiService apiDispatcherService;
+    private final AuthenticatedApiService authenticatedApiService;
     private final ApiRequestBuilderUtil apiRequestBuilderUtil;
 
-    public ChatServiceImpl(AuthenticatedApiService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
-        this.apiDispatcherService = apiDispatcherService;
+    public ChatServiceImpl(AuthenticatedApiService authenticatedApiService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
+        this.authenticatedApiService = authenticatedApiService;
         this.apiRequestBuilderUtil = apiRequestBuilderUtil;
     }
 
@@ -39,7 +39,7 @@ public class ChatServiceImpl implements ChatService {
         // Build API request
         ApiRequest apiRequest = apiRequestBuilderUtil.build("conv.getOrCreateConv", pathParams, Collections.emptyMap());
         // Dispatch API call
-        SuccessResponse<String> response = apiDispatcherService.call(apiRequest, new ParameterizedTypeReference<SuccessResponse<String>>() {
+        SuccessResponse<String> response = authenticatedApiService.call(apiRequest, new ParameterizedTypeReference<SuccessResponse<String>>() {
         });
         // Validate response
         List<String> conversationIds = response.getData();
@@ -62,7 +62,7 @@ public class ChatServiceImpl implements ChatService {
         // Build API request
         ApiRequest apiRequest = apiRequestBuilderUtil.build("message.getByConvId", pathParams, Collections.emptyMap());
         // Dispatch API call
-        SuccessResponse<MessageDTO> response = apiDispatcherService.call(apiRequest, new ParameterizedTypeReference<SuccessResponse<MessageDTO>>() {
+        SuccessResponse<MessageDTO> response = authenticatedApiService.call(apiRequest, new ParameterizedTypeReference<SuccessResponse<MessageDTO>>() {
         });
 
         // Validate response
@@ -84,7 +84,7 @@ public class ChatServiceImpl implements ChatService {
         // Build API request - assuming the API key for this is "conversation.getLastMessagesByUser"
         ApiRequest apiRequest = apiRequestBuilderUtil.build("conv.getLastConversationByLoggedInUser", pathParams, Collections.emptyMap());
         // Dispatch API call
-        SuccessResponse<ConversationLastMsgDTO> response = apiDispatcherService.call(apiRequest, new ParameterizedTypeReference<SuccessResponse<ConversationLastMsgDTO>>() {
+        SuccessResponse<ConversationLastMsgDTO> response = authenticatedApiService.call(apiRequest, new ParameterizedTypeReference<SuccessResponse<ConversationLastMsgDTO>>() {
         });
 
         // Validate response

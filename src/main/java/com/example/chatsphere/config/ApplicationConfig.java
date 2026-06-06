@@ -41,6 +41,7 @@ public class ApplicationConfig implements WebMvcConfigurer {
                         "/static/**",
                         "/login",
                         "/register",
+                        "/",
                         "/css/**",
                         "/js/**",
                         "/images/**"); // Skip APIs and assets

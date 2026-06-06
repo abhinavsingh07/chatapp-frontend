@@ -20,20 +20,20 @@ public class UserServiceImpl implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    private final AuthenticatedApiService apiDispatcherService;
+    private final AuthenticatedApiService authenticatedApiService;
     private final ApiRequestBuilderUtil apiRequestBuilderUtil;
 
-    public UserServiceImpl(AuthenticatedApiService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
-        this.apiDispatcherService = apiDispatcherService;
+    public UserServiceImpl(AuthenticatedApiService authenticatedApiService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
+        this.authenticatedApiService = authenticatedApiService;
         this.apiRequestBuilderUtil = apiRequestBuilderUtil;
     }
 
     @Override
     public SuccessResponse<UserDTO> getAllUsers() {
         ApiRequest apiReq = apiRequestBuilderUtil.build("user.getAllUsers", Collections.emptyMap(), Collections.emptyMap());
-        logger.info("Fetching all users via API path: {}", apiReq.getPath());
+        logger.info("Fetching all users");
 
-        SuccessResponse<UserDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserDTO>>() {
+        SuccessResponse<UserDTO> response = authenticatedApiService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserDTO>>() {
         });
 
         if (response.getData() != null && !response.getData().isEmpty()) {
@@ -49,9 +49,9 @@ public class UserServiceImpl implements UserService {
         Map<String, String> pathParams = Map.of("userId", userId);
 
         ApiRequest apiReq = apiRequestBuilderUtil.build("user.getByUserId", pathParams, Collections.emptyMap());
-        logger.info("Fetching user details for userId: {} via API path: {}", userId, apiReq.getPath());
+        logger.info("Fetching user details for userId: {}", userId);
 
-        SuccessResponse<UserDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserDTO>>() {
+        SuccessResponse<UserDTO> response = authenticatedApiService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserDTO>>() {
         });
 
         if (response.getData() != null) {
@@ -67,9 +67,9 @@ public class UserServiceImpl implements UserService {
         Map<String, String> queryParams = Map.of("userId", userId);
 
         ApiRequest apiReq = apiRequestBuilderUtil.build("user.getUserLastActiveStatus", Collections.emptyMap(), queryParams);
-        logger.info("Fetching last active status for userId: {} via API path: {}", userId, apiReq.getPath());
+        logger.info("Fetching last active status for userId: {} ", userId);
 
-        SuccessResponse<UserStatusDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserStatusDTO>>() {
+        SuccessResponse<UserStatusDTO> response = authenticatedApiService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserStatusDTO>>() {
         });
 
         if (response.getData() != null && !response.getData().isEmpty()) {
@@ -83,9 +83,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public SuccessResponse<UserDTO> getUserMe() {
         ApiRequest apiReq = apiRequestBuilderUtil.build("user.getUserMe", Collections.emptyMap(), Collections.emptyMap());
-        logger.info("Fetching current logged-in user details via API path: {}", apiReq.getPath());
+        logger.info("Fetching current logged-in user details");
 
-        SuccessResponse<UserDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserDTO>>() {
+        SuccessResponse<UserDTO> response = authenticatedApiService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserDTO>>() {
         });
 
         if (response.getData() != null && !response.getData().isEmpty()) {

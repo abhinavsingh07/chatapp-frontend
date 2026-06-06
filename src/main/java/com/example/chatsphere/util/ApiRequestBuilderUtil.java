@@ -4,6 +4,8 @@ import com.apiservice.client.ApiRequest;
 import com.example.chatsphere.mappings.EndpointRegistry;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -43,7 +46,7 @@ public class ApiRequestBuilderUtil {
     @Autowired
     private EndpointRegistry endpointRegistry;
 
-    //Builds api request
+    // Builds api request
     public ApiRequest build(String key, Object body) {
         ApiEndpoint endpoint = endpointRegistry.get(key);
 
@@ -80,7 +83,9 @@ public class ApiRequestBuilderUtil {
         }
 
         if (queryParams != null && !queryParams.isEmpty()) {
-            String queryString = queryParams.entrySet().stream().map(entry -> entry.getKey() + "=" + UriUtils.encodeQueryParam(entry.getValue(), StandardCharsets.UTF_8)).collect(Collectors.joining("&"));
+            String queryString = queryParams.entrySet().stream().map(
+                    entry -> entry.getKey() + "=" + UriUtils.encodeQueryParam(entry.getValue(), StandardCharsets.UTF_8))
+                    .collect(Collectors.joining("&"));
             pathWithParams += "?" + queryString;
         }
 
@@ -88,29 +93,88 @@ public class ApiRequestBuilderUtil {
             logger.debug("Built path for key={}, finalPath={}", key, pathWithParams);
         }
 
-        return ApiRequest.builder().withPath(pathWithParams).withMethod(endpoint.getMethod()).withHeaders(getDefaultHeaders(endpoint));
+        return ApiRequest.builder()
+                .withPath(pathWithParams)
+                .withMethod(endpoint.getMethod())
+                .withHeaders(getDefaultHeaders(endpoint));
     }
 
+    /**
+     * Setting bearer auth token in headers (Bearer <JWT Token>)
+     * 
+     * @param apiEndpoint
+     * @return
+     */
     public HttpHeaders getDefaultHeaders(ApiEndpoint apiEndpoint) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        if (apiEndpoint.getPath().contains("/authenticate")
-             || apiEndpoint.getPath().contains("/register")) {
+        // 1. Bypass authentication headers for public/anonymous endpoints (Login,
+        // Registration, etc.)
+        if (apiEndpoint.getPath().contains("/authenticate") || apiEndpoint.getPath().contains("/register")) {
             return headers;
         }
-        //setting auth token from cookie if present
+
+        // 2. Retrieve the active HTTP request context from Spring's thread-local
+        // storage
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attr != null) {
             HttpServletRequest httpRequest = attr.getRequest();
-            if (httpRequest.getCookies() != null) {
-                for (Cookie cookie : httpRequest.getCookies()) {
-                    if ("jwt".equals(cookie.getName())) {
-                        headers.setBearerAuth(cookie.getValue());
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("JWT token added to headers for path={}", apiEndpoint.getPath());
+
+            // Extract lifecycle synchronization flags set during interceptor/refresh flow
+            String isToKenRefreshedInCurrentRequest = (String) httpRequest
+                    .getAttribute("tokenRefreshedInOngoingRequest");
+            String afterRefreshJwtToken = (String) httpRequest.getAttribute("afterRefreshJwtToken");
+
+            // 3. STRATEGY A: Prioritise the freshly minted token if a refresh event
+            // occurred mid-request.
+            // This prevents downstream API calls in the same lifecycle from using the
+            // expired browser cookie.
+            if (isToKenRefreshedInCurrentRequest != null && "true".equals(isToKenRefreshedInCurrentRequest)) {
+                headers.setBearerAuth(afterRefreshJwtToken);
+            }
+            // 4. STRATEGY B: Fall back to extracting the original token from incoming
+            // browser cookies.
+            else {
+                if (httpRequest.getCookies() != null) {
+                    for (Cookie cookie : httpRequest.getCookies()) {
+                        if ("jwt".equals(cookie.getName())) {
+                            headers.setBearerAuth(cookie.getValue());
+
+                            // Guarded logging to maintain application performance under load
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("JWT token added to headers for path={}", apiEndpoint.getPath());
+                            }
                         }
                     }
+                }
+            }
+        }
+
+        return headers;
+    }
+
+    /**
+     * Setting bearer auth token in headers (Bearer <JWT Token>)
+     * 
+     * @return
+     */
+
+    // using in Authenticated API service class
+    public HttpHeaders getDefaultHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        // setting auth token from cookie if present
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attr != null) {
+            // when cookie is setting after refresh it is setting in response so for retry
+            // request we fetch from response
+            HttpServletResponse httpResponse = attr.getResponse();
+            Collection<String> headers1 = httpResponse.getHeaders("Set-Cookie");
+            for (String header : headers1) {
+                if (header.startsWith("jwt" + "=")) {
+                    String token = header.split(";")[0].split("=")[1];
+                    headers.setBearerAuth(token);
                 }
             }
         }
@@ -136,4 +200,3 @@ public class ApiRequestBuilderUtil {
         }
     }
 }
-

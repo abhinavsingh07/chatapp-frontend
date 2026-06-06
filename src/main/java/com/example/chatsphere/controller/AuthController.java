@@ -22,12 +22,12 @@ import java.util.Arrays;
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-    private final AuthService loginService;
+    private final AuthService authService;
 
     private final CookieService tokenCookieService;
 
-    public AuthController(AuthService loginService, CookieService tokenCookieService) {
-        this.loginService = loginService;
+    public AuthController(AuthService authService, CookieService tokenCookieService) {
+        this.authService = authService;
         this.tokenCookieService = tokenCookieService;
     }
 
@@ -71,7 +71,7 @@ public class AuthController {
             HttpServletResponse response) {
         logger.debug("Authenticating user with phone/email: {}", authDTO.getPhoneNumberOrEmail());
 
-        JwtResponse jwtResponse = loginService.validateCredentials(authDTO);
+        JwtResponse jwtResponse = authService.validateCredentials(authDTO);
         // dont need session as all details is in token.
         //create cookies for access and refresh token and add to response.  
         tokenCookieService.writeTokenCookies(response, jwtResponse);
@@ -83,7 +83,7 @@ public class AuthController {
     public String doRegister(@ModelAttribute UserDTO userDTO, Model model) {
         logger.debug("Registering user with email: {}", userDTO.getEmail());
 
-        loginService.registerUser(userDTO);
+        authService.registerUser(userDTO);
 
         model.addAttribute("successMessage", "Registration successful! Please log in.");
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.REGISTER_VIEW);
@@ -98,7 +98,7 @@ public class AuthController {
     public SuccessResponse<JwtResponse> authenticate(@RequestBody AuthDTO authDTO) {
         logger.debug("Authenticating API user with phone/email: {}", authDTO.getPhoneNumberOrEmail());
 
-        JwtResponse jwtResponse = loginService.validateCredentials(authDTO);
+        JwtResponse jwtResponse = authService.validateCredentials(authDTO);
 
         logger.info("API authentication successful for user: {}", jwtResponse.getId());
         return new SuccessResponse<>("200", "Authentication successful", java.util.Arrays.asList(jwtResponse));
@@ -109,7 +109,7 @@ public class AuthController {
     public SuccessResponse<UserDTO> register(@RequestBody UserDTO userDTO) {
         logger.debug("Registering API user with email: {}", userDTO.getEmail());
 
-        UserDTO userResponse = loginService.registerUser(userDTO);
+        UserDTO userResponse = authService.registerUser(userDTO);
 
         logger.info("API registration successful for user: {}", userResponse.getEmail());
         return new SuccessResponse<>("200", "Registration successful! Please log in.", Arrays.asList(userResponse));
@@ -120,7 +120,7 @@ public class AuthController {
     public SuccessResponse<JwtResponse> refreshAccessToken(@RequestBody RefreshTokenRequest refreshTokenRequest, HttpServletResponse response) {
         logger.debug("Refreshing access token");
 
-        JwtResponse jwtResponse = loginService.refreshToken(refreshTokenRequest);
+        JwtResponse jwtResponse = authService.refreshToken(refreshTokenRequest);
         tokenCookieService.writeTokenCookies(response, jwtResponse);
 
         logger.info("Access token refreshed successfully for user: {}", jwtResponse.getId());
