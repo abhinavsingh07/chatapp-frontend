@@ -20,7 +20,8 @@ public class AuthenticatedApiService {
     private final RefreshTokenService refreshTokenService;
     private final ApiRequestBuilderUtil apiRequestBuilderUtil;
 
-    public AuthenticatedApiService(ApiDispatcherService apiDispatcherService, @Lazy RefreshTokenService refreshTokenService,
+    public AuthenticatedApiService(ApiDispatcherService apiDispatcherService,
+            @Lazy RefreshTokenService refreshTokenService,
             ApiRequestBuilderUtil apiRequestBuilderUtil) {
         this.apiDispatcherService = apiDispatcherService;
         this.refreshTokenService = refreshTokenService;
@@ -51,13 +52,13 @@ public class AuthenticatedApiService {
                 throw new SessionExpiredException("Session expired after retry: " + ex.getMessage());
             }
 
+            /*** Refresh token call ***/
             boolean refreshed = refreshTokenService.refreshCurrentSession();
             logger.info("Refresh token attempt completed for simple response type for path: {}. refreshed={}",
                     apiRequest.getPath(), refreshed);
 
             if (!refreshed) {
-                logger.error("Session refresh failed for simple response type: {}. Throwing SessionExpiredException",
-                        responseType.getSimpleName());
+                logger.error("Session refresh failed for simple response type: {}. Throwing SessionExpiredException");
                 throw new SessionExpiredException("Session expired and unable to refresh: " + ex.getMessage());
             }
 
@@ -68,7 +69,7 @@ public class AuthenticatedApiService {
             HttpHeaders httpheaders = apiRequestBuilderUtil.getDefaultHeaders();
             apiRequest.withHeaders(httpheaders);
 
-            return callInternal(apiRequest, responseType, false);
+            return callInternal(apiRequest, responseType, false);//retry flag prevents infinite call
         }
     }
 
@@ -98,6 +99,7 @@ public class AuthenticatedApiService {
                 throw new SessionExpiredException("Session expired after retry: " + ex.getMessage());
             }
 
+            /*** Refresh token call ***/
             boolean refreshed = refreshTokenService.refreshCurrentSession();
             logger.info("Refresh token attempt completed for parameterized response type for path: {}. refreshed={}",
                     apiRequest.getPath(), refreshed);

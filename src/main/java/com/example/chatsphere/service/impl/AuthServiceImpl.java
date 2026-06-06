@@ -1,5 +1,6 @@
 package com.example.chatsphere.service.impl;
 
+import com.apiservice.client.ApiDispatcherService;
 import com.apiservice.client.ApiRequest;
 import com.example.chatsphere.dto.AuthDTO;
 import com.example.chatsphere.dto.UserDTO;
@@ -17,10 +18,13 @@ public class AuthServiceImpl implements AuthService {
     private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     private final AuthenticatedApiService authenticatedApiService;
+    private final ApiDispatcherService apiDispatcherService;
     private final ApiRequestBuilderUtil apiRequestBuilderUtil;
 
-    public AuthServiceImpl(AuthenticatedApiService authenticatedApiService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
+    public AuthServiceImpl(AuthenticatedApiService authenticatedApiService, ApiDispatcherService apiDispatcherService,
+            ApiRequestBuilderUtil apiRequestBuilderUtil) {
         this.authenticatedApiService = authenticatedApiService;
+        this.apiDispatcherService = apiDispatcherService;
         this.apiRequestBuilderUtil = apiRequestBuilderUtil;
     }
 
@@ -49,7 +53,8 @@ public class AuthServiceImpl implements AuthService {
     public JwtResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
         ApiRequest apiReq = apiRequestBuilderUtil.build("auth.refresh", refreshTokenRequest);
         logger.info("Refreshing token request");
-        JwtResponse responseEntity = authenticatedApiService.call(apiReq, JwtResponse.class);
+        //Not calling APIAuthenticateservice causing infinite loop in refresh token expires.
+        JwtResponse responseEntity = apiDispatcherService.call(apiReq, JwtResponse.class);
         logger.info("Token refreshed successfully");
         return responseEntity;
     }

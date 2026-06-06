@@ -58,6 +58,7 @@ public class UserInterceptor implements HandlerInterceptor {
                 logger.debug("User details populated for userId: {}", user.getId());
             }
         } catch (Exception e) {
+            //also catching SessionExpiredException from ApiAuthenticateService
             logger.warn("Error fetching user details in interceptor: {}", e.getMessage());
             // Refresh token failed/expired too -> Force login
             response.sendRedirect(request.getContextPath() + "/login");
