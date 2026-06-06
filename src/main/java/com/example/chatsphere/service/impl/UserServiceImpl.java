@@ -1,20 +1,18 @@
 package com.example.chatsphere.service.impl;
 
-import com.apiservice.client.ApiDispatcherService;
 import com.apiservice.client.ApiRequest;
 import com.example.chatsphere.dto.UserDTO;
 import com.example.chatsphere.dto.UserStatusDTO;
+import com.example.chatsphere.service.AuthenticatedApiService;
 import com.example.chatsphere.service.UserService;
 import com.example.chatsphere.util.ApiRequestBuilderUtil;
 import com.example.chatsphere.util.SuccessResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -22,10 +20,10 @@ public class UserServiceImpl implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    private final ApiDispatcherService apiDispatcherService;
+    private final AuthenticatedApiService apiDispatcherService;
     private final ApiRequestBuilderUtil apiRequestBuilderUtil;
 
-    public UserServiceImpl(ApiDispatcherService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
+    public UserServiceImpl(AuthenticatedApiService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
         this.apiDispatcherService = apiDispatcherService;
         this.apiRequestBuilderUtil = apiRequestBuilderUtil;
     }
@@ -78,6 +76,22 @@ public class UserServiceImpl implements UserService {
             logger.info("Retrieved last active status for {} users", response.getData().size());
         } else {
             logger.info("No status data found for userId: {}", userId);
+        }
+        return response;
+    }
+
+    @Override
+    public SuccessResponse<UserDTO> getUserMe() {
+        ApiRequest apiReq = apiRequestBuilderUtil.build("user.getUserMe", Collections.emptyMap(), Collections.emptyMap());
+        logger.info("Fetching current logged-in user details via API path: {}", apiReq.getPath());
+
+        SuccessResponse<UserDTO> response = apiDispatcherService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserDTO>>() {
+        });
+
+        if (response.getData() != null && !response.getData().isEmpty()) {
+            logger.info("Current user details retrieved successfully");
+        } else {
+            logger.info("No user data found");
         }
         return response;
     }

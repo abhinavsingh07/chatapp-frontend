@@ -11,4 +11,6 @@ public interface UserService {
     SuccessResponse<UserDTO> getByUserId(String userId);
 
     SuccessResponse<UserStatusDTO> getUserLastActiveStatus(String userId);
+
+    SuccessResponse<UserDTO> getUserMe();
 }

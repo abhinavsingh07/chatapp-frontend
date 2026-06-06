@@ -7,12 +7,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.example.chatsphere.mappings.PageMappings;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
+import java.util.Map;
 
 // This class handles exceptions globally for the application.
 @ControllerAdvice
@@ -39,6 +42,18 @@ public class GlobalExceptionHandler {
         }
 
         return modelAndView;
+    }
+
+    @ExceptionHandler(SessionExpiredException.class)
+    public Object handleSessionExpired(HttpServletRequest request, HttpServletResponse response) {
+        String requestedWith = request.getHeader("X-Requested-With");
+
+        if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Session expired"));
+        }
+
+        return new ModelAndView("redirect:/login");
     }
 
     // Optional: handle other exceptions

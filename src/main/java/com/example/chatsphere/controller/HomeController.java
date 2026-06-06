@@ -26,6 +26,7 @@ public class HomeController {
     @GetMapping("/home")
     public String homePage(Model model, HttpServletRequest request) {
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.HOME_PAGE_VIEW);
+        logger.info("Loading home page for user");
         String loggedInUserid = (String) request.getAttribute("userId");
         List<ConversationLastMsgDTO> chatData = chatService.getLastMessageByLoggedInUserId(loggedInUserid);
         model.addAttribute("chatData", chatData);

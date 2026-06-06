@@ -6,19 +6,20 @@ import com.example.chatsphere.dto.UserDTO;
 import com.example.chatsphere.util.JwtResponse;
 import com.example.chatsphere.util.RefreshTokenRequest;
 import com.example.chatsphere.service.AuthService;
+import com.example.chatsphere.service.AuthenticatedApiService;
 import com.example.chatsphere.util.ApiRequestBuilderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import com.apiservice.client.ApiDispatcherService;
 
 @Service
 public class AuthServiceImpl implements AuthService {
     private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
-    private final ApiDispatcherService apiDispatcherService;
+    
+    private final AuthenticatedApiService apiDispatcherService;
     private final ApiRequestBuilderUtil apiRequestBuilderUtil;
 
-    public AuthServiceImpl(ApiDispatcherService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
+    public AuthServiceImpl(AuthenticatedApiService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
         this.apiDispatcherService = apiDispatcherService;
         this.apiRequestBuilderUtil = apiRequestBuilderUtil;
     }

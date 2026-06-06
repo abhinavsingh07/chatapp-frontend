@@ -1,15 +1,14 @@
 package com.example.chatsphere.service.impl;
 
-import com.apiservice.client.ApiDispatcherService;
 import com.apiservice.client.ApiRequest;
 import com.example.chatsphere.dto.ContactDTO;
 import com.example.chatsphere.dto.ContactUserDTO;
+import com.example.chatsphere.service.AuthenticatedApiService;
 import com.example.chatsphere.service.ContactService;
 import com.example.chatsphere.util.ApiRequestBuilderUtil;
 import com.example.chatsphere.util.SuccessResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +20,10 @@ import java.util.Map;
 public class ContactServiceImpl implements ContactService {
     private static final Logger logger = LoggerFactory.getLogger(ContactServiceImpl.class);
 
-    private final ApiDispatcherService apiDispatcherService;
+    private final AuthenticatedApiService apiDispatcherService;
     private final ApiRequestBuilderUtil apiRequestBuilderUtil;
 
-    public ContactServiceImpl(ApiDispatcherService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
+    public ContactServiceImpl(AuthenticatedApiService apiDispatcherService, ApiRequestBuilderUtil apiRequestBuilderUtil) {
         this.apiDispatcherService = apiDispatcherService;
         this.apiRequestBuilderUtil = apiRequestBuilderUtil;
     }

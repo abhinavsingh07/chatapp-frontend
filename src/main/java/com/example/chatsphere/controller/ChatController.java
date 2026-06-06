@@ -11,7 +11,6 @@ import com.example.chatsphere.service.ChatService;
 import com.example.chatsphere.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,11 +51,11 @@ public class ChatController {
             if (userResponse.getData() != null && !userResponse.getData().isEmpty()) {
                 model.addAttribute("toUserDetails", userResponse.getData().get(0));
             } else {
-                logger.debug("No user details found for toUserId={}", toUserId);
+                logger.info("No user details found for toUserId={}", toUserId);
                 model.addAttribute("toUserDetails", null);
             }
 
-            logger.debug("Loaded {} messages for conversationId={}", messages.size(), conversationId);
+            logger.info("Loaded {} messages for conversationId={}", messages.size(), conversationId);
         }
 
         // always set placeholder for layout
@@ -67,7 +66,7 @@ public class ChatController {
     @GetMapping("/api/conversation/get-or-create/{fromUserId}/{toUserId}")
     @ResponseBody
     public SuccessResponse<String> getOrCreateConversationId(@PathVariable String fromUserId, @PathVariable String toUserId) {
-        logger.debug("Fetching/creating conversation between fromUserId={} and toUserId={}", fromUserId, toUserId);
+        logger.info("Fetching/creating conversation between fromUserId={} and toUserId={}", fromUserId, toUserId);
 
         String conversationId = chatService.getOrCreateConversationId(fromUserId, toUserId);
         return new SuccessResponse<>("200", "Conversation fetched/created successfully", Arrays.asList(conversationId));
@@ -76,7 +75,7 @@ public class ChatController {
     @GetMapping("/api/messages/conversation/{conversationId}")
     @ResponseBody
     public SuccessResponse<MessageDTO> getMessagesByConversationId(@PathVariable String conversationId) {
-        logger.debug("Fetching messages for conversationId={}", conversationId);
+        logger.info("Fetching messages for conversationId={}", conversationId);
 
         List<MessageDTO> messages = chatService.getMessagesByConversationId(conversationId);
         String message = messages.isEmpty() ? "No messages found for this conversation" : "Messages fetched successfully";
@@ -87,7 +86,7 @@ public class ChatController {
     @GetMapping("/api/messages/last-messages/user/{userId}")
     @ResponseBody
     public SuccessResponse<ConversationLastMsgDTO> getLastMessageByLoggedInUserId(@PathVariable String userId) {
-        logger.debug("Fetching last messages for logged-in userId={}", userId);
+        logger.info("Fetching last messages for logged-in userId={}", userId);
 
         List<ConversationLastMsgDTO> lastMessages = chatService.getLastMessageByLoggedInUserId(userId);
         String message = lastMessages.isEmpty() ? "No last messages found for this user" : "Last messages fetched successfully";

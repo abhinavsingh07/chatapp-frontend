@@ -4,7 +4,7 @@ import com.example.chatsphere.dto.AuthDTO;
 import com.example.chatsphere.dto.UserDTO;
 import com.example.chatsphere.mappings.PageMappings;
 import com.example.chatsphere.service.AuthService;
-import com.example.chatsphere.service.TokenCookieService;
+import com.example.chatsphere.service.CookieService;
 import com.example.chatsphere.util.JwtResponse;
 import com.example.chatsphere.util.RefreshTokenRequest;
 import com.example.chatsphere.util.SuccessResponse;
@@ -24,9 +24,9 @@ public class AuthController {
 
     private final AuthService loginService;
 
-    private final TokenCookieService tokenCookieService;
+    private final CookieService tokenCookieService;
 
-    public AuthController(AuthService loginService, TokenCookieService tokenCookieService) {
+    public AuthController(AuthService loginService, CookieService tokenCookieService) {
         this.loginService = loginService;
         this.tokenCookieService = tokenCookieService;
     }
