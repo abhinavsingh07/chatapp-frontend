@@ -99,6 +99,41 @@ public class ApiRequestBuilderUtil {
                 .withHeaders(getDefaultHeaders(endpoint));
     }
 
+    public ApiRequest build(String key, Map<String, String> pathParams, Map<String, String> queryParams,Object body) {
+        ApiEndpoint endpoint = endpointRegistry.get(key);
+
+        if (endpoint == null) {
+            throw new IllegalArgumentException("No endpoint mapping found for key: " + key);
+        }
+
+        String pathWithParams = endpoint.getPath();
+
+        if (pathParams != null && !pathParams.isEmpty()) {
+            for (Map.Entry<String, String> entry : pathParams.entrySet()) {
+                String placeholder = "{" + entry.getKey() + "}";
+                String encodedValue = UriUtils.encodePathSegment(entry.getValue(), StandardCharsets.UTF_8);
+                pathWithParams = pathWithParams.replace(placeholder, encodedValue);
+            }
+        }
+
+        if (queryParams != null && !queryParams.isEmpty()) {
+            String queryString = queryParams.entrySet().stream().map(
+                    entry -> entry.getKey() + "=" + UriUtils.encodeQueryParam(entry.getValue(), StandardCharsets.UTF_8))
+                    .collect(Collectors.joining("&"));
+            pathWithParams += "?" + queryString;
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Built path for key={}, finalPath={}", key, pathWithParams);
+        }
+
+        return ApiRequest.builder()
+                .withPath(pathWithParams)
+                .withMethod(endpoint.getMethod())
+                .withBody(body)
+                .withHeaders(getDefaultHeaders(endpoint));
+    }
+
     /**
      * Setting bearer auth token in headers (Bearer <JWT Token>)
      * 

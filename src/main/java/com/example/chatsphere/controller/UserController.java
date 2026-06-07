@@ -2,14 +2,17 @@ package com.example.chatsphere.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.example.chatsphere.dto.UserDTO;
 import com.example.chatsphere.dto.UserStatusDTO;
+import com.example.chatsphere.mappings.PageMappings;
 import com.example.chatsphere.service.UserService;
 import com.example.chatsphere.util.SuccessResponse;
 
@@ -22,6 +25,26 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+
+    @GetMapping("/profile")
+    public String profilePage(Model model) {
+        logger.info("Loading profile page.");
+        try {
+            SuccessResponse<UserDTO> userResponse = userService.getUserMe();
+            if (userResponse.getData() != null && !userResponse.getData().isEmpty()) {
+                model.addAttribute("user", userResponse.getData().get(0));
+                logger.info("Loaded logged-in user details for profile page");
+            } else {
+                logger.warn("No logged-in user details returned for profile page");
+            }
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Unable to load profile details: " + e.getMessage());
+            logger.error("Failed to load logged-in user details for profile page", e);
+        }
+        model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.PROFILE_VIEW);
+        return PageMappings.INDEX_PAGE;
+    }
+    
 
     @GetMapping("/api/user/all")
     @ResponseBody
@@ -55,5 +78,22 @@ public class UserController {
         SuccessResponse<UserStatusDTO> statusResponse = userService.getUserLastActiveStatus(userId);
         logger.info("Last active status fetched for {} user(s)", statusResponse.getData().size());
         return statusResponse;
+    }
+
+    @PostMapping("/update-profile")
+    public String updateUser(@ModelAttribute UserDTO userDTO, Model model) {
+        logger.debug("Updating user profile for userId: {}", userDTO.getId());
+
+        try {
+            userService.updateUserById(userDTO.getId(), userDTO);
+            model.addAttribute("successMessage", "Profile updated successfully!");
+            logger.info("User profile updated successfully for userId: {}", userDTO.getId());
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Error updating profile: " + e.getMessage());
+            logger.error("Error updating user profile for userId: {}", userDTO.getId(), e);
+        }
+
+        model.addAttribute("user", userDTO);
+        return "profile";
     }
 }

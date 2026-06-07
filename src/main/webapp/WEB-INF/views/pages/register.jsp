@@ -55,7 +55,9 @@
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
-                                    <div class="form-text">At least 8 characters</div>
+                                    <div class="invalid-feedback d-block" id="passwordError"></div>
+                                    <div class="form-text">At least 8 characters with uppercase, lowercase, number, and
+                                        special character</div>
                                 </div>
 
                                 <div class="col-md-6 mb-4">
@@ -69,6 +71,7 @@
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
+                                    <div class="invalid-feedback d-block" id="confirmPasswordError"></div>
                                 </div>
                             </div>
 
@@ -111,36 +114,52 @@
             const registerForm = document.getElementById('registerForm');
             const passwordField = document.getElementById('password');
             const confirmPasswordField = document.getElementById('confirm_password');
+            const passwordError = document.getElementById('passwordError');
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
+            const validator = new Validator();
 
-            confirmPasswordField.addEventListener('input', function () {
-                if (this.value && this.value !== passwordField.value) {
-                    this.setCustomValidity('Passwords do not match');
-                    this.classList.add('is-invalid');
-                } else {
-                    this.setCustomValidity('');
-                    this.classList.remove('is-invalid');
+            function validatePassword() {
+                const password = passwordField.value;
+                const confirmPassword = confirmPasswordField.value;
+                let isValid = true;
+
+                passwordField.classList.remove('is-invalid');
+                confirmPasswordField.classList.remove('is-invalid');
+                passwordError.textContent = '';
+                confirmPasswordError.textContent = '';
+                passwordField.setCustomValidity('');
+                confirmPasswordField.setCustomValidity('');
+
+                if (password && !validator.isStrongPassword(password)) {
+                    passwordField.classList.add('is-invalid');
+                    passwordError.textContent = 'Password must include uppercase, lowercase, number, and special character';
+                    passwordField.setCustomValidity('Password is not strong enough');
+                    isValid = false;
                 }
-            });
+
+                if (confirmPassword && password !== confirmPassword) {
+                    confirmPasswordField.classList.add('is-invalid');
+                    confirmPasswordError.textContent = 'Passwords do not match';
+                    confirmPasswordField.setCustomValidity('Passwords do not match');
+                    isValid = false;
+                }
+
+                return isValid;
+            }
+
+            confirmPasswordField.addEventListener('input', validatePassword);
 
             passwordField.addEventListener('input', function () {
                 const password = this.value;
                 const strength = calculatePasswordStrength(password);
                 updatePasswordStrength(strength);
+                validatePassword();
             });
 
             registerForm.addEventListener('submit', function (e) {
-                const password = passwordField.value;
-                const confirmPassword = confirmPasswordField.value;
-
-                if (password !== confirmPassword) {
+                if (!validatePassword()) {
                     e.preventDefault();
-                    showAlert('Passwords do not match', 'error');
-                    return;
-                }
-
-                if (password.length < 8) {
-                    e.preventDefault();
-                    showAlert('Password must be at least 8 characters long', 'error');
+                    showAlert('Please fix the password errors above', 'error');
                     return;
                 }
 
@@ -172,21 +191,19 @@
                 document.getElementById('password').parentNode.parentNode.appendChild(strengthIndicator);
             }
 
-            strengthIndicator.innerHTML = `
-        <small class="text-${colors[strength]}">
-            Password Strength: ${texts[strength]}
-        </small>
-    `;
+            strengthIndicator.innerHTML =
+                '<small class="text-' + colors[strength] + '">' +
+                'Password Strength: ' + texts[strength] +
+                '</small>';
         }
 
         function showAlert(message, type) {
             const alertClass = type === 'error' ? 'alert-danger' : 'alert-info';
-            const alertHtml = `
-        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
+            const alertHtml =
+                '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                '</div>';
 
             const existingAlert = document.querySelector('.alert');
             if (existingAlert) {

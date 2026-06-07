@@ -95,5 +95,23 @@ public class UserServiceImpl implements UserService {
         }
         return response;
     }
+
+    @Override
+    public SuccessResponse<UserDTO> updateUserById(String userId, UserDTO userDTO) {
+        Map<String, String> pathParams = Map.of("userId", userId);
+
+        ApiRequest apiReq = apiRequestBuilderUtil.build("user.updateUserById", pathParams, Collections.emptyMap(), userDTO);
+        logger.info("Updating user details for userId: {}", userId);
+
+        SuccessResponse<UserDTO> response = authenticatedApiService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<UserDTO>>() {
+        });
+
+        if (response.getData() != null) {
+            logger.info("User details updated successfully for userId: {}", userId);
+        } else {
+            logger.info("Failed to update user details for userId: {}", userId);
+        }
+        return response;
+    }
 }
 

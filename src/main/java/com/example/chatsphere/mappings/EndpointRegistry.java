@@ -19,6 +19,7 @@ public class EndpointRegistry {
             Map.entry("user.getAllUsers", new ApiRequestBuilderUtil.ApiEndpoint("/api/users/all", HttpMethod.GET)),
             Map.entry("user.getUserLastActiveStatus", new ApiRequestBuilderUtil.ApiEndpoint("/api/users/lastActiveStatus", HttpMethod.GET)),
             Map.entry("user.getUserMe", new ApiRequestBuilderUtil.ApiEndpoint("/api/users/me", HttpMethod.GET)),
+            Map.entry("user.updateUserById", new ApiRequestBuilderUtil.ApiEndpoint("/api/users/{userId}", HttpMethod.PUT)),
             Map.entry("message.getByConvId", new ApiRequestBuilderUtil.ApiEndpoint("/api/messages/conversation/{conversationId}", HttpMethod.GET)),
             Map.entry("conv.getOrCreateConv", new ApiRequestBuilderUtil.ApiEndpoint("/api/conversations/get-or-create/{fromUserId}/{toUserId}", HttpMethod.POST)),
             Map.entry("conv.getLastConversationByLoggedInUser", new ApiRequestBuilderUtil.ApiEndpoint("/api/conversations/{userId}/last-message", HttpMethod.GET)),
