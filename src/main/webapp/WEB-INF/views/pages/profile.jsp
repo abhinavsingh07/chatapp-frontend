@@ -12,7 +12,7 @@
             <p>Update your personal information and preferences</p>
         </div>
 
-        <form id="updateProfileForm" action="${ctx}/update-profile" method="post" enctype="multipart/form-data" novalidate>
+        <form id="updateProfileForm" method="post" enctype="multipart/form-data" data-url="${ctx}/api/update-profile" novalidate>
             <!-- Profile Picture Section -->
             <div class="settings-section">
                 <h2><i class="fas fa-camera me-2"></i>Profile Picture</h2>
@@ -57,7 +57,7 @@
 
                 <div class="mb-3">
                     <label for="phoneNumber" class="form-label">Phone Number</label>
-                    <input type="tel" class="form-control profile-input" id="phoneNumber" name="phoneNumber" value="${fn:escapeXml(user.phoneNumber)}" placeholder="+1 234-567-8901">
+                    <input type="tel" class="form-control profile-input" id="phoneNumber" name="phoneNumber" value="${fn:escapeXml(user.phoneNumber)}" placeholder="+1 234-567-8901" readonly>
                     <div class="invalid-feedback" id="phoneNumberError"></div>
                 </div>
 
@@ -183,6 +183,8 @@
 
         // Form validation before submission
         form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
             // Clear previous errors
             clearErrors();
             
@@ -238,9 +240,36 @@
             }
             
             if (!isValid) {
-                e.preventDefault();
                 showAlert('Please fix the errors above', 'danger');
+                return;
             }
+
+            updateProfileBtn.disabled = true;
+
+            ajaxRequest(
+                form.dataset.url,
+                'POST',
+                new FormData(form),
+                function (response) {
+                    updateProfileBtn.disabled = false;
+
+                    if (response.responseCode === 'ERROR') {
+                        showAlert(response.message || 'Unable to update profile', 'danger');
+                        return;
+                    }
+
+                    showAlert(response.message || 'Profile updated successfully!', 'success');
+                },
+                function (xhr) {
+                    updateProfileBtn.disabled = false;
+
+                    const errorMessage = xhr.responseJSON && xhr.responseJSON.message
+                        ? xhr.responseJSON.message
+                        : 'Unable to update profile. Please try again.';
+                    showAlert(errorMessage, 'danger');
+                },
+                { isFormData: true }
+            );
         });
         
         function showError(fieldId, message) {

@@ -418,6 +418,18 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
+.profile-input[readonly] {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+    color: var(--secondary-color);
+    cursor: not-allowed;
+}
+
+.profile-input[readonly]:focus {
+    border-color: #ced4da;
+    box-shadow: none;
+}
+
 /* Login/Register Styles */
 .login-page,
 .register-page {

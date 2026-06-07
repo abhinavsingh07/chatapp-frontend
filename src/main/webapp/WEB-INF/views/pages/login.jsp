@@ -20,7 +20,8 @@
                                       <i class="fas fa-user me-2"></i>Email or Phone
                                   </label>
                                   <input type="text" class="form-control form-control-lg" id="identifier"
-                                         name="phoneNumberOrEmail" required placeholder="Enter email or phone number">
+                                         name="phoneNumberOrEmail" required placeholder="Enter email or phone number"
+                                         value="${fn:escapeXml(auth.phoneNumberOrEmail)}">
                               </div>
 
                               <div class="mb-4">
