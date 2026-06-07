@@ -16,6 +16,8 @@ import com.example.chatsphere.mappings.PageMappings;
 import com.example.chatsphere.service.UserService;
 import com.example.chatsphere.util.SuccessResponse;
 
+import java.util.Collections;
+
 @Controller
 public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -80,20 +82,18 @@ public class UserController {
         return statusResponse;
     }
 
-    @PostMapping("/update-profile")
-    public String updateUser(@ModelAttribute UserDTO userDTO, Model model) {
+    @PostMapping("/api/update-profile")
+    @ResponseBody
+    public SuccessResponse<UserDTO> updateUser(@ModelAttribute UserDTO userDTO) {
         logger.debug("Updating user profile for userId: {}", userDTO.getId());
 
         try {
-            userService.updateUserById(userDTO.getId(), userDTO);
-            model.addAttribute("successMessage", "Profile updated successfully!");
+            SuccessResponse<UserDTO> response = userService.updateUserById(userDTO.getId(), userDTO);
             logger.info("User profile updated successfully for userId: {}", userDTO.getId());
+            return new SuccessResponse<>("SUCCESS", "Profile updated successfully!", response.getData());
         } catch (Exception e) {
-            model.addAttribute("errorMessage", "Error updating profile: " + e.getMessage());
             logger.error("Error updating user profile for userId: {}", userDTO.getId(), e);
+            return new SuccessResponse<>("ERROR", "Error updating profile: " + e.getMessage(), Collections.emptyList());
         }
-
-        model.addAttribute("user", userDTO);
-        return "profile";
     }
 }

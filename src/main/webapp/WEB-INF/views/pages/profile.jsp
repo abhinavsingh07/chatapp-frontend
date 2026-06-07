@@ -258,6 +258,14 @@
                         return;
                     }
 
+                    if (changePasswordToggle.checked) {
+                        showAlert('Password updated successfully. Please sign in again.', 'success');
+                        setTimeout(function () {
+                            window.location.href = '${ctx}/logout';
+                        }, 1000);
+                        return;
+                    }
+
                     showAlert(response.message || 'Profile updated successfully!', 'success');
                 },
                 function (xhr) {

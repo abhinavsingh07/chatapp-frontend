@@ -1,7 +1,9 @@
 package com.example.chatsphere.controller;
 
+import com.apiservice.client.ApiException;
 import com.example.chatsphere.dto.AuthDTO;
 import com.example.chatsphere.dto.UserDTO;
+import com.example.chatsphere.mappings.ErrorMessageMappings;
 import com.example.chatsphere.mappings.PageMappings;
 import com.example.chatsphere.service.AuthService;
 import com.example.chatsphere.service.CookieService;
@@ -71,12 +73,26 @@ public class AuthController {
             HttpServletResponse response) {
         logger.debug("Authenticating user with phone/email: {}", authDTO.getPhoneNumberOrEmail());
 
-        JwtResponse jwtResponse = authService.validateCredentials(authDTO);
-        // dont need session as all details is in token.
-        //create cookies for access and refresh token and add to response.  
-        tokenCookieService.writeTokenCookies(response, jwtResponse);
-        logger.info("User {} authenticated successfully", jwtResponse.getId());
-        return PageMappings.REDIRECT_HOME;
+        try {
+            JwtResponse jwtResponse = authService.validateCredentials(authDTO);
+            // dont need session as all details is in token.
+            //create cookies for access and refresh token and add to response.
+            tokenCookieService.writeTokenCookies(response, jwtResponse);
+            logger.info("User {} authenticated successfully", jwtResponse.getId());
+            return PageMappings.REDIRECT_HOME;
+        } catch (ApiException ex) {
+            logger.warn("Login failed for phone/email: {}", authDTO.getPhoneNumberOrEmail());
+            model.addAttribute("errorMessage", ErrorMessageMappings.toFriendlyMessage(ex.getErrorMessage()));
+            model.addAttribute("auth", authDTO);
+            model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.LOGIN_VIEW);
+            return PageMappings.INDEX_PAGE;
+        } catch (Exception ex) {
+            logger.error("Unexpected login failure for phone/email: {}", authDTO.getPhoneNumberOrEmail(), ex);
+            model.addAttribute("errorMessage", "Unable to sign in. Please check your credentials and try again.");
+            model.addAttribute("auth", authDTO);
+            model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.LOGIN_VIEW);
+            return PageMappings.INDEX_PAGE;
+        }
     }
 
     @PostMapping("/register")
