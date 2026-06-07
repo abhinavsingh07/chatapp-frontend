@@ -6,6 +6,7 @@ public class PageMappings {
 
     // Page names defined in web-inf views
     public static final String LOGIN_VIEW = "login";
+    public static final String FORGOT_PASSWORD_VIEW = "forgot-password";
     public static final String HOME_PAGE_VIEW = "chat-home";
     public static final String CHAT_PAGE_VIEW = "chat-room";
     public static final String REGISTER_VIEW = "register";

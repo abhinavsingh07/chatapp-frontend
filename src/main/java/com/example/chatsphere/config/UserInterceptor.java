@@ -33,8 +33,9 @@ public class UserInterceptor implements HandlerInterceptor {
         logger.info("Interceptor intercepting path:: {} ----------", path);
         if (path.contains("/login")
                 || path.contains("/register")
-                || path.contains("/api")
                 || path.contains("/authenticate")
+                || path.contains("/forgot-password")
+                || path.contains("/api")
                 || path.contains("/icons")) {
             logger.info("Skipping getUserMe Api call------");
             return true;

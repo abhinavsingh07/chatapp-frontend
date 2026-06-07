@@ -41,6 +41,7 @@ public class ApplicationConfig implements WebMvcConfigurer {
                         "/static/**",
                         "/login",
                         "/register",
+                        "/forgot-password",
                         "/",
                         "/css/**",
                         "/js/**",

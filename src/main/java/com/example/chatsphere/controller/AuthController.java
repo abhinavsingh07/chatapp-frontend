@@ -47,6 +47,13 @@ public class AuthController {
         return PageMappings.INDEX_PAGE;
     }
 
+    // Forgot password page route
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage(Model model) {
+        model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.FORGOT_PASSWORD_VIEW);
+        return PageMappings.INDEX_PAGE;
+    }
+
     // Logout route
     @GetMapping("/logout")
     public String logout(HttpServletResponse response) {
@@ -108,6 +115,35 @@ public class AuthController {
         return PageMappings.INDEX_PAGE;
     }
 
+    @PostMapping("/forgot-password")
+    public String doForgotPassword(@ModelAttribute AuthDTO authDTO, Model model) {
+        logger.debug("Processing forgot password request for phone/email: {}", authDTO.getPhoneNumberOrEmail());
+
+        try {
+            SuccessResponse<String> response = authService.forgotPassword(authDTO);
+            String message = response != null && response.getMessage() != null
+                    ? response.getMessage()
+                    : "Password reset successful. Please sign in with your new password.";
+            model.addAttribute("successMessage", message);
+            model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.LOGIN_VIEW);
+            logger.info("Forgot password request successful for phone/email: {}", authDTO.getPhoneNumberOrEmail());
+            return PageMappings.INDEX_PAGE;
+        } catch (ApiException ex) {
+            logger.warn("Forgot password request failed for phone/email: {}", authDTO.getPhoneNumberOrEmail());
+            model.addAttribute("errorMessage", ErrorMessageMappings.toFriendlyMessage(ex.getErrorMessage()));
+            model.addAttribute("auth", authDTO);
+            model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.FORGOT_PASSWORD_VIEW);
+            return PageMappings.INDEX_PAGE;
+        } catch (Exception ex) {
+            logger.error("Unexpected forgot password failure for phone/email: {}",
+                    authDTO.getPhoneNumberOrEmail(), ex);
+            model.addAttribute("errorMessage", "Unable to reset password. Please check your details and try again.");
+            model.addAttribute("auth", authDTO);
+            model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.FORGOT_PASSWORD_VIEW);
+            return PageMappings.INDEX_PAGE;
+        }
+    }
+
     // APIs Route
     @PostMapping("/api/authenticate")
     @ResponseBody
@@ -129,6 +165,17 @@ public class AuthController {
 
         logger.info("API registration successful for user: {}", userResponse.getEmail());
         return new SuccessResponse<>("200", "Registration successful! Please log in.", Arrays.asList(userResponse));
+    }
+
+    @PostMapping("/api/forgot-password")
+    @ResponseBody
+    public SuccessResponse<String> forgotPassword(@RequestBody AuthDTO authDTO) {
+        logger.debug("Processing API forgot password request for phone/email: {}", authDTO.getPhoneNumberOrEmail());
+
+        SuccessResponse<String> response = authService.forgotPassword(authDTO);
+
+        logger.info("API forgot password request successful for phone/email: {}", authDTO.getPhoneNumberOrEmail());
+        return response;
     }
 
     @PostMapping("/api/tokenrefresh")

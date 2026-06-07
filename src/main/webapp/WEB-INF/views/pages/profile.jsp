@@ -259,9 +259,19 @@
                     }
 
                     if (changePasswordToggle.checked) {
-                        showAlert('Password updated successfully. Please sign in again.', 'success');
-                        setTimeout(function () {
-                            window.location.href = '${ctx}/logout';
+                        let secondsRemaining = 3;
+                        showAlert('Password updated successfully. Logging out in ' + secondsRemaining + '...', 'success');
+
+                        const logoutCountdown = setInterval(function () {
+                            secondsRemaining--;
+
+                            if (secondsRemaining === 0) {
+                                clearInterval(logoutCountdown);
+                                window.location.href = '${ctx}/logout';
+                                return;
+                            }
+
+                            showAlert('Password updated successfully. Logging out in ' + secondsRemaining + '...', 'success');
                         }, 1000);
                         return;
                     }

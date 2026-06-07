@@ -4,6 +4,7 @@ import com.example.chatsphere.dto.AuthDTO;
 import com.example.chatsphere.dto.UserDTO;
 import com.example.chatsphere.util.JwtResponse;
 import com.example.chatsphere.util.RefreshTokenRequest;
+import com.example.chatsphere.util.SuccessResponse;
 
 public interface AuthService {
     /**
@@ -23,6 +24,14 @@ public interface AuthService {
      * @return true if registration is successful, false otherwise
      */
      UserDTO registerUser(UserDTO dto);
+
+    /**
+     * Sends a forgot password request with the user's identifier and new password.
+     *
+     * @param dto the user's phone number/email and password
+     * @return response from the auth API
+     */
+     SuccessResponse<String> forgotPassword(AuthDTO dto);
 
     /**
      * Refreshes the JWT token using the refresh token.

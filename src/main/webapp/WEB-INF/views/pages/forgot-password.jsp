@@ -6,34 +6,32 @@
                   <div class="card shadow-lg border-0">
                       <div class="card-body p-5">
                           <div class="text-center mb-4">
-                              <i class="fas fa-comments fa-3x text-primary mb-3"></i>
-                              <h2 class="h3 mb-1">Welcome Back</h2>
-                              <p class="text-muted">Sign in to your account</p>
+                              <i class="fas fa-key fa-3x text-primary mb-3"></i>
+                              <h2 class="h3 mb-1">Forgot Password</h2>
+                              <p class="text-muted">Reset your account password</p>
                           </div>
 
-                           <c:if test="${not empty errorMessage}">
-                                <div class="alert alert-danger">${fn:escapeXml(errorMessage)}</div>
-                            </c:if>
-                           <c:if test="${not empty successMessage}">
-                                <div class="alert alert-success">${fn:escapeXml(successMessage)}</div>
-                            </c:if>
-                          <form action="${pageContext.request.contextPath}/authenticate" method="POST" id="loginForm">
+                          <c:if test="${not empty errorMessage}">
+                              <div class="alert alert-danger">${fn:escapeXml(errorMessage)}</div>
+                          </c:if>
+
+                          <form action="${pageContext.request.contextPath}/forgot-password" method="POST" id="forgotPasswordForm" autocomplete="off">
                               <div class="mb-3">
                                   <label for="identifier" class="form-label">
                                       <i class="fas fa-user me-2"></i>Email or Phone
                                   </label>
                                   <input type="text" class="form-control form-control-lg" id="identifier"
                                          name="phoneNumberOrEmail" required placeholder="Enter email or phone number"
-                                         value="${fn:escapeXml(auth.phoneNumberOrEmail)}">
+                                         value="${fn:escapeXml(auth.phoneNumberOrEmail)}" autocomplete="off">
                               </div>
 
                               <div class="mb-4">
                                   <label for="password" class="form-label">
-                                      <i class="fas fa-lock me-2"></i>Password
+                                      <i class="fas fa-lock me-2"></i>New Password
                                   </label>
                                   <div class="input-group">
                                       <input type="password" class="form-control form-control-lg" id="password"
-                                             name="password" required placeholder="Enter password">
+                                             name="password" required placeholder="Enter new password" autocomplete="new-password">
                                       <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                           <i class="fas fa-eye"></i>
                                       </button>
@@ -41,43 +39,24 @@
                               </div>
 
                               <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
-                                  <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                                  <i class="fas fa-save me-2"></i>Reset Password
                               </button>
 
-                              <div class="text-center mb-2">
-                                  <a href="${pageContext.request.contextPath}/forgot-password" class="text-decoration-none">
-                                      Forgot password?
-                                  </a>
-                              </div>
-
                               <div class="text-center">
-                                  <p class="mb-0">Don't have an account?
-                                      <a href="${pageContext.request.contextPath}/register" class="text-decoration-none">
-                                          Sign up here
+                                  <p class="mb-0">Remembered your password?
+                                      <a href="${pageContext.request.contextPath}/login" class="text-decoration-none">
+                                          Sign in here
                                       </a>
                                   </p>
                               </div>
                           </form>
                       </div>
                   </div>
-
-                  <!-- Phone Auth Alternative -->
-                 <!-- <div class="card mt-3 shadow-sm border-0">
-                      <div class="card-body p-4">
-                          <h6 class="card-title text-center mb-3">
-                              <i class="fas fa-mobile-alt me-2"></i>Quick Phone Login
-                          </h6>
-                          <button class="btn btn-outline-primary w-100" id="phoneAuthBtn">
-                              <i class="fas fa-sms me-2"></i>Login with SMS Code
-                          </button>
-                      </div>
-                  </div>-->
               </div>
           </div>
       </div>
       <script>
       document.addEventListener('DOMContentLoaded', function() {
-          // Toggle password visibility
           const togglePassword = document.getElementById('togglePassword');
           const passwordField = document.getElementById('password');
 
@@ -90,9 +69,8 @@
               icon.classList.toggle('fa-eye-slash');
           });
 
-          // Form validation
-          const loginForm = document.getElementById('loginForm');
-          loginForm.addEventListener('submit', function(e) {
+          const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+          forgotPasswordForm.addEventListener('submit', function(e) {
               const identifier = document.getElementById('identifier').value.trim();
               const password = document.getElementById('password').value;
 
@@ -104,30 +82,23 @@
 
               if (!password) {
                   e.preventDefault();
-                  showAlert('Please enter your password', 'error');
+                  showAlert('Please enter your new password', 'error');
                   return;
               }
 
-              // Show loading state
               const submitBtn = this.querySelector('button[type="submit"]');
-              submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing In...';
+              submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Resetting...';
               submitBtn.disabled = true;
           });
-
-          // Phone auth placeholder
-         /** document.getElementById('phoneAuthBtn').addEventListener('click', function() {
-              showAlert('Phone authentication will be integrated with backend service', 'info');
-          });**/
       });
 
       function showAlert(message, type) {
           const alertClass = type === 'error' ? 'alert-danger' : 'alert-info';
-          const alertHtml = `
-              <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                  ${message}
-                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-              </div>
-          `;
+          const alertHtml =
+              '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+              message +
+              '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+              '</div>';
 
           const existingAlert = document.querySelector('.alert');
           if (existingAlert) {

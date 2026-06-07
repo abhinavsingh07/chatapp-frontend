@@ -24,7 +24,7 @@
       <!-- Preloader -->
       <div id="preloader"></div>
       <!-- header content -->
-      <c:if test="${not empty view and view != 'login' and view != 'register'}">
+      <c:if test="${not empty view and view != 'login' and view != 'register' and view != 'forgot-password'}">
         <%@ include file="layouts/header.jsp" %>
       </c:if>
       <!-- main content -->

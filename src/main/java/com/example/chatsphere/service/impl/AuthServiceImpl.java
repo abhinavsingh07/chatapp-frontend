@@ -9,8 +9,10 @@ import com.example.chatsphere.util.RefreshTokenRequest;
 import com.example.chatsphere.service.AuthService;
 import com.example.chatsphere.service.AuthenticatedApiService;
 import com.example.chatsphere.util.ApiRequestBuilderUtil;
+import com.example.chatsphere.util.SuccessResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,6 +48,18 @@ public class AuthServiceImpl implements AuthService {
         logger.info("Registering user with phone number or email: {}", userDTO.getPhoneNumber());
         UserDTO responseEntity = authenticatedApiService.call(apiReq, UserDTO.class);
         logger.info("User registration successful for: {}", apiReq.getPath());
+        return responseEntity;
+    }
+
+    @Override
+    public SuccessResponse<String> forgotPassword(AuthDTO authDTO) {
+        ApiRequest apiReq = apiRequestBuilderUtil.build("auth.forgotPassword", authDTO);
+        logger.info("Submitting forgot password request for phone number or email: {}",
+                authDTO.getPhoneNumberOrEmail());
+        SuccessResponse<String> responseEntity = apiDispatcherService.call(apiReq,
+                new ParameterizedTypeReference<SuccessResponse<String>>() {
+                });
+        logger.info("Forgot password request completed for: {}", apiReq.getPath());
         return responseEntity;
     }
 
