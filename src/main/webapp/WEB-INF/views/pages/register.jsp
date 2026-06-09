@@ -93,7 +93,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="${cspNonce}">
         document.addEventListener('DOMContentLoaded', function () {
             function setupPasswordToggle(toggleId, passwordId) {
                 const toggleBtn = document.getElementById(toggleId);

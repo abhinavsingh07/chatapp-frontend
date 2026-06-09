@@ -120,7 +120,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="${cspNonce}">
     document.addEventListener('DOMContentLoaded', function () {
         const validator = new Validator();
         const form = document.getElementById('updateProfileForm');

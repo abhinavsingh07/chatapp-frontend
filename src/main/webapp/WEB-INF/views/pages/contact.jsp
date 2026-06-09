@@ -128,7 +128,7 @@
          </div>
       </div>
    </div>
-   <script>
+   <script nonce="${cspNonce}">
       //these values coming from commons.jsp which is included at the top of this file. commons.jsp is used to set common variables like ctx and userid for all jsp files.
       //init in header.jsp
       // const ctx = "<c:out value='${ctx}'/>";

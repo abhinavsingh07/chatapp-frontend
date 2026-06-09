@@ -1,5 +1,4 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ include file="/WEB-INF/views/common.jsp" %>
       <div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
           <div class="row w-100">
               <div class="col-md-6 col-lg-4 mx-auto">
@@ -55,7 +54,7 @@
               </div>
           </div>
       </div>
-      <script>
+      <script nonce="${cspNonce}">
       document.addEventListener('DOMContentLoaded', function() {
           const togglePassword = document.getElementById('togglePassword');
           const passwordField = document.getElementById('password');

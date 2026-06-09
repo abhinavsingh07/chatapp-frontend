@@ -234,7 +234,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="${cspNonce}">
         //init in header.jsp
         // const ctx = "<c:out value='${ctx}'/>";//getting from commons.jsp
         // const userId = "<c:out value='${userid}'/>"; //getting from commons.jsp

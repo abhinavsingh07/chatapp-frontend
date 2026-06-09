@@ -1,3 +1,4 @@
+<%@ include file="/WEB-INF/views/common.jsp" %>
 <div class="container">
     <div class="back-link">
         <a href="${pageContext.request.contextPath}/home">
@@ -79,7 +80,7 @@
         </div> -->
     </div>
 </div>
-<script>
+<script nonce="${cspNonce}">
     document.addEventListener('DOMContentLoaded', function () {
         const button = document.getElementById('enableNotificationBtn');
         const statusDiv = document.getElementById('notificationStatus');

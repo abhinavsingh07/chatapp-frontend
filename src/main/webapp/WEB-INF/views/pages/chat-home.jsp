@@ -184,7 +184,7 @@
       </div>
    </div>
    <!-- JavaScript for interactivity -->
-   <script>
+   <script nonce="${cspNonce}">
       document.addEventListener('DOMContentLoaded', function () {
          // Chat search functionality
          const chatSearch = document.getElementById('chatSearch');
