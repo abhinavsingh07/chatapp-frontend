@@ -3,9 +3,9 @@ package com.example.chatsphere.service.impl;
 import com.apiservice.client.ApiDispatcherService;
 import com.apiservice.client.ApiRequest;
 import com.example.chatsphere.dto.AuthDTO;
+import com.example.chatsphere.dto.RefreshTokenDTO;
 import com.example.chatsphere.dto.UserDTO;
 import com.example.chatsphere.util.JwtResponse;
-import com.example.chatsphere.util.RefreshTokenRequest;
 import com.example.chatsphere.service.AuthService;
 import com.example.chatsphere.service.AuthenticatedApiService;
 import com.example.chatsphere.util.ApiRequestBuilderUtil;
@@ -63,8 +63,9 @@ public class AuthServiceImpl implements AuthService {
         return responseEntity;
     }
 
+   
     @Override
-    public JwtResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+    public JwtResponse refreshToken(RefreshTokenDTO refreshTokenRequest) {
         ApiRequest apiReq = apiRequestBuilderUtil.build("auth.refresh", refreshTokenRequest);
         logger.info("Refreshing token request");
         //Not calling APIAuthenticateservice causing infinite loop in refresh token expires.
@@ -72,4 +73,16 @@ public class AuthServiceImpl implements AuthService {
         logger.info("Token refreshed successfully");
         return responseEntity;
     }
+
+     @Override
+    public SuccessResponse<String> logout() {
+        ApiRequest apiReq = apiRequestBuilderUtil.build("auth.logout", null);
+        logger.info("Submitting logout request");
+        SuccessResponse<String> responseEntity = authenticatedApiService.call(apiReq,
+                new ParameterizedTypeReference<SuccessResponse<String>>() {
+                });
+        logger.info("Logout request completed for: {}", apiReq.getPath());
+        return responseEntity;
+    }
+
 }

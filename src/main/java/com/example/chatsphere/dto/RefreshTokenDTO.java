@@ -1,15 +1,15 @@
-package com.example.chatsphere.util;
+package com.example.chatsphere.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class RefreshTokenRequest {
+public class RefreshTokenDTO {
     @NotBlank(message = "Refresh token is required")
     private String refreshToken;
 
-    public RefreshTokenRequest() {
+    public RefreshTokenDTO() {
     }
 
-    public RefreshTokenRequest(String refreshToken) {
+    public RefreshTokenDTO(String refreshToken) {
         this.refreshToken = refreshToken;
     }
 

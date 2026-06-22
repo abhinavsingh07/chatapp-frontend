@@ -7,9 +7,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.apiservice.client.ApiRequest;
+import com.example.chatsphere.dto.RefreshTokenDTO;
 import com.example.chatsphere.util.ApiRequestBuilderUtil;
 import com.example.chatsphere.util.JwtResponse;
-import com.example.chatsphere.util.RefreshTokenRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -67,7 +67,7 @@ public class RefreshTokenService {
 
             // Call the authentication service with the refresh token to obtain new JWT
             // tokens
-            JwtResponse jwtResponse = authService.refreshToken(new RefreshTokenRequest(refreshToken));
+            JwtResponse jwtResponse = authService.refreshToken(new RefreshTokenDTO(refreshToken));
 
             // Validate response from authentication service
             if (jwtResponse == null || jwtResponse.getJwtToken() == null) {

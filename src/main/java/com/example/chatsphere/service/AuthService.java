@@ -1,9 +1,9 @@
 package com.example.chatsphere.service;
 
 import com.example.chatsphere.dto.AuthDTO;
+import com.example.chatsphere.dto.RefreshTokenDTO;
 import com.example.chatsphere.dto.UserDTO;
 import com.example.chatsphere.util.JwtResponse;
-import com.example.chatsphere.util.RefreshTokenRequest;
 import com.example.chatsphere.util.SuccessResponse;
 
 public interface AuthService {
@@ -34,10 +34,17 @@ public interface AuthService {
      SuccessResponse<String> forgotPassword(AuthDTO dto);
 
     /**
+     * Logs out the current authenticated user.
+     *
+     * @return response from the auth API
+     */
+     SuccessResponse<String> logout();
+
+    /**
      * Refreshes the JWT token using the refresh token.
      *
      * @param refreshTokenRequest the request containing the refresh token
      * @return JwtResponse containing the new access token and refresh token
      */
-     JwtResponse refreshToken(RefreshTokenRequest refreshTokenRequest);
+     JwtResponse refreshToken(RefreshTokenDTO refreshTokenRequest);
 }

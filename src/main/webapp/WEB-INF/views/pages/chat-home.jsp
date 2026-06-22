@@ -51,7 +51,7 @@
                      <c:forEach var="data" items="${chatData}">
                         <div class="chat-item p-3 border-bottom bg-white hover-bg-light cursor-pointer"
                            data-touserid='<c:out value="${data.participantId}"/>'
-                           data-conversationid='<c:out value="${data.conversationId}"/>' onclick="startChat(event);">
+                           data-conversationid='<c:out value="${data.conversationId}"/>'>
                            <div class="d-flex">
                               <!-- Avatar -->
                               <div class="flex-shrink-0 me-3">
@@ -171,12 +171,10 @@
                <i class="fas fa-comments me-2"></i>Chats
             </h5>
             <div class="btn-group">
-               <button class="btn btn-sm btn-outline-light"
-                  onclick="window.location.href='<c:out value='${pageContext.request.contextPath}'/>/search'">
+               <button class="btn btn-sm btn-outline-light js-search-button" type="button">
                   <i class="fas fa-search"></i>
                </button>
-               <button class="btn btn-sm btn-outline-light"
-                  onclick="window.location.href='<c:out value='${pageContext.request.contextPath}'/>/contacts'">
+               <button class="btn btn-sm btn-outline-light js-contacts-button" type="button">
                   <i class="fas fa-plus"></i>
                </button>
             </div>
@@ -209,6 +207,8 @@
          // Add hover effects
          const chatItems = document.querySelectorAll('.chat-item');
          chatItems.forEach(item => {
+            item.addEventListener('click', startChat);
+
             item.addEventListener('mouseenter', function () {
                this.classList.add('bg-primary', 'bg-opacity-10');
             });
@@ -217,6 +217,20 @@
                this.classList.remove('bg-primary', 'bg-opacity-10');
             });
          });
+
+         const searchButton = document.querySelector('.js-search-button');
+         if (searchButton) {
+            searchButton.addEventListener('click', function () {
+               window.location.href = '<c:out value="${pageContext.request.contextPath}"/>/search';
+            });
+         }
+
+         const contactsButton = document.querySelector('.js-contacts-button');
+         if (contactsButton) {
+            contactsButton.addEventListener('click', function () {
+               window.location.href = '<c:out value="${pageContext.request.contextPath}"/>/contacts';
+            });
+         }
 
          // Simulate unread message counts (would come from backend)
          setTimeout(() => {

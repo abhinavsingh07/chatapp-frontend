@@ -29,7 +29,14 @@ public class HomeController {
         logger.info("Loading home page for user");
         String loggedInUserid = (String) request.getAttribute("userId");
         List<ConversationLastMsgDTO> chatData = chatService.getLastMessageByLoggedInUserId(loggedInUserid);
-        model.addAttribute("chatData", chatData);
+        //get loggedin user contacts ids
+        //todo
+        // List<String> loggedInUserContactIds = chatData.stream()
+        //         .map(ConversationLastMsgDTO::getParticipantId)
+        //         .filter(participantId -> participantId != null && !participantId.isBlank())
+        //         .toList();
+        // model.addAttribute("chatData", chatData);
+        // request.setAttribute("loggedInUserContactIds", loggedInUserContactIds);
         return PageMappings.INDEX_PAGE;
     }
 

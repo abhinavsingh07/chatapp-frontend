@@ -26,21 +26,21 @@
                 </ul>
 
                 <!-- Search Form -->
-                <form class="d-flex me-3" action="${pageContext.request.contextPath}/search" method="GET">
+                <!-- <form class="d-flex me-3" action="${pageContext.request.contextPath}/search" method="GET">
                     <div class="input-group">
                         <input class="form-control" type="search" name="q" placeholder="Search..." aria-label="Search">
                         <button class="btn btn-outline-light" type="submit">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
-                </form>
+                </form> -->
 
                 <!-- User Menu -->
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="fas fa-user-circle me-1"></i>
                         <c:if test="${not empty username}">
-                            <span>Hello! ${username}!</span>
+                            <span>Hello! <c:out value='${username}'/></span>
                         </c:if>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -65,7 +65,7 @@
         //these values available for all pages as header is common in all pages.
         const ctx = "<c:out value='${ctx}'/>";//getting from commons.jsp
         const userId = "<c:out value='${userid}'/>"; //getting from commons.jsp
-        const username = "<c:out value='${username}'/>"; //getting from request setting in jwt filter.
+        const username = "<c:out value='${username}'/>"; //getting from request setting.
         // 1. In-App Notification comes
         function sendInAppNotification(title, messageBody, redirectUrl, showFullMsgInBody) {
             if (Notification.permission === "granted") {

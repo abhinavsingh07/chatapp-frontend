@@ -7,7 +7,7 @@
                 <div class="bg-primary text-white p-3">
                     <div class="d-flex align-items-center">
                         <!-- Back Button -->
-                        <button class="btn btn-sm btn-outline-light me-3" onclick="window.history.back()">
+                        <button class="btn btn-sm btn-outline-light me-3 js-back-button" type="button">
                             <i class="fas fa-arrow-left"></i>
                         </button>
 
@@ -33,7 +33,7 @@
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#" onclick="toggleChatInfo()">
+                                <li><a class="dropdown-item js-chat-info-button" href="#">
                                         <i class="fas fa-info-circle me-2"></i>Chat Info
                                     </a></li>
                             </ul>
@@ -79,7 +79,7 @@
                         </div>
 
                         <!-- Chat Actions -->
-                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleChatInfo()" title="Chat Info">
+                        <button class="btn btn-outline-secondary btn-sm js-chat-info-button" type="button" title="Chat Info">
                             <i class="fas fa-info-circle"></i>
                         </button>
                     </div>
@@ -146,7 +146,7 @@
                         <input type="hidden" name="chat_id" value="<c:out value='${conversationId}'/>">
 
                         <!-- Attachment Button -->
-                        <!-- <button type="button" class="btn btn-outline-secondary" onclick="showAttachmentOptions()">
+                        <!-- <button type="button" class="btn btn-outline-secondary js-attachment-button">
                             <i class="fas fa-paperclip"></i>
                         </button> -->
 
@@ -158,7 +158,7 @@
                         </div>
 
                         <!-- Emoji Button -->
-                        <!-- <button type="button" class="btn btn-outline-secondary" onclick="showEmojiPicker()">
+                        <!-- <button type="button" class="btn btn-outline-secondary js-emoji-button">
                             <i class="fas fa-smile"></i>
                         </button> -->
 
@@ -206,23 +206,23 @@
 
                         <!-- Actions -->
                         <div class="list-group list-group-flush">
-                            <button class="list-group-item list-group-item-action" onclick="searchInChat()">
+                            <button class="list-group-item list-group-item-action js-search-chat-button" type="button">
                                 <i class="fas fa-search me-3"></i>Search in Chat
                             </button>
-                            <!-- <button class="list-group-item list-group-item-action" onclick="viewSharedMedia()">
+                            <!-- <button class="list-group-item list-group-item-action js-shared-media-button">
                                 <i class="fas fa-images me-3"></i>Shared Media
                             </button> -->
                             <!-- <c:if test="${!chat.group}">
-                                <button class="list-group-item list-group-item-action" onclick="blockUser()">
+                                <button class="list-group-item list-group-item-action js-block-user-button">
                                     <i class="fas fa-ban me-3 text-danger"></i>Block User
                                 </button>
                             </c:if> -->
-                            <!-- <button class="list-group-item list-group-item-action text-danger" onclick="clearChat()">
+                            <!-- <button class="list-group-item list-group-item-action text-danger js-clear-chat-button">
                                 <i class="fas fa-trash me-3"></i>Clear Chat
                             </button> -->
                             <!-- <c:if test="${chat.group}">
                                 <button class="list-group-item list-group-item-action text-danger"
-                                    onclick="leaveGroup()">
+                                    data-action="leave-group">
                                     <i class="fas fa-sign-out-alt me-3"></i>Leave Group
                                 </button>
                             </c:if> -->
@@ -243,12 +243,31 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             initSocket();
-            //initUserPresencePoller()//for online status and last seen(update not needed poller now for this)
+            initUserPresencePoller()//for online status and last seen(update not needed poller now for this)
             convertSentAtUTCtoUserTimeZone();
             // Auto-scroll to bottom
             scrollToBottom();
             // Focus message input
             document.getElementById('messageInput').focus();
+
+            const backButton = document.querySelector('.js-back-button');
+            if (backButton) {
+                backButton.addEventListener('click', function () {
+                    window.history.back();
+                });
+            }
+
+            document.querySelectorAll('.js-chat-info-button').forEach(function (button) {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    toggleChatInfo();
+                });
+            });
+
+            const searchChatButton = document.querySelector('.js-search-chat-button');
+            if (searchChatButton) {
+                searchChatButton.addEventListener('click', searchInChat);
+            }
         });
 
         function scrollToBottom() {
@@ -294,7 +313,7 @@
         //     const messageInput = document.getElementById('messageInput');
 
         //     const emojiMenu = emojis.map(emoji =>
-        //         `<button class="btn btn-sm btn-outline-secondary me-1 mb-1" onclick="addEmoji('${emoji}')">${emoji}</button>`
+        //         `<button class="btn btn-sm btn-outline-secondary me-1 mb-1 js-emoji-option" data-emoji="${emoji}">${emoji}</button>`
         //     ).join('');
 
         //     const modal = `
@@ -346,9 +365,9 @@
         //     }
         // }
 
-        // function searchInChat() {
-        //     alert('Search in chat functionality will be integrated');
-        // }
+        function searchInChat() {
+            alert('Search in chat functionality will be integrated');
+        }
 
         // function viewSharedMedia() {
         //     alert('Shared media view will be integrated');

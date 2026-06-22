@@ -51,13 +51,13 @@
                      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContactModal">
                         <i class="fas fa-user-plus me-2"></i>Add Contact
                      </button>
-                     <!-- <button class="btn btn-outline-primary" onclick="createGroup()">
+                     <!-- <button class="btn btn-outline-primary js-create-group-button">
                      <i class="fas fa-users me-2"></i>Create Group
                      </button>
-                     <button class="btn btn-outline-secondary" onclick="importContacts()">
+                     <button class="btn btn-outline-secondary js-import-contacts-button">
                      <i class="fas fa-download me-2"></i>Import Contacts
                      </button>
-                     <button class="btn btn-outline-info" onclick="shareProfile()">
+                     <button class="btn btn-outline-info js-share-profile-button">
                      <i class="fas fa-share me-2"></i>Share My Profile
                      </button>
                      -->
@@ -107,7 +107,7 @@
                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-               <button class="btn btn-outline-primary" onclick="addByEmail()">
+               <button class="btn btn-outline-primary js-add-by-email-button" type="button">
                   <i class="fas fa-envelope me-2"></i>Email
                </button>
             </div>
@@ -256,7 +256,7 @@
          html += '<p class="small">' + displayAbout + '</p>';
          html += '</div>';
          html += '<div class="d-grid gap-2">';
-         html += '<button class="btn btn-primary" onclick="startChat(\'' + user.id + '\')">';
+         html += '<button class="btn btn-primary js-start-chat-button" type="button" data-contactuserid="' + user.id + '">';
          html += '<i class="fas fa-comment me-2"></i>Start Chat';
          html += '</button>';
          html += '</div>';
@@ -385,11 +385,11 @@
                if (contact.contactStatus == 'ADDED') {
                   // Actions
                   html += '<div class="btn-group">';
-                  html += '<button class="btn btn-primary btn-sm" data-contactuserid="' + contact.contactUserId + '" onclick="startChat(event)" title="Start Chat">'
+                  html += '<button class="btn btn-primary btn-sm js-start-chat-button" type="button" data-contactuserid="' + contact.contactUserId + '" title="Start Chat">'
                         + '<i class="fas fa-comment"></i>'
                         + '</button>';
 
-                  html += '<button class="btn btn-outline-secondary btn-sm" data-contactuserid="' + contact.contactUserId + '" onclick="viewProfile(event)" title="View Profile">'
+                  html += '<button class="btn btn-outline-secondary btn-sm js-view-profile-button" type="button" data-contactuserid="' + contact.contactUserId + '" title="View Profile">'
                      + '<i class="fas fa-eye"></i>'
                      + '</button>';
                }
@@ -400,12 +400,12 @@
                   + '</button>'
                   + '<ul class="dropdown-menu">'
                   // + '<li>'
-                  // + '<a class="dropdown-item" href="#" onclick="editContact(\'' + contact.contactId + '\')">'
+                  // + '<a class="dropdown-item js-edit-contact-button" href="#" data-contactid="' + contact.contactId + '">'
                   // + '<i class="fas fa-edit me-2"></i>Edit'
                   // + '</a>'
                   // + '</li>'
                   + '<li>'
-                  + '<a class="dropdown-item text-danger" href="#" data-contactuserid="' + contact.contactId + '" onclick="removeContact()">'
+                  + '<a class="dropdown-item text-danger js-remove-contact-button" href="#" data-contactid="' + contact.contactId + '">'
                   + '<i class="fas fa-trash me-2"></i>Remove'
                   + '</a>'
                   + '</li>'
@@ -440,7 +440,37 @@
 
       $(document).ready(function () {
          loadContacts();
+         bindContactClickHandlers();
       })
+
+      function bindContactClickHandlers() {
+         const addByEmailButton = document.querySelector('.js-add-by-email-button');
+         if (addByEmailButton) {
+            addByEmailButton.addEventListener('click', addByEmail);
+         }
+
+         document.addEventListener('click', function (event) {
+            const startChatButton = event.target.closest('.js-start-chat-button');
+            if (startChatButton) {
+               event.preventDefault();
+               startChat({ target: startChatButton, currentTarget: startChatButton });
+               return;
+            }
+
+            const viewProfileButton = event.target.closest('.js-view-profile-button');
+            if (viewProfileButton) {
+               event.preventDefault();
+               viewProfile({ target: viewProfileButton, currentTarget: viewProfileButton });
+               return;
+            }
+
+            const removeContactButton = event.target.closest('.js-remove-contact-button');
+            if (removeContactButton) {
+               event.preventDefault();
+               removeContact({ target: removeContactButton, currentTarget: removeContactButton });
+            }
+         });
+      }
 
       // document.addEventListener('DOMContentLoaded', function () {
       //    // Contact search functionality
@@ -519,7 +549,7 @@
       //              <h6 class="mb-1">user.full_name || user.username</h6>
       //              <small class="text-muted">user.username</small>
       //          </div>
-      //          <button class="btn btn-primary btn-sm" onclick="sendContactRequest(user.id)">
+      //          <button class="btn btn-primary btn-sm js-send-contact-request-button" data-userid="user.id">
       //              <i class="fas fa-user-plus"></i> Add
       //          </button>
       //      </div>

@@ -2,13 +2,13 @@ package com.example.chatsphere.controller;
 
 import com.apiservice.client.ApiException;
 import com.example.chatsphere.dto.AuthDTO;
+import com.example.chatsphere.dto.RefreshTokenDTO;
 import com.example.chatsphere.dto.UserDTO;
 import com.example.chatsphere.mappings.ErrorMessageMappings;
 import com.example.chatsphere.mappings.PageMappings;
 import com.example.chatsphere.service.AuthService;
 import com.example.chatsphere.service.CookieService;
 import com.example.chatsphere.util.JwtResponse;
-import com.example.chatsphere.util.RefreshTokenRequest;
 import com.example.chatsphere.util.SuccessResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -53,13 +53,20 @@ public class AuthController {
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.FORGOT_PASSWORD_VIEW);
         return PageMappings.INDEX_PAGE;
     }
-
     // Logout route
     @GetMapping("/logout")
     public String logout(HttpServletResponse response) {
-        // Remove JWT token cookie and refresh token cookie
-        tokenCookieService.clearAuthCookies(response);    
-        logger.info("User logged out successfully");
+        try {
+            authService.logout();
+            logger.info("User logged out successfully");
+        } catch (ApiException ex) {
+            logger.warn("Logout API request failed: {}", ex.getErrorMessage());
+        } catch (Exception ex) {
+            logger.error("Unexpected logout failure", ex);
+        } finally {
+            // Remove JWT token cookie and refresh token cookie
+            tokenCookieService.clearAuthCookies(response);
+        }
         return PageMappings.REDIRECT_LOGIN;
     }
 
@@ -177,10 +184,22 @@ public class AuthController {
         logger.info("API forgot password request successful for phone/email: {}", authDTO.getPhoneNumberOrEmail());
         return response;
     }
+    @PostMapping("/api/logout")
+    @ResponseBody
+    public SuccessResponse<String> logoutApi(HttpServletResponse response) {
+        logger.debug("Processing API logout request");
+
+        SuccessResponse<String> logoutResponse = authService.logout();
+        tokenCookieService.clearAuthCookies(response);
+
+        logger.info("API logout request successful");
+        return logoutResponse;
+    }
+
 
     @PostMapping("/api/tokenrefresh")
     @ResponseBody
-    public SuccessResponse<JwtResponse> refreshAccessToken(@RequestBody RefreshTokenRequest refreshTokenRequest, HttpServletResponse response) {
+    public SuccessResponse<JwtResponse> refreshAccessToken(@RequestBody RefreshTokenDTO refreshTokenRequest, HttpServletResponse response) {
         logger.debug("Refreshing access token");
 
         JwtResponse jwtResponse = authService.refreshToken(refreshTokenRequest);
