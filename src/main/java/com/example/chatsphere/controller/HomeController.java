@@ -29,6 +29,8 @@ public class HomeController {
         logger.info("Loading home page for user");
         String loggedInUserid = (String) request.getAttribute("userId");
         List<ConversationLastMsgDTO> chatData = chatService.getLastMessageByLoggedInUserId(loggedInUserid);
+        //logger.info("/home endpoint called. Retrieved chat data for user {}: {}", loggedInUserid, chatData);
+        model.addAttribute("chatData", chatData);
         //get loggedin user contacts ids
         //todo
         // List<String> loggedInUserContactIds = chatData.stream()

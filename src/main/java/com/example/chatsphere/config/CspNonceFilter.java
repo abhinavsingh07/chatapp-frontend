@@ -35,7 +35,7 @@ public class CspNonceFilter extends OncePerRequestFilter {
                 "style-src 'self' 'unsafe-inline' https://ka-f.fontawesome.com; " +
                 "font-src 'self' data: https://ka-f.fontawesome.com; " +
                 "img-src 'self' data: blob:; " +
-                "connect-src 'self' ws://localhost:8080 https://ka-f.fontawesome.com; " +
+                "connect-src 'self' ws://localhost https://ka-f.fontawesome.com; " +
                 "frame-ancestors 'none'; " +
                 "object-src 'none'; " +
                 "base-uri 'self'; " +

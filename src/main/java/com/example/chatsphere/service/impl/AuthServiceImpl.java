@@ -10,10 +10,13 @@ import com.example.chatsphere.service.AuthService;
 import com.example.chatsphere.service.AuthenticatedApiService;
 import com.example.chatsphere.util.ApiRequestBuilderUtil;
 import com.example.chatsphere.util.SuccessResponse;
+import jakarta.servlet.http.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -76,13 +79,29 @@ public class AuthServiceImpl implements AuthService {
 
      @Override
     public SuccessResponse<String> logout() {
-        ApiRequest apiReq = apiRequestBuilderUtil.build("auth.logout", null);
+        RefreshTokenDTO refreshTokenDTO = new RefreshTokenDTO();
+        refreshTokenDTO.setRefreshToken(getRefreshTokenFromCookie());
+        ApiRequest apiReq = apiRequestBuilderUtil.build("auth.logout", refreshTokenDTO);
         logger.info("Submitting logout request");
         SuccessResponse<String> responseEntity = authenticatedApiService.call(apiReq,
                 new ParameterizedTypeReference<SuccessResponse<String>>() {
                 });
         logger.info("Logout request completed for: {}", apiReq.getPath());
         return responseEntity;
+    }
+
+    private String getRefreshTokenFromCookie() {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes == null || attributes.getRequest().getCookies() == null) {
+            return null;
+        }
+
+        for (Cookie cookie : attributes.getRequest().getCookies()) {
+            if ("jwt_refresh".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 
 }

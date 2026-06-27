@@ -1,97 +1,151 @@
 <%@ include file="/WEB-INF/views/common.jsp" %>
-    <div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
-        <div class="row w-100">
-            <div class="col-md-8 col-lg-6 mx-auto">
-                <div class="card shadow-lg border-0">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
-                            <h2 class="h3 mb-1">Create Account</h2>
-                            <p class="text-muted">Join the conversation</p>
-                        </div>
-                        <c:if test="${not empty errorMessage}">
-                            <div class="alert alert-danger">${fn:escapeXml(errorMessage)}</div>
-                        </c:if>
-                        <c:if test="${not empty successMessage}">
-                            <div class="alert alert-success">${fn:escapeXml(successMessage)}</div>
-                        </c:if>
+<div class="auth-wrapper">
 
-                        <form action="${pageContext.request.contextPath}/register" method="POST" id="registerForm">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="name" class="form-label">
-                                        <i class="fas fa-at me-2"></i>Name *
-                                    </label>
-                                    <input type="text" class="form-control" id="name" name="name" required
-                                        placeholder="Enter name" value="<c:out value='${param.name}'/>">
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label for="email" class="form-label">
-                                        <i class="fas fa-envelope me-2"></i>Email *
-                                    </label>
-                                    <input type="email" class="form-control" id="email" name="email" required
-                                        placeholder="your@email.com" value="<c:out value='${param.email}'/>">
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="phone" class="form-label">
-                                    <i class="fas fa-phone me-2"></i>Phone Number
-                                </label>
-                                <input type="tel" class="form-control" id="phone" name="phoneNumber"
-                                    placeholder="+91 5551234567" value="<c:out value='${param.phoneNumber}'/>">
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="password" class="form-label">
-                                        <i class="fas fa-lock me-2"></i>Password *
-                                    </label>
-                                    <div class="input-group">
-                                        <input type="password" class="form-control" id="password" name="password"
-                                            required placeholder="Create password">
-                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                    <div class="invalid-feedback d-block" id="passwordError"></div>
-                                    <div class="form-text">At least 8 characters with uppercase, lowercase, number, and
-                                        special character</div>
-                                </div>
-
-                                <div class="col-md-6 mb-4">
-                                    <label for="confirm_password" class="form-label">
-                                        <i class="fas fa-lock me-2"></i>Confirm Password *
-                                    </label>
-                                    <div class="input-group">
-                                        <input type="password" class="form-control" id="confirm_password" required
-                                            placeholder="Confirm password">
-                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                    <div class="invalid-feedback d-block" id="confirmPasswordError"></div>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
-                                <i class="fas fa-user-plus me-2"></i>Create Account
-                            </button>
-
-                            <div class="text-center">
-                                <p class="mb-0">Already have an account?
-                                    <a href="${pageContext.request.contextPath}/login" class="text-decoration-none">
-                                        Sign in here
-                                    </a>
-                                </p>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+    <%-- ═══ Left branding panel — decorative, lg+ screens only ═══ --%>
+    <div class="auth-brand-panel d-none d-lg-flex flex-column align-items-center justify-content-center">
+        <div class="auth-brand-logo">
+            <i class="fas fa-user-plus fa-2x text-white"></i>
+        </div>
+        <h1 class="auth-brand-title mt-3 mb-2">Join ChatSphere</h1>
+        <p class="auth-brand-tagline">Create your account and start connecting with people around you.</p>
+        <div class="d-flex flex-column gap-3 mt-5 w-100" style="max-width: 280px;">
+            <div class="auth-brand-feature">
+                <i class="fas fa-bolt"></i>
+                <span>Quick account setup</span>
+            </div>
+            <div class="auth-brand-feature">
+                <i class="fas fa-shield-alt"></i>
+                <span>Secure &amp; private by design</span>
+            </div>
+            <div class="auth-brand-feature">
+                <i class="fas fa-comments"></i>
+                <span>Real-time messaging</span>
             </div>
         </div>
     </div>
+
+    <%-- ═══ Right form panel ═══ --%>
+    <div class="auth-form-panel auth-form-panel--scroll">
+        <div class="auth-card card border-0 w-100" style="max-width: 520px;">
+
+            <%-- .card-body REQUIRED — JS showAlert() uses querySelector('.card-body') --%>
+            <div class="card-body p-4 p-md-5">
+
+                <%-- Mobile brand header — hidden on lg+ --%>
+                <div class="text-center mb-4 d-lg-none">
+                    <div class="auth-logo-mobile mx-auto">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <p class="fw-bold text-primary mb-0 mt-1 small">ChatSphere</p>
+                </div>
+
+                <h2 class="h4 fw-bold mb-1">Create account</h2>
+                <p class="text-muted small mb-4">Fill in the details below to get started</p>
+
+                <%-- Protected: JSTL c:if + fn:escapeXml --%>
+                <c:if test="${not empty errorMessage}">
+                    <div class="alert alert-danger d-flex align-items-center gap-2 py-2" role="alert">
+                        <i class="fas fa-exclamation-circle flex-shrink-0"></i>
+                        <span>${fn:escapeXml(errorMessage)}</span>
+                    </div>
+                </c:if>
+                <c:if test="${not empty successMessage}">
+                    <div class="alert alert-success d-flex align-items-center gap-2 py-2" role="alert">
+                        <i class="fas fa-check-circle flex-shrink-0"></i>
+                        <span>${fn:escapeXml(successMessage)}</span>
+                    </div>
+                </c:if>
+
+                <%-- Protected: action URL + id="registerForm" used by JS --%>
+                <form action="${pageContext.request.contextPath}/register" method="POST" id="registerForm">
+
+                    <%-- Row 1: Name + Email --%>
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label for="name" class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+                            <%-- Protected: id="name", name="name", c:out EL binding --%>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-user text-muted"></i></span>
+                                <input type="text" class="form-control" id="name" name="name" required
+                                    placeholder="Your name" value="<c:out value='${param.name}'/>">
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="email" class="form-label fw-semibold small">Email <span class="text-danger">*</span></label>
+                            <%-- Protected: id="email", name="email", c:out EL binding --%>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-envelope text-muted"></i></span>
+                                <input type="email" class="form-control" id="email" name="email" required
+                                    placeholder="your@email.com" value="<c:out value='${param.email}'/>">
+                            </div>
+                        </div>
+                    </div>
+
+                    <%-- Phone --%>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label fw-semibold small">Phone Number <span class="text-muted fw-normal">(optional)</span></label>
+                        <%-- Protected: id="phone", name="phoneNumber", c:out EL binding --%>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fas fa-phone text-muted"></i></span>
+                            <input type="tel" class="form-control" id="phone" name="phoneNumber"
+                                placeholder="+91 5551234567" value="<c:out value='${param.phoneNumber}'/>">
+                        </div>
+                    </div>
+
+                    <%-- Row 2: Password + Confirm — structure kept for JS strength meter --%>
+                    <%-- JS uses: getElementById('password').parentNode.parentNode to inject #passwordStrength --%>
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <label for="password" class="form-label fw-semibold small">Password <span class="text-danger">*</span></label>
+                            <%-- Protected: id="password", name="password", id="togglePassword1" --%>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-lock text-muted"></i></span>
+                                <input type="password" class="form-control" id="password" name="password"
+                                    required placeholder="Create password">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <%-- Protected: id="passwordError" used by JS --%>
+                            <div class="invalid-feedback d-block small" id="passwordError"></div>
+                            <div class="form-text">Min 8 chars with upper, lower, number &amp; symbol</div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="confirm_password" class="form-label fw-semibold small">Confirm Password <span class="text-danger">*</span></label>
+                            <%-- Protected: id="confirm_password", id="togglePassword2" --%>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-lock text-muted"></i></span>
+                                <input type="password" class="form-control" id="confirm_password" required
+                                    placeholder="Confirm password">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <%-- Protected: id="confirmPasswordError" used by JS --%>
+                            <div class="invalid-feedback d-block small" id="confirmPasswordError"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 mb-4">
+                        <i class="fas fa-user-plus me-2"></i>Create Account
+                    </button>
+
+                    <div class="text-center">
+                        <p class="text-muted small mb-0">Already have an account?
+                            <%-- Protected: href URL mapping --%>
+                            <a href="${pageContext.request.contextPath}/login"
+                               class="fw-semibold text-decoration-none link-primary">Sign in</a>
+                        </p>
+                    </div>
+
+                </form>
+            </div><%-- /.card-body --%>
+        </div><%-- /.auth-card --%>
+    </div><%-- /.auth-form-panel --%>
+
+</div><%-- /.auth-wrapper --%>
 
     <script nonce="${cspNonce}">
         document.addEventListener('DOMContentLoaded', function () {

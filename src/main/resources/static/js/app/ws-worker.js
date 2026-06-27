@@ -23,7 +23,8 @@ class chatWebSocketManager {
 
     connect() {
         //and jwt goes with cookie, so no need to send it explicitly in the WebSocket connection URL or headers. The server can extract the JWT from the cookie during the WebSocket handshake and use it for authentication and authorization.
-        const wsUrl = `ws://localhost:8080/synk/ws/chat`;
+        // const wsUrl = `ws://localhost:8080/synk/ws/chat`;
+        const wsUrl = `ws://localhost/synk/ws/chat`;
 
         // Check if socket exists and is still open or connecting
         if (

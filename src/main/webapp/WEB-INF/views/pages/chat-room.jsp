@@ -1,239 +1,160 @@
 <%@ include file="/WEB-INF/views/common.jsp" %>
-    <div class="container-fluid h-100">
-        <div class="row h-100">
+    <div class="cr-layout">
+        <div class="cr-header chat-header">
 
-            <!-- Mobile Back Button + Chat Header -->
-            <div class="d-md-none col-12 p-0">
-                <div class="bg-primary text-white p-3">
-                    <div class="d-flex align-items-center">
-                        <!-- Back Button -->
-                        <button class="btn btn-sm btn-outline-light me-3 js-back-button" type="button">
-                            <i class="fas fa-arrow-left"></i>
-                        </button>
+            <%-- Back button (mobile / browser history) --%>
+                <button class="cr-header-btn js-back-button d-md-none" type="button" title="Back">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
 
-                        <!-- Chat Name & Status -->
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0">
+                <%-- Avatar --%>
+                    <c:choose>
+                        <c:when test="${not empty toUserDetails.profilePictureUrl}">
+                            <img src="<c:out value='${toUserDetails.profilePictureUrl}'/>" alt="Avatar"
+                                class="cr-header-avatar">
+                        </c:when>
+                        <c:otherwise>
+                            <div class="cr-header-avatar-placeholder">
+                                <i class="fas fa-users fa-sm"></i>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+
+                    <%-- Name + presence --%>
+                        <div class="flex-grow-1 min-width-0">
+                            <div class="cr-header-name">
                                 <c:choose>
                                     <c:when test="${chat.group}">
                                         ${not empty chat.name ? chat.name : 'Group Chat'}
                                     </c:when>
                                     <c:otherwise>
-                                        <c:out value=" ${not empty toUserDetails ? toUserDetails.name : 'User'}" />
+                                        <c:out value="${not empty toUserDetails ? toUserDetails.name : 'User'}" />
                                     </c:otherwise>
                                 </c:choose>
-                            </h6>
-                            <small class="text-light opacity-75" id="user-presence-status">
-                            </small>
+                            </div>
+                            <%-- Protected: id="user-presence-status" queried by initUserPresencePoller() --%>
+                                <div class="cr-header-status" id="user-presence-status"></div>
                         </div>
 
-                        <!-- Chat Info Dropdown -->
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-light" data-bs-toggle="dropdown">
-                                <i class="fas fa-ellipsis-v"></i>
+                        <%-- Chat info trigger --%>
+                            <button class="cr-header-btn js-chat-info-button" type="button" title="Chat info">
+                                <i class="fas fa-info-circle"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item js-chat-info-button" href="#">
-                                        <i class="fas fa-info-circle me-2"></i>Chat Info
-                                    </a></li>
-                            </ul>
+        </div>
+
+
+        <div class="cr-messages" id="messagesContainer">
+
+            <c:choose>
+                <c:when test="${not empty messages}">
+                    <c:forEach var="message" items="${messages}">
+                        <div
+                            class="message-wrapper mb-2 d-flex ${message.senderId == userid ? 'justify-content-end' : 'justify-content-start'}">
+                            <div
+                                class="message-bubble ${message.senderId == userid ? 'cr-bubble-sent' : 'cr-bubble-received'}">
+                                <div class="message-content">
+                                    <c:out value="${message.content}" />
+                                </div>
+                                <%-- Protected: id="sentAt" + data-date — queried by convertSentAtUTCtoUserTimeZone()
+                                    --%>
+                                    <div id="sentAt" data-date="<c:out value='${message.sentAt}'/>"
+                                        class="message-time cr-bubble-time ${message.senderId == userid ? 'text-white-50' : 'text-muted'}">
+                                    </div>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </c:when>
+                <c:otherwise>
+                    <%-- Protected: id="noMessagesPlaceholder" --%>
+                        <div class="cr-empty" id="noMessagesPlaceholder">
+                            <div class="cr-empty-icon">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <h6 class="fw-semibold text-secondary mb-1">No messages yet</h6>
+                            <p class="text-muted small mb-0">Send the first message to start the conversation
+                            </p>
+                        </div>
+                </c:otherwise>
+            </c:choose>
+
+            <%-- Protected: id="typingIndicator" class="d-none" — toggled by WebSocket handler in header.jsp --%>
+                <div class="typing-indicator d-none mb-2 d-flex justify-content-start" id="typingIndicator">
+                    <div class="cr-typing-bubble">
+                        <div class="typing-dots">
+                            <span></span><span></span><span></span>
                         </div>
                     </div>
                 </div>
+        </div>
+
+
+        <div class="cr-input-bar">
+            <form id="messageForm" action="/submit" autocomplete="off">
+                <input type="hidden" name="chat_id" value="<c:out value='${conversationId}'/>">
+                <div class="cr-input-inner">
+                    <textarea class="form-control cr-textarea" id="messageInput" name="content"
+                        placeholder="Type a message" rows="1"></textarea>
+                    <button type="submit" class="btn cr-send-btn" id="sendButton" title="Send">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="chatInfoSidebar" style="max-width:320px;">
+            <div class="offcanvas-header cr-offcanvas-header">
+                <h5 class="offcanvas-title text-white fw-semibold" style="font-size:0.95rem;">
+                    <i class="fas fa-info-circle me-2"></i>Chat Info
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+                    aria-label="Close"></button>
             </div>
 
-            <!-- Main Chat Area -->
-            <div class="col-12 p-0 d-flex flex-column" style="height: calc(100vh - 120px);">
-
-                <!-- Desktop Chat Header -->
-                <div class="d-none d-md-block chat-header bg-white border-bottom p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center">
-                            <!-- Avatar -->
+            <div class="offcanvas-body p-0">
+                <%-- User profile block --%>
+                    <c:set var="other_user" value="${not empty toUserDetails ? toUserDetails : null}" />
+                    <c:if test="${not empty other_user}">
+                        <div class="p-4 text-center border-bottom">
                             <c:choose>
-                                <c:when test="${not empty toUserDetails.profilePictureUrl}">
-                                    <img src="<c:out value='${toUserDetails.profilePictureUrl}'/>"
-                                        class="rounded-circle me-3" style="width:45px;height:45px;object-fit:cover;">
+                                <c:when test="${not empty other_user.profilePictureUrl}">
+                                    <img src="<c:out value='${other_user.profilePictureUrl}'/>" alt="Avatar"
+                                        class="cr-offcanvas-profile-avatar mb-3">
                                 </c:when>
                                 <c:otherwise>
-                                    <div class="avatar-group bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
-                                        style="width: 45px; height: 45px;"><i class="fas fa-users"></i></div>
+                                    <div class="cr-offcanvas-avatar-placeholder mx-auto mb-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
                                 </c:otherwise>
                             </c:choose>
-
-                            <!-- Chat Name & Status -->
-                            <div>
-                                <h6 class="mb-0">
-                                    <c:choose>
-                                        <c:when test="${chat.group}">
-                                            ${not empty chat.name ? chat.name : 'Group Chat'}
-                                        </c:when>
-                                        <c:otherwise>
-                                            <c:out value=" ${not empty toUserDetails ? toUserDetails.name :  'User'}" />
-                                        </c:otherwise>
-                                    </c:choose>
-                                </h6>
-                                <small class="text-muted" id="user-presence-status">
-                                </small>
-                            </div>
-                        </div>
-
-                        <!-- Chat Actions -->
-                        <button class="btn btn-outline-secondary btn-sm js-chat-info-button" type="button" title="Chat Info">
-                            <i class="fas fa-info-circle"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Messages Area -->
-                <div class="flex-grow-1 overflow-auto p-3 bg-light messages-container" id="messagesContainer">
-
-                    <!-- Messages -->
-                    <c:choose>
-                        <c:when test="${not empty messages}">
-                            <c:forEach var="message" items="${messages}">
-                                <div class="message-wrapper mb-3 ${message.senderId == userid ? 'text-end' : ''}">
-                                    <div class="d-inline-block message-bubble 
-                                ${message.senderId ==  userid ? 'bg-primary text-white' : 'bg-white border'} 
-                                rounded-3 p-3 shadow-sm" style="max-width: 70%; word-wrap: break-word;">
-                                        <!-- Sender Name in Group -->
-                                        <!-- <c:if test="${chat.group and message.senderId != userid}">
-                                            <div class="message-sender small fw-bold mb-1 text-primary">
-                                                ${message.sender.full_name != null ? message.sender.full_name :
-                                                message.sender.username}
-                                            </div>
-                                        </c:if> -->
-
-                                        <!-- Message Content -->
-                                        <div class="message-content">
-                                            <c:out value="${message.content}" />
-                                        </div>
-                                        <!-- Message Timestamp -->
-                                        <div id="sentAt" data-date="<c:out value='${message.sentAt}'/>"
-                                            class="message-time small mt-1 ${message.senderId == userid ? 'text-white-50' : 'text-muted'}">
-                                            <!-- date comes from js  -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </c:forEach>
-                        </c:when>
-                        <c:otherwise>
-                            <!-- No Messages -->
-                            <div class="text-center mt-5" id="noMessagesPlaceholder">
-                                <i class="fas fa-comment-dots fa-3x text-muted mb-3"></i>
-                                <h6 class="text-muted">No messages yet</h6>
-                                <p class="text-muted">Send the first message to start the conversation</p>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
-
-                    <!-- Typing Indicator -->
-                    <div class="typing-indicator d-none mb-3" id="typingIndicator">
-                        <div class="d-inline-block bg-white border rounded-3 p-3 shadow-sm">
-                            <div class="typing-dots">
-                                <span></span><span></span><span></span>
-                            </div>
-                            <!-- <div class="small text-muted mt-1">
-                                <span id="typingUsers">Someone</span> is typing...
-                            </div> -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Message Input -->
-                <div class="message-input bg-white border-top p-3">
-                    <form id="messageForm" action="/submit" class="d-flex align-items-end gap-2">
-                        <input type="hidden" name="chat_id" value="<c:out value='${conversationId}'/>">
-
-                        <!-- Attachment Button -->
-                        <!-- <button type="button" class="btn btn-outline-secondary js-attachment-button">
-                            <i class="fas fa-paperclip"></i>
-                        </button> -->
-
-                        <!-- Message Textarea -->
-                        <div class="flex-grow-1">
-                            <textarea class="form-control" id="messageInput" name="content"
-                                placeholder="Type a message..." rows="1"
-                                style="resize: none; max-height: 120px;"></textarea>
-                        </div>
-
-                        <!-- Emoji Button -->
-                        <!-- <button type="button" class="btn btn-outline-secondary js-emoji-button">
-                            <i class="fas fa-smile"></i>
-                        </button> -->
-
-                        <!-- Send Button -->
-                        <button type="submit" class="btn btn-primary" id="sendButton">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </form>
-                </div>
-
-
-                <!-- Chat Info Sidebar (Hidden by default) -->
-                <div class="offcanvas offcanvas-end" tabindex="-1" id="chatInfoSidebar">
-                    <div class="offcanvas-header border-bottom">
-                        <h5 class="offcanvas-title">Chat Info</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-                    </div>
-                    <div class="offcanvas-body p-0">
-                        <!-- Chat/User Info Content -->
-                        <div class="p-4 text-center border-bottom">
-                            <!-- Group Chat -->
-                            <!-- One-to-One Chat -->
-                            <c:set var="other_user" value="${not empty toUserDetails ? toUserDetails : null}" />
-                            <c:if test="${not empty other_user}">
-                                <c:choose>
-                                    <c:when test="${not empty other_user.profilePictureUrl}">
-                                        <img src="<c:out value='${other_user.profilePictureUrl}'/>"  alt="Avatar"
-                                            class="rounded-circle mb-3"
-                                            style="width: 80px; height: 80px; object-fit: cover;">
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="avatar bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                            style="width: 80px; height: 80px;">
-                                            <i class="fas fa-user fa-2x"></i>
-                                        </div>
-                                    </c:otherwise>
-                                </c:choose>
-                                <h5><c:out value="${other_user.name}"/></h5>
-                                <p class="text-muted">@<c:out value="${other_user.name}"/></p>
-                                <c:if test="${not empty other_user.about}">
-                                    <p class="small"><c:out value="${other_user.about}"/></p>
-                                </c:if>
+                            <h6 class="fw-semibold mb-0">
+                                <c:out value="${other_user.name}" />
+                            </h6>
+                            <p class="text-muted small mb-0">@
+                                <c:out value="${other_user.name}" />
+                            </p>
+                            <c:if test="${not empty other_user.about}">
+                                <p class="text-muted small mt-2 mb-0" style="font-size:0.8rem;">
+                                    <c:out value="${other_user.about}" />
+                                </p>
                             </c:if>
                         </div>
+                    </c:if>
 
-                        <!-- Actions -->
+                    <%-- Actions list --%>
                         <div class="list-group list-group-flush">
-                            <button class="list-group-item list-group-item-action js-search-chat-button" type="button">
-                                <i class="fas fa-search me-3"></i>Search in Chat
+                            <button
+                                class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 js-search-chat-button"
+                                type="button">
+                                <span
+                                    style="width:32px;height:32px;background:#dbeafe;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#2563EB;flex-shrink:0;">
+                                    <i class="fas fa-search fa-sm"></i>
+                                </span>
+                                <span class="fw-medium" style="font-size:0.875rem;">Search in Chat</span>
                             </button>
-                            <!-- <button class="list-group-item list-group-item-action js-shared-media-button">
-                                <i class="fas fa-images me-3"></i>Shared Media
-                            </button> -->
-                            <!-- <c:if test="${!chat.group}">
-                                <button class="list-group-item list-group-item-action js-block-user-button">
-                                    <i class="fas fa-ban me-3 text-danger"></i>Block User
-                                </button>
-                            </c:if> -->
-                            <!-- <button class="list-group-item list-group-item-action text-danger js-clear-chat-button">
-                                <i class="fas fa-trash me-3"></i>Clear Chat
-                            </button> -->
-                            <!-- <c:if test="${chat.group}">
-                                <button class="list-group-item list-group-item-action text-danger"
-                                    data-action="leave-group">
-                                    <i class="fas fa-sign-out-alt me-3"></i>Leave Group
-                                </button>
-                            </c:if> -->
                         </div>
-                        <!-- Group Participants -->
-                    </div>
-                </div>
             </div>
         </div>
     </div>
-
     <script nonce="${cspNonce}">
         //init in header.jsp
         // const ctx = "<c:out value='${ctx}'/>";//getting from commons.jsp
@@ -280,104 +201,9 @@
             sidebar.show();
         }
 
-        // function startVideoCall() {
-        //     alert('Video call feature will be integrated with WebRTC service');
-        // }
-
-        // function startVoiceCall() {
-        //     alert('Voice call feature will be integrated with WebRTC service');
-        // }
-
-        // function showAttachmentOptions() {
-        //     // Create temporary file input
-        //     const input = document.createElement('input');
-        //     input.type = 'file';
-        //     input.multiple = true;
-        //     input.accept = 'image/*,video/*,audio/*,.pdf,.doc,.docx';
-
-        //     input.onchange = function (e) {
-        //         const files = Array.from(e.target.files);
-        //         files.forEach(file => {
-        //             // In a real app, this would upload the file
-        //             console.log('Would upload file:', file.name);
-        //             // alert(`File upload for "${file.name}" will be integrated with file service`);
-        //         });
-        //     };
-
-        //     input.click();
-        // }
-
-        // function showEmojiPicker() {
-        //     // Simple emoji picker (in production, use a proper emoji picker library)
-        //     const emojis = ['😀', '😂', '😍', '🤔', '👍', '👎', '❤️', '🎉', '😢', '😡'];
-        //     const messageInput = document.getElementById('messageInput');
-
-        //     const emojiMenu = emojis.map(emoji =>
-        //         `<button class="btn btn-sm btn-outline-secondary me-1 mb-1 js-emoji-option" data-emoji="${emoji}">${emoji}</button>`
-        //     ).join('');
-
-        //     const modal = `
-        // <div class="modal fade" id="emojiModal" tabindex="-1">
-        //     <div class="modal-dialog modal-sm">
-        //         <div class="modal-content">
-        //             <div class="modal-header">
-        //                 <h6 class="modal-title">Choose Emoji</h6>
-        //                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        //             </div>
-        //             <div class="modal-body">
-        //                ${emojiMenu}
-        //             </div>
-        //         </div>
-        //     </div>
-        // </div>`;
-
-        //     document.body.insertAdjacentHTML('beforeend', modal);
-        //     const emojiModalEl = new bootstrap.Modal(document.getElementById('emojiModal'));
-        //     emojiModalEl.show();
-
-        //     // Clean up when modal is hidden
-        //     document.getElementById('emojiModal').addEventListener('hidden.bs.modal', function () {
-        //         this.remove();
-        //     });
-        // }
-
-        // function addEmoji(emoji) {
-        //     const messageInput = document.getElementById('messageInput');
-        //     messageInput.value += emoji;
-        //     messageInput.focus();
-
-        //     // Close emoji modal
-        //     const emojiModal = bootstrap.Modal.getInstance(document.getElementById('emojiModal'));
-        //     if (emojiModal) {
-        //         emojiModal.hide();
-        //     }
-        // }
-
-        // function clearChat() {
-        //     if (confirm('Are you sure you want to clear this chat? This action cannot be undone.')) {
-        //         alert('Clear chat functionality will be integrated with backend service');
-        //     }
-        // }
-
-        // function leaveGroup() {
-        //     if (confirm('Are you sure you want to leave this group?')) {
-        //         alert('Leave group functionality will be integrated with backend service');
-        //     }
-        // }
-
         function searchInChat() {
             alert('Search in chat functionality will be integrated');
         }
-
-        // function viewSharedMedia() {
-        //     alert('Shared media view will be integrated');
-        // }
-
-        // function blockUser() {
-        //     if (confirm('Are you sure you want to block this user?')) {
-        //         alert('Block user functionality will be integrated with backend service');
-        //     }
-        // }
 
         function convertSentAtUTCtoUserTimeZone() {
             const dates = document.querySelectorAll("#sentAt");

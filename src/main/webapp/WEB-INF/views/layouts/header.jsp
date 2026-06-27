@@ -1,66 +1,111 @@
 <%@ include file="/WEB-INF/views/common.jsp" %>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="${pageContext.request.contextPath}/home">
-                <i class="fas fa-comments me-2"></i>ChatApp
+    <%-- Navigation. Protected: id="navbarNav", data-bs-toggle/target, all href EL, username EL --%>
+    <nav class="cs-navbar navbar navbar-expand-lg sticky-top">
+        <div class="container-fluid px-3 px-lg-4">
+
+            <%-- Brand --%>
+            <a class="cs-brand navbar-brand" href="${pageContext.request.contextPath}/home">
+                <div class="cs-brand-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <span class="cs-brand-name">ChatSphere</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+
+            <%-- Mobile toggler — Protected: data-bs-toggle, data-bs-target="#navbarNav" --%>
+            <button class="cs-toggler navbar-toggler border-0 shadow-none" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
             </button>
 
+            <%-- Protected: id="navbarNav" --%>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+
+                <%-- Primary nav links --%>
+                <ul class="navbar-nav me-auto gap-1">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'chat_list' %}active{% endif %}"
-                            href="${pageContext.request.contextPath}/home">
-                            <i class="fas fa-home me-1"></i>Home
+                        <%-- Protected: href URL mapping --%>
+                        <a class="cs-nav-link nav-link" href="${pageContext.request.contextPath}/home">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'contacts' %}active{% endif %}"
-                            href="${pageContext.request.contextPath}/contacts">
-                            <i class="fas fa-users me-1"></i>Contacts
+                        <%-- Protected: href URL mapping --%>
+                        <a class="cs-nav-link nav-link" href="${pageContext.request.contextPath}/contacts">
+                            <i class="fas fa-users"></i>
+                            <span>Contacts</span>
                         </a>
                     </li>
                 </ul>
 
-                <!-- Search Form -->
-                <!-- <form class="d-flex me-3" action="${pageContext.request.contextPath}/search" method="GET">
-                    <div class="input-group">
-                        <input class="form-control" type="search" name="q" placeholder="Search..." aria-label="Search">
-                        <button class="btn btn-outline-light" type="submit">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </form> -->
-
-                <!-- User Menu -->
-                <div class="dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-circle me-1"></i>
+                <%-- User dropdown. Protected: data-bs-toggle="dropdown", username EL --%>
+                <div class="dropdown ms-auto ms-lg-0">
+                    <button class="cs-user-btn btn dropdown-toggle d-flex align-items-center gap-2"
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="cs-user-avatar">
+                            <c:choose>
+                                <c:when test="${not empty username}">
+                                    <%-- Show first letter of username as avatar initial --%>
+                                    <span class="cs-user-initial">${fn:substring(username,0,1)}</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <i class="fas fa-user" style="font-size:0.75rem;"></i>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
                         <c:if test="${not empty username}">
-                            <span>Hello! <c:out value='${username}'/></span>
+                            <span class="cs-user-name d-none d-lg-inline">
+                                <c:out value='${username}'/>
+                            </span>
                         </c:if>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/profile">
-                                <i class="fas fa-user me-2"></i>Profile
-                            </a></li>
-                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/settings">
-                                <i class="fas fa-cog me-2"></i>Settings
-                            </a></li>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end cs-dropdown shadow border-0 py-1 mt-2">
+                        <c:if test="${not empty username}">
+                            <li class="cs-dropdown-header px-3 py-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="cs-user-avatar cs-user-avatar--lg">
+                                        <span class="cs-user-initial">${fn:substring(username,0,1)}</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold small"><c:out value='${username}'/></div>
+                                        <div class="text-muted" style="font-size:0.7rem;">Online</div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                        </c:if>
                         <li>
-                            <hr class="dropdown-divider">
+                            <%-- Protected: href URL mapping --%>
+                            <a class="dropdown-item cs-dropdown-item" href="${pageContext.request.contextPath}/profile">
+                                <i class="fas fa-user text-primary"></i>
+                                <span>Profile</span>
+                            </a>
                         </li>
-                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/logout">
-                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                            </a></li>
+                        <li>
+                            <%-- Protected: href URL mapping --%>
+                            <a class="dropdown-item cs-dropdown-item" href="${pageContext.request.contextPath}/settings">
+                                <i class="fas fa-cog text-secondary"></i>
+                                <span>Settings</span>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li>
+                            <%-- Protected: href URL mapping --%>
+                            <a class="dropdown-item cs-dropdown-item cs-dropdown-item--danger"
+                               href="${pageContext.request.contextPath}/logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
-            </div>
+
+            </div><%-- /#navbarNav --%>
         </div>
     </nav>
+    <%-- Theme init: runs early to apply saved theme before page paint, preventing flash --%>
+    <script nonce="${cspNonce}">(function(){var t=localStorage.getItem('cs-theme');if(t==='dark')document.body.classList.add('theme-dark');}());</script>
     <script nonce="${cspNonce}">
         //these values available for all pages as header is common in all pages.
         const ctx = "<c:out value='${ctx}'/>";//getting from commons.jsp

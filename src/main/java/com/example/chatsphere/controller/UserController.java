@@ -76,7 +76,7 @@ public class UserController {
     @GetMapping("/api/user/lastActiveStatus")
     @ResponseBody
     public SuccessResponse<UserStatusDTO> getUserLastActiveStatus(@RequestParam("userId") String userId) {
-        logger.debug("Fetching last active status for userId={}", userId);
+        logger.info("Fetching last active status for userId={}", userId);
         SuccessResponse<UserStatusDTO> statusResponse = userService.getUserLastActiveStatus(userId);
         logger.info("Last active status fetched for {} user(s)", statusResponse.getData().size());
         return statusResponse;

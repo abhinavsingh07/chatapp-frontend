@@ -1,129 +1,139 @@
 <%@ include file="/WEB-INF/views/common.jsp" %>
+   <%-- Protected: .mutual-button:disabled used by JS --%>
    <style type="text/css">
       .mutual-button:disabled {
          pointer-events: auto;
       }
    </style>
-   <div class="container mt-4">
-      <div class="row">
-         <!-- Contacts List -->
+
+   <div class="container-fluid px-3 px-lg-4 py-4">
+      <div class="row g-4">
+
+         <%-- ═══ Left: Contacts list ═══ --%>
          <div class="col-lg-8">
-            <div class="card shadow-sm">
-               <div class="card-header bg-primary text-white">
-                  <div class="d-flex justify-content-between align-items-center">
-                     <h5 class="mb-0">
-                        <i class="fas fa-users me-2"></i>My Contacts
-                     </h5>
-                     <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addContactModal">
-                        <i class="fas fa-user-plus me-2"></i>Add Contact
-                     </button>
+            <div class="card border-0 shadow-sm overflow-hidden">
+
+               <div class="ct-card-header d-flex align-items-center justify-content-between px-4 py-3">
+                  <div class="d-flex align-items-center gap-2">
+                     <div class="ct-header-icon">
+                        <i class="fas fa-users" style="font-size:0.85rem;"></i>
+                     </div>
+                     <span class="fw-bold text-white">My Contacts</span>
                   </div>
+                  <%-- Protected: data-bs-toggle + data-bs-target="#addContactModal" --%>
+                  <button class="btn ct-header-btn btn-sm d-flex align-items-center gap-2"
+                          data-bs-toggle="modal" data-bs-target="#addContactModal">
+                     <i class="fas fa-user-plus" style="font-size:0.78rem;"></i>
+                     <span class="d-none d-sm-inline">Add Contact</span>
+                  </button>
                </div>
+
                <div class="card-body p-0">
-                  <!-- Search Contacts -->
-                  <div class="p-3 border-bottom">
+
+                  <div class="ct-search-wrap">
                      <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0">
-                           <i class="fas fa-search text-muted"></i>
+                        <span class="input-group-text ct-search-icon">
+                           <i class="fas fa-search" style="font-size:0.78rem;"></i>
                         </span>
-                        <input type="text" class="form-control border-start-0" placeholder="Search contacts..."
-                           id="contactSearch">
+                        <%-- Protected: id="contactSearch" --%>
+                        <input type="text" class="form-control ct-search-input"
+                               placeholder="Search contacts..." id="contactSearch">
                      </div>
                   </div>
-                  <!-- Contacts List -->
-                  <div class="contacts-list" style="max-height: 500px; overflow-y: auto;">
-                     <!-- content adds dynamically fron js. -->
+
+                  <%-- Protected: .contacts-list filled by JS $(".contacts-list").html() --%>
+                  <div class="contacts-list ct-list">
                   </div>
+
                </div>
             </div>
          </div>
 
-         <div class="col-lg-4">
-            <!-- Quick Actions -->
-            <div class="card shadow-sm mb-4">
-               <div class="card-header">
-                  <h6 class="mb-0">
-                     <i class="fas fa-bolt me-2"></i>Quick Actions
+         <%-- ═══ Right: Actions + Stats ═══ --%>
+         <div class="col-lg-4 d-flex flex-column gap-4">
+
+            <%-- Quick Actions --%>
+            <div class="card border-0 shadow-sm">
+               <div class="card-body p-4">
+                  <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                     <span class="ct-section-icon ct-section-icon--yellow">
+                        <i class="fas fa-bolt" style="font-size:0.78rem;"></i>
+                     </span>
+                     Quick Actions
                   </h6>
-               </div>
-               <div class="card-body">
-                  <div class="d-grid gap-2">
-                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContactModal">
-                        <i class="fas fa-user-plus me-2"></i>Add Contact
-                     </button>
-                     <!-- <button class="btn btn-outline-primary js-create-group-button">
-                     <i class="fas fa-users me-2"></i>Create Group
-                     </button>
-                     <button class="btn btn-outline-secondary js-import-contacts-button">
-                     <i class="fas fa-download me-2"></i>Import Contacts
-                     </button>
-                     <button class="btn btn-outline-info js-share-profile-button">
-                     <i class="fas fa-share me-2"></i>Share My Profile
-                     </button>
-                     -->
-                  </div>
+                  <%-- Protected: data-bs-toggle + data-bs-target="#addContactModal" --%>
+                  <button class="btn btn-primary w-100 py-2"
+                          data-bs-toggle="modal" data-bs-target="#addContactModal">
+                     <i class="fas fa-user-plus me-2"></i>Add New Contact
+                  </button>
                </div>
             </div>
-            <!-- Statistics -->
-            <div class="card shadow-sm">
-               <div class="card-header">
-                  <h6 class="mb-0">
-                     <i class="fas fa-chart-bar me-2"></i>Statistics
+
+            <%-- Statistics --%>
+            <div class="card border-0 shadow-sm">
+               <div class="card-body p-4">
+                  <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                     <span class="ct-section-icon ct-section-icon--blue">
+                        <i class="fas fa-chart-bar" style="font-size:0.78rem;"></i>
+                     </span>
+                     Statistics
                   </h6>
-               </div>
-               <div class="card-body">
-                  <div class="row text-center">
+                  <div class="row g-3">
                      <div class="col-6">
-                        <div class="border-end">
-                           <h4 class="text-primary mb-0" id="activeContactsCount"></h4>
-                           <small class="text-muted">Active Contacts</small>
+                        <div class="ct-stat-card">
+                           <%-- Protected: id="activeContactsCount" set by JS --%>
+                           <div class="ct-stat-num" id="activeContactsCount">—</div>
+                           <div class="ct-stat-label">Active</div>
                         </div>
                      </div>
                      <div class="col-6">
-                        <div class="border-end">
-                           <h4 class="text-primary mb-0" id="invitedContactsCount"></h4>
-                           <small class="text-muted">Invited Contacts</small>
+                        <div class="ct-stat-card ct-stat-card--amber">
+                           <%-- Protected: id="invitedContactsCount" set by JS --%>
+                           <div class="ct-stat-num ct-stat-num--amber" id="invitedContactsCount">—</div>
+                           <div class="ct-stat-label">Invited</div>
                         </div>
                      </div>
-                     <!--<div class="col-6">
-                     <h4 class="text-success mb-0">
-                     </h4>
-                     <small class="text-muted">Online</small>
-                  </div>-->
                   </div>
                </div>
             </div>
+
          </div>
       </div>
    </div>
-   <!-- Add Contact Modal -->
+
+   <%-- Add Contact Modal. Protected: id="addContactModal", tabindex="-1" --%>
    <div class="modal fade" id="addContactModal" tabindex="-1">
-      <div class="modal-dialog">
-         <div class="modal-content">
-            <div class="modal-header">
-               <h5 class="modal-title">
+      <div class="modal-dialog modal-dialog-centered">
+         <div class="modal-content border-0 shadow ct-modal">
+            <div class="modal-header ct-modal-header">
+               <h5 class="modal-title fw-bold">
                   <i class="fas fa-user-plus me-2"></i>Add New Contact
                </h5>
-               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+               <%-- Protected: data-bs-dismiss="modal" --%>
+               <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-               <button class="btn btn-outline-primary js-add-by-email-button" type="button">
-                  <i class="fas fa-envelope me-2"></i>Email
+            <div class="modal-body p-4">
+               <p class="text-muted small mb-3">Search by the contact's registered email address.</p>
+               <%-- Protected: .js-add-by-email-button used by JS querySelector --%>
+               <button class="btn btn-primary w-100 py-2 js-add-by-email-button" type="button">
+                  <i class="fas fa-envelope me-2"></i>Add by Email
                </button>
             </div>
          </div>
       </div>
    </div>
-   <!-- Contact Profile Modal -->
+
+   <%-- Contact Profile Modal. Protected: id="contactProfileModal", id="profileContent", tabindex="-1" --%>
    <div class="modal fade" id="contactProfileModal" tabindex="-1">
-      <div class="modal-dialog">
-         <div class="modal-content">
-            <div class="modal-header">
-               <h5 class="modal-title">Contact Profile</h5>
-               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      <div class="modal-dialog modal-dialog-centered">
+         <div class="modal-content border-0 shadow ct-modal">
+            <div class="modal-header ct-modal-header">
+               <h5 class="modal-title fw-bold">Contact Profile</h5>
+               <%-- Protected: data-bs-dismiss="modal" --%>
+               <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="profileContent">
-               <!-- Profile content will be loaded here -->
+            <%-- Protected: id="profileContent" JS inserts HTML here --%>
+            <div class="modal-body p-4" id="profileContent">
             </div>
          </div>
       </div>

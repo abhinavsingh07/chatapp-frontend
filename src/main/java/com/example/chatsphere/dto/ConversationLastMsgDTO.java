@@ -6,10 +6,10 @@ public class ConversationLastMsgDTO {
     private String senderId;
     private String sentAt;
     private String conversationType;
-    private String participantName;
-    private String participantId;
-    private String lastMessageId;
-    private String participantProfilePic;
+    private String userName;
+    private String userId;
+    private String messageId;
+    private String userProfilePictureUrl;
 
     // Getters and Setters
     public String getContent() {
@@ -44,36 +44,36 @@ public class ConversationLastMsgDTO {
         this.sentAt = sentAt;
     }
 
-    public String getParticipantName() {
-        return participantName;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setParticipantName(String participantName) {
-        this.participantName = participantName;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    public String getParticipantId() {
-        return participantId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setParticipantId(String participantId) {
-        this.participantId = participantId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getLastMessageId() {
-        return lastMessageId;
+    public String getMessageId() {
+        return messageId;
     }
 
-    public void setLastMessageId(String lastMessageId) {
-        this.lastMessageId = lastMessageId;
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
     }
 
-    public String getParticipantProfilePic() {
-        return participantProfilePic;
+    public String getUserProfilePictureUrl() {
+        return userProfilePictureUrl;
     }
 
-    public void setParticipantProfilePic(String participantProfilePic) {
-        this.participantProfilePic = participantProfilePic;
+    public void setUserProfilePictureUrl(String userProfilePictureUrl) {
+        this.userProfilePictureUrl = userProfilePictureUrl;
     }
 
     public String getConversationType() {

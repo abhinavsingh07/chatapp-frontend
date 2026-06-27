@@ -1,0 +1,47 @@
+Enhance only the frontend UI styling of this Spring MVC JSP application.
+
+Rules:
+1. Do NOT change any JSP tags, JSTL tags, EL expressions, form action URLs, input names, IDs used by JavaScript, href mappings, backend URLs, or data-binding logic.
+2. Do NOT change JavaScript behavior or API calls.
+3. Do NOT rename CSS classes or IDs that are already used by JavaScript.
+4. Only improve HTML layout structure where safe, Bootstrap classes, CSS styling, spacing, colors, responsiveness, icons, cards, buttons, tables, forms, chat layout, and empty states.
+5. Keep all existing dynamic data exactly as it is.
+6. If any change may affect backend/JSP rendering, do not change it; add a comment instead.
+7. Prefer Bootstrap 5 utility classes and custom CSS.
+8. Make the UI modern, clean, responsive, and chat-app friendly.
+9. Remove old css if you add new bootstrap css
+
+Target pages:
+- chat-home.jsp
+- chat-room.jsp
+- contact.jsp 
+- error.jsp 
+- forgot-password.jsp  
+- login.jsp
+- profile.jsp
+- register.jsp
+- settings.jsp 
+
+- header.jsp
+- footer.jsp
+
+Design goals:
+- Modern WhatsApp/Slack-like chat UI
+- Responsive mobile-first layout
+- Clean navbar/sidebar
+- Better form validation message styling
+- Better chat bubbles for sender/receiver
+- Better contact/conversation list cards
+- Consistent buttons, colors, spacing, typography
+- No backend or JSP logic changes
+
+Before editing, first identify JSP expressions, JSTL tags, form actions, JavaScript-dependent IDs/classes, and mark them as protected.
+Then apply UI-only changes.
+After editing, summarize exactly what visual changes were
+
+Work page by page. Do not rewrite the whole app at once.
+Start with login.jsp and shared CSS only.
+
+
+1. The Real-Time Enterprise (Modern Light Mode)This palette offers high visibility and feels incredibly clean, mimicking top-tier tools like Slack or Intercom. It provides crisp text contrast for continuous reading.Application Canvas (60%): #F8FAFC (Slate White). Use this for the primary chat window background.Sidebar & Structural Panels (30%): #0F172A (Deep Slate). Separates your channel navigation and user lists clearly from the active chat.WebSocket Action Accents (10%): #2563EB (Electric Blue). Use this for active message states, send buttons, and unread notification numbers.Why it works: The high contrast between the deep navigation sidebar and the clean, bright white chat area makes multi-channel navigation intuitive.
+2. The Developer's Hub (Sleek Dark Mode)Perfect if your application caters to developers, tech teams, or features syntax highlighting for code snippets. It drastically reduces eye strain during long chat sessions.Application Canvas (60%): #0B0F19 (Midnight Obsidian). A deep, dark blue-grey that avoids the harshness of pure black.Chat Bubbles & Cards (30%): #1E293B (Cool Slate). Creates perfect elevation layers for message containers against the dark canvas.WebSocket Action Accents (10%): #6366F1 (Indigo Neon) or #10B981 (Emerald Green).Why it works: It looks premium and highly technical. Neon accents jump out instantly on the dark backdrop, perfect for immediate real-time notifications.
