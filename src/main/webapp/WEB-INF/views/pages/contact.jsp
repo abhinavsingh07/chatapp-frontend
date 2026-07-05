@@ -361,69 +361,65 @@
 
          if (contacts && contacts.length > 0) {
             contacts.forEach(function (contact) {
-               html += '<div class="contact-item d-flex align-items-center p-3 border-bottom hover-bg-light">';
+               html += '<div class="ct-contact-item">';
 
-               // Avatar
-               html += '<div class="flex-shrink-0 me-3" style="position: relative;">';
+               // Avatar with status indicator
+               html += '<div class="ct-contact-avatar">';
                if (contact.profilePictureUrl != null && contact.profilePictureUrl !== "") {
-                  html += '<img src="' + contact.profilePictureUrl + '" alt="Avatar"'
-                     + ' class="rounded-circle"'
-                     + ' style="width: 50px; height: 50px; object-fit: cover;">';
+                  html += '<img src="' + contact.profilePictureUrl + '" alt="Avatar" />';
                } else {
-                  html += '<div class="avatar bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center"'
-                     + ' style="width: 50px; height: 50px;">'
-                     + '<i class="fas fa-user"></i>'
-                     + '</div>';
+                  html += '<div class="avatar"><i class="fas fa-user"></i></div>';
                }
-
                if (contact.status === 'ONLINE') {
-                  html += '<span class="position-absolute translate-middle badge rounded-pill bg-success"'
-                     + ' style="top: 75%; left: 85%;">'
-                     + '<span class="visually-hidden">online</span>'
-                     + '</span>';
+                  html += '<span class="ct-online-badge"></span>';
                }
-               html += '</div>'; // close avatar div
-
-               // Contact Info
-               html += '<div class="flex-grow-1">';
-               html += '<h6 class="mb-1">Status: ' + contact.contactStatus + '</h6>';
-               html += '<p class="mb-0 text-muted small">' + (contact.contactEmail || "") + '</p>';
-               html += '<p class="mb-0 text-muted small">' + (contact.phoneNumber || "") + '</p>';
-               html += '<p class="mb-0 text-muted small">' + (contact.name || "Not Registered") + '</p>';
                html += '</div>';
 
+               // Contact Info Section
+               html += '<div class="ct-contact-info-wrap">';
+               html += '<div class="ct-contact-name">' + (contact.name || "Unknown Contact") + '</div>';
+               
+               // Meta info (email, phone) on same line with separator
+               var metaParts = [];
+               if (contact.contactEmail) metaParts.push(contact.contactEmail);
+               if (contact.phoneNumber) metaParts.push('@' + contact.phoneNumber);
+               var metaText = metaParts.join('|');
+               html += '<div class="ct-contact-meta">' + (metaText || "No contact info") + '</div>';
+               
+               // Status badge
+               var statusClass = contact.contactStatus === 'ADDED' ? 'ct-contact-status-badge--added' : 'ct-contact-status-badge--invited';
+               var statusText = contact.contactStatus === 'ADDED' ? 'Active' : 'Invited';
+               html += '<div class="ct-contact-status-badge ' + statusClass + '">' + statusText + '</div>';
+               html += '</div>';
+
+               // Action Buttons
+               html += '<div class="ct-contact-actions">';
+               
                if (contact.contactStatus == 'ADDED') {
-                  // Actions
-                  html += '<div class="btn-group">';
-                  html += '<button class="btn btn-primary btn-sm js-start-chat-button" type="button" data-contactuserid="' + contact.contactUserId + '" title="Start Chat">'
-                        + '<i class="fas fa-comment"></i>'
-                        + '</button>';
-
-                  html += '<button class="btn btn-outline-secondary btn-sm js-view-profile-button" type="button" data-contactuserid="' + contact.contactUserId + '" title="View Profile">'
-                     + '<i class="fas fa-eye"></i>'
-                     + '</button>';
+                  // Start Chat button (primary)
+                  html += '<button class="ct-action-btn-icon ct-action-primary js-start-chat-button" '
+                     + 'type="button" data-contactuserid="' + contact.contactUserId + '" '
+                     + 'title="Start Chat"><i class="fas fa-comment"></i></button>';
+                  
+                  // View Profile button
+                  html += '<button class="ct-action-btn-icon js-view-profile-button" '
+                     + 'type="button" data-contactuserid="' + contact.contactUserId + '" '
+                     + 'title="View Profile"><i class="fas fa-eye"></i></button>';
                }
-
-               html += '<div class="dropdown">'
-                  + '<button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">'
-                  + '<i class="fas fa-ellipsis-v"></i>'
-                  + '</button>'
-                  + '<ul class="dropdown-menu">'
-                  // + '<li>'
-                  // + '<a class="dropdown-item js-edit-contact-button" href="#" data-contactid="' + contact.contactId + '">'
-                  // + '<i class="fas fa-edit me-2"></i>Edit'
-                  // + '</a>'
-                  // + '</li>'
-                  + '<li>'
-                  + '<a class="dropdown-item text-danger js-remove-contact-button" href="#" data-contactid="' + contact.contactId + '">'
-                  + '<i class="fas fa-trash me-2"></i>Remove'
-                  + '</a>'
-                  + '</li>'
-                  + '</ul>'
-                  + '</div>';
-               html += '</div>'; // close btn-group
-
-               html += '</div>'; // close contact-item
+               
+               // More menu (dropdown)
+               html += '<div class="dropdown">';
+               html += '<button class="ct-action-btn-icon" type="button" data-bs-toggle="dropdown" title="More actions">'
+                  + '<i class="fas fa-ellipsis-v"></i></button>';
+               html += '<ul class="dropdown-menu dropdown-menu-end">';
+               html += '<li><a class="dropdown-item text-danger js-remove-contact-button" href="#" data-contactid="' + contact.contactId + '">'
+                  + '<i class="fas fa-trash me-2"></i>Remove</a></li>';
+               html += '</ul>';
+               html += '</div>';
+               
+               html += '</div>'; // close ct-contact-actions
+               html += '</div>'; // close ct-contact-item
+               
                if (contact.contactStatus == 'ADDED') {
                   activeContactsCount++;
                } else if (contact.contactStatus == 'INVITED') {
@@ -432,14 +428,13 @@
 
             });
          } else {
-            html = '<div class="text-center p-5">'
-               + '<i class="fas fa-address-book fa-3x text-muted mb-3"></i>'
-               + '<h6 class="text-muted">No contacts yet</h6>'
-               + '<p class="text-muted">Add contacts to start chatting</p>'
-               + '<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContactModal">'
-               + '<i class="fas fa-user-plus me-2"></i>Add Your First Contact'
-               + '</button>'
-               + '</div>';
+            html = '<div class="ct-empty-state-wrapper">';
+            html += '<div class="ct-empty-state-icon"><i class="fas fa-address-book"></i></div>';
+            html += '<div class="ct-empty-state-title">No contacts yet</div>';
+            html += '<div class="ct-empty-state-text">Start building your network by adding your first contact</div>';
+            html += '<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContactModal">';
+            html += '<i class="fas fa-user-plus me-2"></i>Add Your First Contact</button>';
+            html += '</div>';
          }
          // Update statistics
          document.getElementById('activeContactsCount').textContent = activeContactsCount;

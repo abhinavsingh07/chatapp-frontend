@@ -207,12 +207,11 @@
             //hide typing indicator first.
             hideTypingIndicator();
             const isMe = message.fromUserId === userId;
-
             const wrapper = document.createElement("div");
-            wrapper.className = `message-wrapper mb-3 ${isMe ? "text-end" : ""}`;
+            wrapper.className = `message-wrapper mb-2 d-flex ${isMe ? "justify-content-end" : "justify-content-start"}`;
 
             const bubble = document.createElement("div");
-            bubble.className = `d-inline-block message-bubble ${isMe ? "bg-primary text-white" : "bg-white border"} rounded-3 p-3 shadow-sm`;
+            bubble.className = `d-inline-block message-bubble ${isMe ? "cr-bubble-sent" : "cr-bubble-received"}`;
             bubble.style.maxWidth = "70%";
             bubble.style.wordWrap = "break-word";
 
@@ -233,7 +232,7 @@
             // Time
             const timeDiv = document.createElement("div");
             timeDiv.className = `message-time small mt-1 ${isMe ? "text-white-50" : "text-muted"}`;
-            timeDiv.textContent = isMe ? formatDateToCurrentTimeZone() : formatSentAtToCurrentTimeZone(`${message.sentAt}`);
+            timeDiv.textContent = isMe ? formatDateToCurrentTimeZone() : formatSentAtToCurrentTimeZone(message.sentAt);
             bubble.appendChild(timeDiv);
 
             wrapper.appendChild(bubble);
@@ -262,7 +261,9 @@
         }
 
         function formatSentAtToCurrentTimeZone(sentAt) {
+            console.log("formatSentAtToCurrentTimeZone header.jsp called with sentAt:*****", sentAt);
             if (!sentAt) return "";
+             console.log("formatSentAtToCurrentTimeZone header.jsp called with sentAt:", sentAt);
             //convert UTC date to local timezone.
             return new Date(sentAt).toLocaleString(undefined, {
                 year: "numeric",

@@ -27,6 +27,11 @@ class ChatWebSocket {
         this.typingIndicator = document.getElementById("typingIndicator");
         this.messageForm = document.getElementById("messageForm");
         this.heartbeatInterval = null;
+
+        // Media upload state
+        this.selectedMediaFile = null;
+        this.selectedMediaId = null;
+        this.isUploadingMedia = false;
     }
 
     // not calling WebSocket Lifecycle from chatroom directly, instead calling from shared worker 
@@ -167,10 +172,10 @@ class ChatWebSocket {
         const isMe = message.fromUserId === this.fromUserId;
 
         const wrapper = document.createElement("div");
-        wrapper.className = `message-wrapper mb-3 ${isMe ? "text-end" : ""}`;
+        wrapper.className = `message-wrapper mb-2 d-flex ${isMe ? "justify-content-end" : "justify-content-start"}`;
 
         const bubble = document.createElement("div");
-        bubble.className = `d-inline-block message-bubble ${isMe ? "bg-primary text-white" : "bg-white border"} rounded-3 p-3 shadow-sm`;
+        bubble.className = `d-inline-block message-bubble ${isMe ? "cr-bubble-sent" : "cr-bubble-received"}`;
         bubble.style.maxWidth = "70%";
         bubble.style.wordWrap = "break-word";
 
@@ -187,6 +192,21 @@ class ChatWebSocket {
         contentDiv.className = "message-content";
         contentDiv.textContent = message.body;
         bubble.appendChild(contentDiv);
+
+        // Media attachment (if mediaId present)
+        if (message.mediaId) {
+            const mediaDiv = document.createElement("div");
+            mediaDiv.className = "message-media mt-2";
+            
+            // Display media placeholder/loading state
+            // In production, you'd fetch presigned URL using getPresignedDownloadUrl(mediaId)
+            const mediaPlaceholder = document.createElement("div");
+            mediaPlaceholder.className = "alert alert-info small py-1 px-2 mb-0";
+            mediaPlaceholder.innerHTML = '<i class="fas fa-image me-1"></i> Media attached (mediaId: ' + message.mediaId + ')';
+            mediaDiv.appendChild(mediaPlaceholder);
+            
+            bubble.appendChild(mediaDiv);
+        }
 
         // Time
         const timeDiv = document.createElement("div");
@@ -256,8 +276,16 @@ class ChatWebSocket {
         const form = this.messageForm;
         form.addEventListener("submit", (e) => {
             e.preventDefault();
-            this.sendChatMessage(this.messageInput.value);
-            this.messageInput.value = "";
+            
+            // Check if media file is selected
+            if (this.selectedMediaFile) {
+                // Upload media first, then send message
+                this.handleMediaUploadAndSend();
+            } else {
+                // Send text-only message
+                this.sendChatMessage(this.messageInput.value);
+                this.messageInput.value = "";
+            }
         });
         this.messageInput.addEventListener("keydown", function (event) {
             if (event.key === "Enter" && !event.shiftKey) {
@@ -265,6 +293,197 @@ class ChatWebSocket {
                 form.requestSubmit();   // trigger submit
             }
         });
+    }
+
+    // ─────── Media Upload Handlers ───────
+    /**
+     * Handle file selection for chat media attachment
+     */
+    bindMediaEvents() {
+        const attachBtn = document.getElementById('attachMediaBtn');
+        const chatMediaInput = document.getElementById('chatMediaInput');
+        const removeMediaBtn = document.getElementById('removeMediaBtn');
+
+        if (attachBtn) {
+            attachBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                chatMediaInput?.click();
+            });
+        }
+
+        if (chatMediaInput) {
+            chatMediaInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Validate file
+                const validation = validateSelectedFile(file, 'CHAT_MESSAGE');
+                if (!validation.valid) {
+                    showUploadError(validation.error, 'chat');
+                    chatMediaInput.value = ''; // Reset input
+                    return;
+                }
+
+                // Store selected file
+                this.selectedMediaFile = file;
+
+                // Show preview
+                this.displayMediaPreview(file);
+            });
+        }
+
+        if (removeMediaBtn) {
+            removeMediaBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.clearMediaSelection();
+            });
+        }
+    }
+
+    /**
+     * Display preview of selected media file
+     */
+    displayMediaPreview(file) {
+        const previewContainer = document.getElementById('mediaPreviewContainer');
+        const previewText = document.getElementById('mediaPreviewText');
+        const previewImageArea = document.getElementById('mediaPreviewImageArea');
+
+        if (!previewContainer) return;
+
+        // Format file size
+        const fileSizeKB = (file.size / 1024).toFixed(2);
+        const fileSizeMB = fileSizeKB > 1024 ? (file.size / 1024 / 1024).toFixed(2) + ' MB' : fileSizeKB + ' KB';
+
+        // Update preview text
+        if (previewText) {
+            previewText.textContent = file.name + ' (' + fileSizeMB + ')';
+        }
+
+        // Show image preview for image files
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (previewImageArea) {
+                    previewImageArea.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; max-height: 180px; border-radius: 6px;">`;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Show preview container
+        previewContainer.classList.remove('d-none');
+    }
+
+    /**
+     * Clear selected media and hide preview
+     */
+    clearMediaSelection() {
+        this.selectedMediaFile = null;
+        this.selectedMediaId = null;
+
+        const chatMediaInput = document.getElementById('chatMediaInput');
+        if (chatMediaInput) {
+            chatMediaInput.value = '';
+        }
+
+        resetUploadState('chat');
+    }
+
+    /**
+     * Handle media upload followed by message send
+     */
+    async handleMediaUploadAndSend() {
+        if (!this.selectedMediaFile) {
+            this.sendChatMessage(this.messageInput.value);
+            return;
+        }
+
+        this.isUploadingMedia = true;
+        setUploadLoadingState('preparing', 'chat');
+        const sendBtn = document.getElementById('sendButton');
+        if (sendBtn) sendBtn.disabled = true;
+
+        try {
+            const clientUploadId = generateClientUploadId();
+
+            // Step 1: Initialize upload
+            setUploadLoadingState('preparing', 'chat');
+            showUploadError('', 'chat'); // Clear any previous errors
+            
+            const initResponse = await initMediaUpload('CHAT_MESSAGE', clientUploadId, {
+                file: this.selectedMediaFile,
+                conversationId: this.chatId
+            });
+
+            this.selectedMediaId = initResponse.mediaId;
+
+            // Step 2: Upload to S3
+            setUploadLoadingState('uploading', 'chat');
+            await uploadFileToS3(initResponse.uploadUrl, this.selectedMediaFile, (progress) => {
+                // Progress callback
+                setUploadLoadingState('uploading', 'chat');
+            });
+
+            // Step 3: Complete upload
+            setUploadLoadingState('verifying', 'chat');
+            const completeResponse = await completeMediaUpload(this.selectedMediaId, clientUploadId);
+
+            if (completeResponse.status === 'ACTIVE') {
+                // Upload successful, send message with mediaId
+                showUploadSuccess('Media uploaded successfully!', 'chat');
+                
+                // Send message with mediaId
+                this.sendChatMessageWithMedia(this.messageInput.value, this.selectedMediaId);
+                
+                // Clear UI
+                setTimeout(() => {
+                    this.clearMediaSelection();
+                    this.messageInput.value = '';
+                }, 500);
+            } else {
+                showUploadError('Media status is not ACTIVE. Please try again.', 'chat');
+            }
+        } catch (error) {
+            showUploadError(error || 'Upload failed. Please try again.', 'chat');
+            
+            // Allow retry
+            if (this.selectedMediaId) {
+                this.showMediaRetry(this.selectedMediaId, clientUploadId);
+            }
+        } finally {
+            this.isUploadingMedia = false;
+            if (sendBtn) sendBtn.disabled = false;
+            setUploadLoadingState('completed', 'chat');
+        }
+    }
+
+    /**
+     * Send chat message with media attachment
+     */
+    sendChatMessageWithMedia(content, mediaId) {
+        const trimmed = content.trim();
+
+        const msg = {
+            wsStatus: ChatWebSocket.wsStatus.CHAT,
+            conversationId: this.chatId,
+            fromUserId: this.fromUserId,
+            toUserId: this.toUserId,
+            body: trimmed || '[Image/Media attachment]',
+            mediaId: mediaId,
+            fromUserName: this.fromUserName
+        };
+
+        this.sendMessageViaSocket(msg);
+        this.addMessageToUI(msg);
+        this.hideTypingIndicator();
+    }
+
+    /**
+     * Show retry option for failed verification
+     */
+    showMediaRetry(mediaId, clientUploadId) {
+        // Could implement a retry button in UI here
+        // For now, user can click send again to retry
     }
 
     formatSentAtToCurrentTimeZone(sentAt) {

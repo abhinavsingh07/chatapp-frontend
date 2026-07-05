@@ -27,7 +27,10 @@ public class EndpointRegistry {
             Map.entry("conv.getLastConversationByLoggedInUser", new ApiRequestBuilderUtil.ApiEndpoint("/api/conversations/{userId}/last-message", HttpMethod.GET)),
             Map.entry("contact.add", new ApiRequestBuilderUtil.ApiEndpoint("/api/contacts", HttpMethod.POST)),
             Map.entry("contact.remove", new ApiRequestBuilderUtil.ApiEndpoint("/api/contacts/{contactId}", HttpMethod.DELETE)),
-            Map.entry("contacts.getByUserId", new ApiRequestBuilderUtil.ApiEndpoint("/api/contacts/search", HttpMethod.GET))
+            Map.entry("contacts.getByUserId", new ApiRequestBuilderUtil.ApiEndpoint("/api/contacts/search", HttpMethod.GET)),
+            Map.entry("media.uploadInit", new ApiRequestBuilderUtil.ApiEndpoint("/api/media/upload-init", HttpMethod.POST)),
+            Map.entry("media.uploadComplete", new ApiRequestBuilderUtil.ApiEndpoint("/api/media/upload-complete/{mediaId}", HttpMethod.POST)),
+            Map.entry("media.getPresignedUrl", new ApiRequestBuilderUtil.ApiEndpoint("/api/media/pre-signed-url/{mediaId}", HttpMethod.GET))
     );
 
     public ApiRequestBuilderUtil.ApiEndpoint get(String key) {

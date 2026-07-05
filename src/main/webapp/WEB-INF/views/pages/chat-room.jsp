@@ -49,9 +49,9 @@
                 <c:when test="${not empty messages}">
                     <c:forEach var="message" items="${messages}">
                         <div
-                            class="message-wrapper mb-2 d-flex ${message.senderId == userid ? 'justify-content-end' : 'justify-content-start'}">
+                            class="message-wrapper mb-2 d-flex ${fn:trim(message.senderId) == fn:trim(userid) ? 'justify-content-end' : 'justify-content-start'}">
                             <div
-                                class="message-bubble ${message.senderId == userid ? 'cr-bubble-sent' : 'cr-bubble-received'}">
+                                class="message-bubble ${fn:trim(message.senderId) == fn:trim(userid) ? 'cr-bubble-sent' : 'cr-bubble-received'}">
                                 <div class="message-content">
                                     <c:out value="${message.content}" />
                                 </div>
@@ -88,10 +88,26 @@
         </div>
 
 
+        <%-- Media Preview Container (hidden by default) --%>
+        <div id="mediaPreviewContainer" class="d-none px-3 pt-2 pb-2">
+            <div class="alert alert-info small py-2 px-3 mb-0 d-flex justify-content-between align-items-center">
+                <span id="mediaPreviewText">Image: example.jpg (2.5 MB)</span>
+                <button type="button" class="btn-close btn-sm" id="removeMediaBtn" title="Remove"></button>
+            </div>
+            <div id="mediaPreviewImageArea" class="mt-2"></div>
+        </div>
+
+        <%-- Upload Status Text (hidden by default) --%>
+        <div id="uploadStatusText" class="text-muted small mt-2 px-3 d-none"></div>
+
         <div class="cr-input-bar">
             <form id="messageForm" action="/submit" autocomplete="off">
                 <input type="hidden" name="chat_id" value="<c:out value='${conversationId}'/>">
                 <div class="cr-input-inner">
+                    <%-- Attachment Button --%>
+                    <button type="button" class="btn cr-attach-btn" id="attachMediaBtn" title="Attach file">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
                     <textarea class="form-control cr-textarea" id="messageInput" name="content"
                         placeholder="Type a message" rows="1"></textarea>
                     <button type="submit" class="btn cr-send-btn" id="sendButton" title="Send">
@@ -100,6 +116,9 @@
                 </div>
             </form>
         </div>
+
+        <%-- Hidden File Input for Chat Media --%>
+        <input type="file" id="chatMediaInput" class="d-none" accept="image/*" />
 
         <div class="offcanvas offcanvas-end" tabindex="-1" id="chatInfoSidebar" style="max-width:320px;">
             <div class="offcanvas-header cr-offcanvas-header">
@@ -226,6 +245,7 @@
             // chatWs.connect();
             chatWs.bindInputEvents();
             chatWs.bindFormEvents();
+            chatWs.bindMediaEvents(); // Initialize media upload handlers
         }
 
         function initUserPresencePoller() {

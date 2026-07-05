@@ -28,7 +28,7 @@ public class ApplicationConfig implements WebMvcConfigurer {
     @Bean
     public ApiDispatcherService apiDispatcherService() {
         ApiDispatcherService service = new ApiDispatcherService();
-        service.setBaseUrl("http://localhost/synk"); // Set your base URL here
+        service.setBaseUrl("https://localhost/synk"); // Set your base URL here
         // service.setBaseUrl("http://localhost:8080/synk");
         return service;
     }

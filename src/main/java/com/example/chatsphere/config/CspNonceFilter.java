@@ -34,8 +34,8 @@ public class CspNonceFilter extends OncePerRequestFilter {
                 "script-src 'self' 'nonce-" + nonce + "' https://kit.fontawesome.com; " +
                 "style-src 'self' 'unsafe-inline' https://ka-f.fontawesome.com; " +
                 "font-src 'self' data: https://ka-f.fontawesome.com; " +
-                "img-src 'self' data: blob:; " +
-                "connect-src 'self' ws://localhost https://ka-f.fontawesome.com; " +
+                "img-src 'self' data: blob: https://chatapp-dev-media-051987442168-ap-south-1-an.s3.ap-south-1.amazonaws.com; " +
+                "connect-src 'self' ws://localhost wss://localhost https://ka-f.fontawesome.com https://chatapp-dev-media-051987442168-ap-south-1-an.s3.ap-south-1.amazonaws.com; " +
                 "frame-ancestors 'none'; " +
                 "object-src 'none'; " +
                 "base-uri 'self'; " +

@@ -38,12 +38,20 @@
                                             class="pf-avatar">
                                     </c:otherwise>
                                 </c:choose>
-                                <label for="avatarInput" class="pf-avatar-edit" title="Change photo">
+                                <!-- When you click on a label with a for attribute, it automatically-->
+                                <label for="profilePictureInput" class="pf-avatar-edit" title="Change photo">
                                     <i class="fas fa-pencil-alt"></i>
                                 </label>
                             </div>
                             <input type="file" id="avatarInput" name="avatar" accept="image/*" class="d-none">
+                            <input type="file" id="profilePictureInput" accept="image/*" class="d-none">
                             <p class="text-muted small mb-0">Click the pencil to change your photo</p>
+
+                            <%-- Upload Status & Retry (hidden by default) --%>
+                            <div id="profileUploadStatus" class="alert alert-info small d-none mt-3 mb-2" role="alert"></div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary d-none mt-2" id="profileRetryUploadBtn">
+                                Retry Upload
+                            </button>
                         </div>
 
                         <div class="pf-divider"></div>
@@ -244,7 +252,7 @@
                 const validator = new Validator();
                 const form = document.getElementById('updateProfileForm');
                 const avatarInput = document.getElementById('avatarInput');
-                const avatarPreview = document.getElementById('avatarPreview');
+                let avatarPreview = document.getElementById('avatarPreview');
                 const aboutTextarea = document.getElementById('about');
                 const aboutCharCount = document.getElementById('aboutCharCount');
                 const updateProfileBtn = document.getElementById('updateProfileBtn');
@@ -261,17 +269,168 @@
                 // Initialize about character count
                 aboutCharCount.textContent = aboutTextarea.value.length;
 
-                // Avatar preview on file selection
-                avatarInput.addEventListener('change', function (e) {
-                    const file = e.target.files[0];
-                    if (file) {
+                // ─────── Media Upload Handlers for Profile Picture ───────
+                const profilePictureInput = document.getElementById('profilePictureInput');
+                const profileUploadStatus = document.getElementById('profileUploadStatus');
+                const profileRetryUploadBtn = document.getElementById('profileRetryUploadBtn');
+
+                // Create upload button if not exists
+                let uploadProfilePictureBtn = document.getElementById('uploadProfilePictureBtn');
+                if (!uploadProfilePictureBtn && profilePictureInput) {
+                    uploadProfilePictureBtn = document.createElement('button');
+                    uploadProfilePictureBtn.type = 'button';
+                    uploadProfilePictureBtn.id = 'uploadProfilePictureBtn';
+                    uploadProfilePictureBtn.className = 'btn btn-primary btn-sm mt-3 d-none';
+                    uploadProfilePictureBtn.textContent = 'Upload Profile Picture';
+                    profilePictureInput.parentElement.insertAdjacentElement('afterend', uploadProfilePictureBtn);
+                }
+
+                // Track profile picture state
+                let profilePictureState = {
+                    file: null,
+                    mediaId: null,
+                    clientUploadId: null,
+                    isUploading: false
+                };
+
+                // Handle profile picture file selection
+                if (profilePictureInput) {
+                    profilePictureInput.addEventListener('change', async function (e) {
+                        const file = e.target.files[0];
+                        if (!file) return;
+
+                        // Validate file
+                        const validation = validateSelectedFile(file, 'PROFILE_PICTURE');
+                        if (!validation.valid) {
+                            showUploadError(validation.error, 'profile');
+                            profilePictureInput.value = '';
+                            return;
+                        }
+
+                        // Store file and show upload button
+                        profilePictureState.file = file;
+                        
+                        // Show circular preview with yellow border
                         const reader = new FileReader();
                         reader.onload = function (e) {
-                            avatarPreview.src = e.target.result;
+                            const previewImg = document.createElement('img');
+                            previewImg.src = e.target.result;
+                            previewImg.className = 'pf-avatar';
+                            previewImg.style.border = '3px solid #ffc107';
+                            avatarPreview.parentElement.replaceChild(previewImg, avatarPreview);
+                            // Update reference
+                            avatarPreview = previewImg;
                         };
                         reader.readAsDataURL(file);
-                    }
-                });
+
+                        //handle automatic upload after selection
+                         if (!profilePictureState.file) {
+                            showUploadError('No file selected', 'profile');
+                            return;
+                        }
+
+                        if (profilePictureState.isUploading) {
+                            return; // Prevent duplicate submissions
+                        }
+
+                        profilePictureState.isUploading = true;
+                        uploadProfilePictureBtn.disabled = true;
+                        setUploadLoadingState('preparing', 'profile');
+
+                        try {
+                            profilePictureState.clientUploadId = generateClientUploadId();
+
+                            // Step 1: Initialize upload
+                            setUploadLoadingState('preparing', 'profile');
+                            const initResponse = await initMediaUpload('PROFILE_PICTURE', profilePictureState.clientUploadId, {
+                                file: profilePictureState.file
+                            });
+
+                            profilePictureState.mediaId = initResponse.mediaId;
+
+                            // Step 2: Upload to S3
+                            setUploadLoadingState('uploading', 'profile');
+                            await uploadFileToS3(initResponse.uploadUrl, profilePictureState.file, (progress) => {
+                                setUploadLoadingState('uploading', 'profile');
+                            });
+
+                            // Step 3: Complete upload
+                            setUploadLoadingState('verifying', 'profile');
+                            const completeResponse = await completeMediaUpload(profilePictureState.mediaId, profilePictureState.clientUploadId);
+
+                            if (completeResponse.status === 'ACTIVE') {
+                                // Upload successful
+                                showUploadSuccess('Profile picture updated successfully!', 'profile');
+                                setUploadLoadingState('completed', 'profile');
+
+                                // Reset UI after success
+                                setTimeout(() => {
+                                    profilePictureState.file = null;
+                                    profilePictureState.mediaId = null;
+                                    profilePictureInput.value = '';
+                                    uploadProfilePictureBtn.classList.add('d-none');
+                                    uploadProfilePictureBtn.disabled = false;
+                                    resetUploadState('profile');
+                                }, 1000);
+                            } else {
+                                showUploadError('Media status is not ACTIVE. Please try again.', 'profile');
+                                uploadProfilePictureBtn.disabled = false;
+                            }
+                        } catch (error) {
+                            showUploadError(error || 'Upload failed. Please try again.', 'profile');
+
+                            // Show retry button if verification failed
+                            if (profilePictureState.mediaId && profileRetryUploadBtn) {
+                                profileRetryUploadBtn.classList.remove('d-none');
+                            }
+
+                            uploadProfilePictureBtn.disabled = false;
+                        } finally {
+                            profilePictureState.isUploading = false;
+                        }
+                        
+                    });
+                }
+
+                // Handle retry for failed verification
+                if (profileRetryUploadBtn) {
+                    profileRetryUploadBtn.addEventListener('click', async function (e) {
+                        e.preventDefault();
+
+                        if (!profilePictureState.mediaId || !profilePictureState.clientUploadId) {
+                            showUploadError('No upload to retry', 'profile');
+                            return;
+                        }
+
+                        profileRetryUploadBtn.disabled = true;
+                        setUploadLoadingState('verifying', 'profile');
+
+                        try {
+                            const completeResponse = await retryUploadComplete(profilePictureState.mediaId, profilePictureState.clientUploadId);
+
+                            if (completeResponse.status === 'ACTIVE') {
+                                showUploadSuccess('Profile picture verified and updated!', 'profile');
+                                setUploadLoadingState('completed', 'profile');
+
+                                // Reset UI
+                                setTimeout(() => {
+                                    profilePictureState.file = null;
+                                    profilePictureState.mediaId = null;
+                                    profilePictureInput.value = '';
+                                    uploadProfilePictureBtn?.classList.add('d-none');
+                                    profileRetryUploadBtn.classList.add('d-none');
+                                    resetUploadState('profile');
+                                }, 1000);
+                            } else {
+                                showUploadError('Verification still failing. Please try uploading again.', 'profile');
+                                profileRetryUploadBtn.disabled = false;
+                            }
+                        } catch (error) {
+                            showUploadError(error || 'Retry failed. Please try again.', 'profile');
+                            profileRetryUploadBtn.disabled = false;
+                        }
+                    });
+                }
 
                 // About character count
                 aboutTextarea.addEventListener('input', function () {

@@ -4,6 +4,7 @@
     <script src="<c:url value='/js/fontawesome.min.js'/>"></script>
     <script src="<c:url value='/js/app/validator.js' />" type="text/javascript"></script>
     <script src="<c:url value='/js/app/ajax.js' />" type="text/javascript"></script>
+    <script src="<c:url value='/js/app/mediaUpload.js' />" type="text/javascript"></script>
     <script src="<c:url value='/js/app/app.js' />" type="text/javascript"></script>
     <script src="<c:url value='/js/app/chat.js' />" type="text/javascript"></script>
     <script src="<c:url value='/js/app/user-presence-poller.js' />" type="text/javascript"></script>
