@@ -24,7 +24,7 @@ const MEDIA_CONFIG = {
     ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'],
     ALLOWED_VIDEO_TYPES: ['video/mp4', 'video/mpeg', 'video/quicktime', 'video/webm', 'video/x-msvideo', 'video/x-matroska', 'video/3gpp'],
     ALLOWED_DOCUMENT_TYPES: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'text/plain', 'application/vnd.oasis.opendocument.text', 'application/vnd.oasis.opendocument.spreadsheet', 'application/vnd.oasis.opendocument.presentation'],
-    DEBUG: false // Set to true for development logging
+    DEBUG: true // Set to true for development logging
 };
 
 // Global state tracking
@@ -148,6 +148,7 @@ function initMediaUpload(usageType, clientUploadId, payload = {}) {
                 debugLog('[initMediaUpload] Success response:', response);
                 if (response && response.data && response.data.length > 0) {
                     const data = response.data[0];
+                    debugLog('[initMediaUpload] Received mediaId:', data.mediaId);
                     resolve({
                         mediaId: data.mediaId,
                         uploadUrl: data.presignedUploadUrl,

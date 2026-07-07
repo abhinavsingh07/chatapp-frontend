@@ -1,6 +1,7 @@
 package com.example.chatsphere.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import java.util.List;
 
 public class MessageDTO {
 
@@ -12,15 +13,15 @@ public class MessageDTO {
     @NotBlank(message = "Receiver ID is required")
     private String receiverId;
     private String content;
-    private String mediaId;
     private String messageStatus; // e.g., SENT, DELIVERED, READ
     private String sentAt;//from api utc date and time coming as string.On lcient side we use js code to convert to user timezone.
+    private List<MediaDTO> mediaList; // List of media associated with the message
 
-    public MessageDTO(String content, String conversationId, String id, String mediaId, String messageStatus, String receiverId, String senderId, String sentAt) {
+    public MessageDTO(String content, String conversationId, String id, List<MediaDTO> mediaList, String messageStatus, String receiverId, String senderId, String sentAt) {
         this.content = content;
         this.conversationId = conversationId;
         this.id = id;
-        this.mediaId = mediaId;
+        this.mediaList = mediaList;
         this.messageStatus = messageStatus;
         this.receiverId = receiverId;
         this.senderId = senderId;
@@ -68,14 +69,6 @@ public class MessageDTO {
         this.content = content;
     }
 
-    public String getMediaId() {
-        return mediaId;
-    }
-
-    public void setMediaId(String mediaId) {
-        this.mediaId = mediaId;
-    }
-
     public String getSentAt() {
         return sentAt;
     }
@@ -88,6 +81,14 @@ public class MessageDTO {
     }
     public void setMessageStatus(String messageStatus) {
         this.messageStatus = messageStatus;
+    }
+
+    public List<MediaDTO> getMediaList() {
+        return mediaList;
+    }
+
+    public void setMediaList(List<MediaDTO> mediaList) {
+        this.mediaList = mediaList;
     }
 
 }

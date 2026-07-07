@@ -229,6 +229,25 @@
             contentDiv.textContent = message.body;
             bubble.appendChild(contentDiv);
 
+            // Media attachment (if mediaId present)
+            if (message.mediaId) {
+                const mediaDiv = document.createElement("div");
+                mediaDiv.className = "message-media mt-2";
+                
+                // Create download button
+                const downloadBtn = document.createElement("button");
+                downloadBtn.className = "btn btn-sm btn-primary";
+                downloadBtn.innerHTML = '<i class="fas fa-download me-1"></i> Download Media';
+                downloadBtn.style.cursor = "pointer";
+                downloadBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    downloadMedia(message.mediaId);
+                });
+                
+                mediaDiv.appendChild(downloadBtn);
+                bubble.appendChild(mediaDiv);
+            }
+
             // Time
             const timeDiv = document.createElement("div");
             timeDiv.className = `message-time small mt-1 ${isMe ? "text-white-50" : "text-muted"}`;
@@ -245,6 +264,61 @@
                 if (document.querySelectorAll('.message-wrapper').length > 0 && document.getElementById("noMessagesPlaceholder")) {
                     document.getElementById("noMessagesPlaceholder").classList.add("d-none");
                 }
+            }
+        }
+
+        /**
+         * Download media file from S3 using pre-signed URL
+         * @param {number} mediaId - The ID of the media to download
+         */
+        async function downloadMedia(mediaId) {
+            try {
+                // Show loading state
+                console.log("Fetching pre-signed URL for mediaId:", mediaId);
+                
+                // Step 1: Get pre-signed URL from server
+                const response = await fetch(`${ctx}/api/media/pre-signed-url/${mediaId}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to get pre-signed URL: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (!data.success || !data.data || data.data.length === 0) {
+                    throw new Error('Invalid response from server');
+                }
+
+                const presignedUrl = data.data[0].presignedUrl;
+                const fileName = data.data[0].fileName || `media_${mediaId}`;
+
+                console.log("Pre-signed URL obtained, downloading file:", fileName);
+
+                // Step 2: Download file from S3 using pre-signed URL
+                const downloadResponse = await fetch(presignedUrl);
+                
+                if (!downloadResponse.ok) {
+                    throw new Error(`Failed to download file: ${downloadResponse.statusText}`);
+                }
+
+                // Step 3: Create blob and trigger download
+                const blob = await downloadResponse.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+
+                console.log("File downloaded successfully:", fileName);
+            } catch (error) {
+                console.error("Error downloading media:", error);
+                alert('Failed to download media. Please try again.');
             }
         }
 

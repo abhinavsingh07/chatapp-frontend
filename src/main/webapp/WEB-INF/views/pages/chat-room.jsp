@@ -55,6 +55,20 @@
                                 <div class="message-content">
                                     <c:out value="${message.content}" />
                                 </div>
+                                
+                                <%-- Media Grid: Lazy-load images and videos --%>
+                                <c:if test="${not empty message.mediaList}">
+                                    <div class="message-media-grid">
+                                        <c:forEach var="media" items="${message.mediaList}">
+                                            <div class="media-lazy-placeholder" 
+                                                 data-media-id="${media.id}" 
+                                                 data-media-type="${media.mediaType}"
+                                                 data-file-name="${media.fileName}">
+                                            </div>
+                                        </c:forEach>
+                                    </div>
+                                </c:if>
+                                
                                 <%-- Protected: id="sentAt" + data-date — queried by convertSentAtUTCtoUserTimeZone()
                                     --%>
                                     <div id="sentAt" data-date="<c:out value='${message.sentAt}'/>"
@@ -171,6 +185,10 @@
             </div>
         </div>
     </div>
+    
+    <!-- Load mediaLoader.js for lazy-loading media -->
+    <script src="${ctx}/js/app/mediaLoader.js" nonce="${cspNonce}"></script>
+    
     <script nonce="${cspNonce}">
         //init in header.jsp
         // const ctx = "<c:out value='${ctx}'/>";//getting from commons.jsp
@@ -180,7 +198,7 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             initSocket();
-            initUserPresencePoller()//for online status and last seen(update not needed poller now for this)
+            //initUserPresencePoller()//for online status and last seen(update not needed poller now for this)
             convertSentAtUTCtoUserTimeZone();
             // Auto-scroll to bottom
             scrollToBottom();

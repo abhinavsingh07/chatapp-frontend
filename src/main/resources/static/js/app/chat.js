@@ -166,7 +166,8 @@ class ChatWebSocket {
     }
 
     // ----------------- UI Updates -----------------
-    addMessageToUI(message) {
+    addMessageToUI(message, filesUploaded) {
+        console.log("[chat.js] Adding message to UI:", message, filesUploaded);
         //hide typing indicator first.
         this.hideTypingIndicator();
         const isMe = message.fromUserId === this.fromUserId;
@@ -193,24 +194,25 @@ class ChatWebSocket {
         contentDiv.textContent = message.body;
         bubble.appendChild(contentDiv);
 
-        // Media attachment (if mediaId or mediaIds present)
-        if (message.mediaId || message.mediaIds) {
-            const mediaDiv = document.createElement("div");
-            mediaDiv.className = "message-media mt-2";
-            
-            // Handle both single mediaId and multiple mediaIds (semicolon-separated)
-            const mediaIds = message.mediaIds ? message.mediaIds.toString().split(';') : [message.mediaId];
-            
-            mediaIds.forEach((mediaId, index) => {
-                if (mediaId && mediaId.trim()) {
-                    const mediaPlaceholder = document.createElement("div");
-                    mediaPlaceholder.className = "alert alert-info small py-1 px-2 mb-1";
-                    mediaPlaceholder.innerHTML = '<i class="fas fa-file me-1"></i> Media #' + (index + 1) + ' (ID: ' + mediaId.trim() + ')';
-                    mediaDiv.appendChild(mediaPlaceholder);
-                }
+
+        // Media Grid: Lazy-load images and videos from mediaList
+        if (filesUploaded && filesUploaded.length > 0) {
+            const mediaGrid = document.createElement("div");
+            mediaGrid.className = "message-media-grid";
+
+            filesUploaded.forEach((media) => {
+                const placeholder = document.createElement("div");
+                placeholder.className = "media-lazy-placeholder";
+                placeholder.dataset.mediaId = media.mediaId;
+                placeholder.dataset.mediaType = media.filetype;
+                placeholder.dataset.fileName = media.filename;
+
+                mediaGrid.appendChild(placeholder);
             });
-            
-            bubble.appendChild(mediaDiv);
+
+            bubble.appendChild(mediaGrid);
+
+
         }
 
         // Time
@@ -230,6 +232,10 @@ class ChatWebSocket {
             document.getElementById("noMessagesPlaceholder").classList.add("d-none");
         }
 
+        // Reinitialize media lazy loader for newly added media
+        if (filesUploaded.length > 0) {
+            MediaLoader.observeNewMedia();
+        }
     }
 
     sendTypingEvent(typingType) {
@@ -281,7 +287,7 @@ class ChatWebSocket {
         const form = this.messageForm;
         form.addEventListener("submit", (e) => {
             e.preventDefault();
-            
+
             // Check if media files are selected
             if (this.selectedMediaFiles && this.selectedMediaFiles.length > 0) {
                 // Upload media first, then send message
@@ -326,7 +332,7 @@ class ChatWebSocket {
                 // Validate and add all files
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
-                    
+
                     // Validate file - only IMAGE and DOCUMENT types allowed
                     const validation = validateSelectedFile(file, 'CHAT_ATTACHMENT');
                     if (!validation.valid) {
@@ -335,9 +341,9 @@ class ChatWebSocket {
                         this.selectedMediaFiles = []; // Clear all selected files
                         return;
                     }
-                    
-                    // Only allow IMAGE and DOCUMENT
-                    if (validation.mediaType !== 'IMAGE' && validation.mediaType !== 'DOCUMENT') {
+
+                    // Only allow IMAGE, DOCUMENT, and VIDEO
+                    if (validation.mediaType !== 'IMAGE' && validation.mediaType !== 'DOCUMENT' && validation.mediaType !== 'VIDEO') {
                         showUploadError('Only IMAGE and DOCUMENT files are supported for multiple upload', 'chat');
                         chatMediaInput.value = '';
                         this.selectedMediaFiles = [];
@@ -376,18 +382,18 @@ class ChatWebSocket {
         files.forEach((file, index) => {
             const totalSizeKB = file.size / 1024;
             const fileSizeMB = totalSizeKB > 1024 ? (totalSizeKB / 1024).toFixed(2) + ' MB' : totalSizeKB.toFixed(2) + ' KB';
-            
+
             // Create individual alert box for this file
             const itemAlert = document.createElement('div');
             itemAlert.className = 'alert alert-info small py-2 px-3 mb-0 d-flex justify-content-between align-items-center';
             itemAlert.style.gap = '10px';
-            
+
             // File info span
             const fileInfoSpan = document.createElement('span');
             fileInfoSpan.className = 'text-truncate';
             fileInfoSpan.textContent = `${file.name} (${fileSizeMB})`;
             fileInfoSpan.title = file.name;
-            
+
             // Individual remove button
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
@@ -397,7 +403,7 @@ class ChatWebSocket {
                 e.preventDefault();
                 this.removeMediaFile(index);
             });
-            
+
             itemAlert.appendChild(fileInfoSpan);
             itemAlert.appendChild(removeBtn);
             mediaItemsList.appendChild(itemAlert);
@@ -406,7 +412,7 @@ class ChatWebSocket {
         // Show image previews only for image files
         if (previewImageArea) {
             previewImageArea.innerHTML = ''; // Clear previous previews
-            
+
             let imageCount = 0;
             for (let i = 0; i < files.length && imageCount < 3; i++) {
                 const file = files[i];
@@ -536,11 +542,12 @@ class ChatWebSocket {
 
             // Wait for all completion calls
             const completeResults = await Promise.all(completePromises);
+            console.log('[chat.js] All media upload completeResults completed:', completeResults);
 
             // Step 4: Collect all media IDs
             let allMediasActive = true;
             const mediaIds = [];
-            
+
             for (let i = 0; i < completeResults.length; i++) {
                 if (completeResults[i].status === 'ACTIVE') {
                     mediaIds.push(initResults[i].mediaId);
@@ -550,17 +557,28 @@ class ChatWebSocket {
                 }
             }
 
+            const filesUploaded = initResults.map(file => {
+                const validation = validateSelectedFile(file.file, 'CHAT_ATTACHMENT');
+
+                return {
+                    filename: file.file.name,
+                    filetype: validation.mediaType,
+                    mediaId: file.mediaId
+                };
+            });
+
             if (allMediasActive && mediaIds.length > 0) {
                 // Upload successful for all files
                 showUploadSuccess(`${mediaIds.length} media files uploaded successfully!`, 'chat');
-                
+
                 // Convert mediaIds array to semicolon-separated string
                 this.selectedMediaIds = mediaIds;
+                console.log('[chat.js] All media uploads completed successfully. Media IDs:', mediaIds);
                 const mediaIdString = mediaIds.join(';');
-                
+                console.log('[chat.js] Sending chat message with media IDs:', mediaIdString);
                 // Send message with all mediaIds
-                this.sendChatMessageWithMedia(this.messageInput.value, mediaIdString);
-                
+                this.sendChatMessageWithMedia(this.messageInput.value, mediaIdString, filesUploaded);
+
                 // Clear UI
                 setTimeout(() => {
                     this.clearMediaSelection();
@@ -571,7 +589,7 @@ class ChatWebSocket {
             }
         } catch (error) {
             showUploadError(error || 'Upload failed. Please try again.', 'chat');
-            
+
             // Allow retry
             if (this.selectedMediaIds.length > 0) {
                 this.showMediaRetry(this.selectedMediaIds, null);
@@ -587,8 +605,9 @@ class ChatWebSocket {
      * Send chat message with media attachment(s)
      * @param {string} content - Message text content
      * @param {string|number} mediaIds - Single mediaId or semicolon-separated mediaIds string
+     * @param {Array} filesUploaded - Array of uploaded file details
      */
-    sendChatMessageWithMedia(content, mediaIds) {
+    sendChatMessageWithMedia(content, mediaIds, filesUploaded) {
         const trimmed = content.trim();
 
         const msg = {
@@ -602,7 +621,7 @@ class ChatWebSocket {
         };
 
         this.sendMessageViaSocket(msg);
-        this.addMessageToUI(msg);
+        this.addMessageToUI(msg, filesUploaded);
         this.hideTypingIndicator();
     }
 

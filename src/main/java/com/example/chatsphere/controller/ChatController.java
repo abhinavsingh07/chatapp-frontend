@@ -46,7 +46,6 @@ public class ChatController {
             model.addAttribute("conversationId", conversationId);
             model.addAttribute("toUserId", toUserId);
             model.addAttribute("messages", messages);
-
             SuccessResponse<UserDTO> userResponse = userService.getByUserId(toUserId);
             if (userResponse.getData() != null && !userResponse.getData().isEmpty()) {
                 model.addAttribute("toUserDetails", userResponse.getData().get(0));
