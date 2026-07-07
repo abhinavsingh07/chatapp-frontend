@@ -26,7 +26,7 @@ public class MediaUploadInitRequest {
     @NotBlank(message = "File name is required")
     private String fileName;
 
-    private Long conversationId; // Optional, for CHAT_ATTACHMENT
+    private String conversationId; // Optional, for CHAT_ATTACHMENT
 
     @NotBlank(message = "Client upload ID is required")
     private String clientUploadId; // Unique client-generated ID for idempotency/retry
@@ -36,7 +36,7 @@ public class MediaUploadInitRequest {
     }
 
     public MediaUploadInitRequest(String mediaType, String usageType, String contentType,
-            Long fileSize, String fileName, Long conversationId, String clientUploadId) {
+            Long fileSize, String fileName, String conversationId, String clientUploadId) {
         this.mediaType = mediaType;
         this.usageType = usageType;
         this.contentType = contentType;
@@ -87,11 +87,11 @@ public class MediaUploadInitRequest {
         this.fileName = fileName;
     }
 
-    public Long getConversationId() {
+    public String getConversationId() {
         return conversationId;
     }
 
-    public void setConversationId(Long conversationId) {
+    public void setConversationId(String conversationId) {
         this.conversationId = conversationId;
     }
 

@@ -90,10 +90,7 @@
 
         <%-- Media Preview Container (hidden by default) --%>
         <div id="mediaPreviewContainer" class="d-none px-3 pt-2 pb-2">
-            <div class="alert alert-info small py-2 px-3 mb-0 d-flex justify-content-between align-items-center">
-                <span id="mediaPreviewText">Image: example.jpg (2.5 MB)</span>
-                <button type="button" class="btn-close btn-sm" id="removeMediaBtn" title="Remove"></button>
-            </div>
+            <div id="mediaItemsList" class="d-flex flex-column gap-2"></div>
             <div id="mediaPreviewImageArea" class="mt-2"></div>
         </div>
 
@@ -118,7 +115,7 @@
         </div>
 
         <%-- Hidden File Input for Chat Media --%>
-        <input type="file" id="chatMediaInput" class="d-none" accept="image/*" />
+        <input type="file" id="chatMediaInput" class="d-none" accept="image/*" multiple />
 
         <div class="offcanvas offcanvas-end" tabindex="-1" id="chatInfoSidebar" style="max-width:320px;">
             <div class="offcanvas-header cr-offcanvas-header">

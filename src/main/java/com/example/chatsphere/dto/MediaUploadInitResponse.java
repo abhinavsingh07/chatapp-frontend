@@ -6,7 +6,7 @@ package com.example.chatsphere.dto;
  */
 public class MediaUploadInitResponse {
 
-    private Long mediaId; // Media record ID in database
+    private String mediaId; // Media record ID in database
 
     private String presignedUploadUrl; // Pre-signed S3 PUT URL for direct upload
 
@@ -16,18 +16,18 @@ public class MediaUploadInitResponse {
     public MediaUploadInitResponse() {
     }
 
-    public MediaUploadInitResponse(Long mediaId, String presignedUploadUrl, int uploadUrlExpiresIn) {
+    public MediaUploadInitResponse(String mediaId, String presignedUploadUrl, int uploadUrlExpiresIn) {
         this.mediaId = mediaId;
         this.presignedUploadUrl = presignedUploadUrl;
         this.uploadUrlExpiresIn = uploadUrlExpiresIn;
     }
 
     // Getters and Setters
-    public Long getMediaId() {
+    public String getMediaId() {
         return mediaId;
     }
 
-    public void setMediaId(Long mediaId) {
+    public void setMediaId(String mediaId) {
         this.mediaId = mediaId;
     }
 

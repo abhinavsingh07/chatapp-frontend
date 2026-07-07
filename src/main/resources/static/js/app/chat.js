@@ -29,8 +29,8 @@ class ChatWebSocket {
         this.heartbeatInterval = null;
 
         // Media upload state
-        this.selectedMediaFile = null;
-        this.selectedMediaId = null;
+        this.selectedMediaFiles = []; // Array of files
+        this.selectedMediaIds = []; // Array of mediaIds
         this.isUploadingMedia = false;
     }
 
@@ -193,17 +193,22 @@ class ChatWebSocket {
         contentDiv.textContent = message.body;
         bubble.appendChild(contentDiv);
 
-        // Media attachment (if mediaId present)
-        if (message.mediaId) {
+        // Media attachment (if mediaId or mediaIds present)
+        if (message.mediaId || message.mediaIds) {
             const mediaDiv = document.createElement("div");
             mediaDiv.className = "message-media mt-2";
             
-            // Display media placeholder/loading state
-            // In production, you'd fetch presigned URL using getPresignedDownloadUrl(mediaId)
-            const mediaPlaceholder = document.createElement("div");
-            mediaPlaceholder.className = "alert alert-info small py-1 px-2 mb-0";
-            mediaPlaceholder.innerHTML = '<i class="fas fa-image me-1"></i> Media attached (mediaId: ' + message.mediaId + ')';
-            mediaDiv.appendChild(mediaPlaceholder);
+            // Handle both single mediaId and multiple mediaIds (semicolon-separated)
+            const mediaIds = message.mediaIds ? message.mediaIds.toString().split(';') : [message.mediaId];
+            
+            mediaIds.forEach((mediaId, index) => {
+                if (mediaId && mediaId.trim()) {
+                    const mediaPlaceholder = document.createElement("div");
+                    mediaPlaceholder.className = "alert alert-info small py-1 px-2 mb-1";
+                    mediaPlaceholder.innerHTML = '<i class="fas fa-file me-1"></i> Media #' + (index + 1) + ' (ID: ' + mediaId.trim() + ')';
+                    mediaDiv.appendChild(mediaPlaceholder);
+                }
+            });
             
             bubble.appendChild(mediaDiv);
         }
@@ -277,8 +282,8 @@ class ChatWebSocket {
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             
-            // Check if media file is selected
-            if (this.selectedMediaFile) {
+            // Check if media files are selected
+            if (this.selectedMediaFiles && this.selectedMediaFiles.length > 0) {
                 // Upload media first, then send message
                 this.handleMediaUploadAndSend();
             } else {
@@ -302,7 +307,6 @@ class ChatWebSocket {
     bindMediaEvents() {
         const attachBtn = document.getElementById('attachMediaBtn');
         const chatMediaInput = document.getElementById('chatMediaInput');
-        const removeMediaBtn = document.getElementById('removeMediaBtn');
 
         if (attachBtn) {
             attachBtn.addEventListener('click', (e) => {
@@ -313,61 +317,112 @@ class ChatWebSocket {
 
         if (chatMediaInput) {
             chatMediaInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
+                const files = e.target.files; // Changed to handle multiple files
+                if (!files || files.length === 0) return;
 
-                // Validate file
-                const validation = validateSelectedFile(file, 'CHAT_MESSAGE');
-                if (!validation.valid) {
-                    showUploadError(validation.error, 'chat');
-                    chatMediaInput.value = ''; // Reset input
+                // Clear previous selection
+                this.selectedMediaFiles = [];
+
+                // Validate and add all files
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    
+                    // Validate file - only IMAGE and DOCUMENT types allowed
+                    const validation = validateSelectedFile(file, 'CHAT_ATTACHMENT');
+                    if (!validation.valid) {
+                        showUploadError(validation.error, 'chat');
+                        chatMediaInput.value = ''; // Reset input
+                        this.selectedMediaFiles = []; // Clear all selected files
+                        return;
+                    }
+                    
+                    // Only allow IMAGE and DOCUMENT
+                    if (validation.mediaType !== 'IMAGE' && validation.mediaType !== 'DOCUMENT') {
+                        showUploadError('Only IMAGE and DOCUMENT files are supported for multiple upload', 'chat');
+                        chatMediaInput.value = '';
+                        this.selectedMediaFiles = [];
+                        return;
+                    }
+
+                    // Add file to collection
+                    this.selectedMediaFiles.push(file);
+                }
+
+                if (this.selectedMediaFiles.length === 0) {
+                    chatMediaInput.value = '';
                     return;
                 }
 
-                // Store selected file
-                this.selectedMediaFile = file;
-
-                // Show preview
-                this.displayMediaPreview(file);
-            });
-        }
-
-        if (removeMediaBtn) {
-            removeMediaBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.clearMediaSelection();
+                // Show previews for all files
+                this.displayMediaPreviews(this.selectedMediaFiles);
             });
         }
     }
 
     /**
-     * Display preview of selected media file
+     * Display previews of all selected media files with individual remove buttons
      */
-    displayMediaPreview(file) {
+    displayMediaPreviews(files) {
         const previewContainer = document.getElementById('mediaPreviewContainer');
-        const previewText = document.getElementById('mediaPreviewText');
+        const mediaItemsList = document.getElementById('mediaItemsList');
         const previewImageArea = document.getElementById('mediaPreviewImageArea');
 
-        if (!previewContainer) return;
+        if (!previewContainer || !mediaItemsList) return;
 
-        // Format file size
-        const fileSizeKB = (file.size / 1024).toFixed(2);
-        const fileSizeMB = fileSizeKB > 1024 ? (file.size / 1024 / 1024).toFixed(2) + ' MB' : fileSizeKB + ' KB';
+        // Clear previous items
+        mediaItemsList.innerHTML = '';
 
-        // Update preview text
-        if (previewText) {
-            previewText.textContent = file.name + ' (' + fileSizeMB + ')';
-        }
+        // Create individual preview items for each file
+        files.forEach((file, index) => {
+            const totalSizeKB = file.size / 1024;
+            const fileSizeMB = totalSizeKB > 1024 ? (totalSizeKB / 1024).toFixed(2) + ' MB' : totalSizeKB.toFixed(2) + ' KB';
+            
+            // Create individual alert box for this file
+            const itemAlert = document.createElement('div');
+            itemAlert.className = 'alert alert-info small py-2 px-3 mb-0 d-flex justify-content-between align-items-center';
+            itemAlert.style.gap = '10px';
+            
+            // File info span
+            const fileInfoSpan = document.createElement('span');
+            fileInfoSpan.className = 'text-truncate';
+            fileInfoSpan.textContent = `${file.name} (${fileSizeMB})`;
+            fileInfoSpan.title = file.name;
+            
+            // Individual remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-close btn-sm flex-shrink-0';
+            removeBtn.title = 'Remove this file';
+            removeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.removeMediaFile(index);
+            });
+            
+            itemAlert.appendChild(fileInfoSpan);
+            itemAlert.appendChild(removeBtn);
+            mediaItemsList.appendChild(itemAlert);
+        });
 
-        // Show image preview for image files
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                if (previewImageArea) {
-                    previewImageArea.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; max-height: 180px; border-radius: 6px;">`;
+        // Show image previews only for image files
+        if (previewImageArea) {
+            previewImageArea.innerHTML = ''; // Clear previous previews
+            
+            let imageCount = 0;
+            for (let i = 0; i < files.length && imageCount < 3; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const imgContainer = document.createElement('div');
+                        imgContainer.style.display = 'inline-block';
+                        imgContainer.style.marginRight = '8px';
+                        imgContainer.innerHTML = `<img src="${e.target.result}" style="max-width: 80px; max-height: 80px; border-radius: 4px;">`;
+                        previewImageArea.appendChild(imgContainer);
+                    };
+                    reader.readAsDataURL(file);
+                    imageCount++;
                 }
-            };
-            reader.readAsDataURL(file);
+            }
         }
 
         // Show preview container
@@ -375,15 +430,45 @@ class ChatWebSocket {
     }
 
     /**
+     * Remove individual media file from selection
+     * @param {number} fileIndex - Index of the file to remove
+     */
+    removeMediaFile(fileIndex) {
+        if (fileIndex < 0 || fileIndex >= this.selectedMediaFiles.length) return;
+
+        // Remove the file from array
+        this.selectedMediaFiles.splice(fileIndex, 1);
+
+        // If no files left, clear everything
+        if (this.selectedMediaFiles.length === 0) {
+            this.clearMediaSelection();
+            return;
+        }
+
+        // Re-display previews with remaining files
+        this.displayMediaPreviews(this.selectedMediaFiles);
+    }
+
+    /**
      * Clear selected media and hide preview
      */
     clearMediaSelection() {
-        this.selectedMediaFile = null;
-        this.selectedMediaId = null;
+        this.selectedMediaFiles = [];
+        this.selectedMediaIds = [];
 
         const chatMediaInput = document.getElementById('chatMediaInput');
         if (chatMediaInput) {
             chatMediaInput.value = '';
+        }
+
+        const mediaItemsList = document.getElementById('mediaItemsList');
+        if (mediaItemsList) {
+            mediaItemsList.innerHTML = '';
+        }
+
+        const previewContainer = document.getElementById('mediaPreviewContainer');
+        if (previewContainer) {
+            previewContainer.classList.add('d-none');
         }
 
         resetUploadState('chat');
@@ -391,9 +476,11 @@ class ChatWebSocket {
 
     /**
      * Handle media upload followed by message send
+     * Supports multiple files (IMAGE and DOCUMENT only) with parallel uploads
      */
     async handleMediaUploadAndSend() {
-        if (!this.selectedMediaFile) {
+        // Validate files
+        if (!this.selectedMediaFiles || this.selectedMediaFiles.length === 0) {
             this.sendChatMessage(this.messageInput.value);
             return;
         }
@@ -404,36 +491,75 @@ class ChatWebSocket {
         if (sendBtn) sendBtn.disabled = true;
 
         try {
-            const clientUploadId = generateClientUploadId();
+            // Reset media IDs collection
+            this.selectedMediaIds = [];
 
-            // Step 1: Initialize upload
+            // Step 1: Prepare all uploads (initMediaUpload in parallel)
             setUploadLoadingState('preparing', 'chat');
-            showUploadError('', 'chat'); // Clear any previous errors
-            
-            const initResponse = await initMediaUpload('CHAT_MESSAGE', clientUploadId, {
-                file: this.selectedMediaFile,
-                conversationId: this.chatId
+            showUploadError('', 'chat');
+
+            const initPromises = this.selectedMediaFiles.map((file, index) => {
+                const clientUploadId = generateClientUploadId();
+                return initMediaUpload('CHAT_ATTACHMENT', clientUploadId, {
+                    file: file,
+                    conversationId: this.chatId
+                }).then(initResponse => {
+                    return {
+                        fileIndex: index,
+                        file: file,
+                        mediaId: initResponse.mediaId,
+                        uploadUrl: initResponse.uploadUrl,
+                        clientUploadId: clientUploadId
+                    };
+                });
             });
 
-            this.selectedMediaId = initResponse.mediaId;
-
-            // Step 2: Upload to S3
+            // Wait for all init calls to complete
+            const initResults = await Promise.all(initPromises);
+            console.log('[chat.js] All media upload initializations completed:', initResults);
+            // Step 2: Upload all files to S3 in parallel
             setUploadLoadingState('uploading', 'chat');
-            await uploadFileToS3(initResponse.uploadUrl, this.selectedMediaFile, (progress) => {
-                // Progress callback
-                setUploadLoadingState('uploading', 'chat');
+            const uploadPromisesArray = initResults.map(result => {
+                return uploadFileToS3(result.uploadUrl, result.file, (progress) => {
+                    setUploadLoadingState('uploading', 'chat');
+                }).then(() => result); // Return result after upload completes
             });
 
-            // Step 3: Complete upload
-            setUploadLoadingState('verifying', 'chat');
-            const completeResponse = await completeMediaUpload(this.selectedMediaId, clientUploadId);
+            // Wait for all S3 uploads to complete
+            const uploadResults = await Promise.all(uploadPromisesArray);
 
-            if (completeResponse.status === 'ACTIVE') {
-                // Upload successful, send message with mediaId
-                showUploadSuccess('Media uploaded successfully!', 'chat');
+            // Step 3: Complete all uploads in parallel
+            setUploadLoadingState('verifying', 'chat');
+            const completePromises = initResults.map(result => {
+                return completeMediaUpload(result.mediaId, result.clientUploadId);
+            });
+
+            // Wait for all completion calls
+            const completeResults = await Promise.all(completePromises);
+
+            // Step 4: Collect all media IDs
+            let allMediasActive = true;
+            const mediaIds = [];
+            
+            for (let i = 0; i < completeResults.length; i++) {
+                if (completeResults[i].status === 'ACTIVE') {
+                    mediaIds.push(initResults[i].mediaId);
+                } else {
+                    allMediasActive = false;
+                    break;
+                }
+            }
+
+            if (allMediasActive && mediaIds.length > 0) {
+                // Upload successful for all files
+                showUploadSuccess(`${mediaIds.length} media files uploaded successfully!`, 'chat');
                 
-                // Send message with mediaId
-                this.sendChatMessageWithMedia(this.messageInput.value, this.selectedMediaId);
+                // Convert mediaIds array to semicolon-separated string
+                this.selectedMediaIds = mediaIds;
+                const mediaIdString = mediaIds.join(';');
+                
+                // Send message with all mediaIds
+                this.sendChatMessageWithMedia(this.messageInput.value, mediaIdString);
                 
                 // Clear UI
                 setTimeout(() => {
@@ -441,14 +567,14 @@ class ChatWebSocket {
                     this.messageInput.value = '';
                 }, 500);
             } else {
-                showUploadError('Media status is not ACTIVE. Please try again.', 'chat');
+                showUploadError('Some media uploads failed. Please try again.', 'chat');
             }
         } catch (error) {
             showUploadError(error || 'Upload failed. Please try again.', 'chat');
             
             // Allow retry
-            if (this.selectedMediaId) {
-                this.showMediaRetry(this.selectedMediaId, clientUploadId);
+            if (this.selectedMediaIds.length > 0) {
+                this.showMediaRetry(this.selectedMediaIds, null);
             }
         } finally {
             this.isUploadingMedia = false;
@@ -458,9 +584,11 @@ class ChatWebSocket {
     }
 
     /**
-     * Send chat message with media attachment
+     * Send chat message with media attachment(s)
+     * @param {string} content - Message text content
+     * @param {string|number} mediaIds - Single mediaId or semicolon-separated mediaIds string
      */
-    sendChatMessageWithMedia(content, mediaId) {
+    sendChatMessageWithMedia(content, mediaIds) {
         const trimmed = content.trim();
 
         const msg = {
@@ -468,8 +596,8 @@ class ChatWebSocket {
             conversationId: this.chatId,
             fromUserId: this.fromUserId,
             toUserId: this.toUserId,
-            body: trimmed || '[Image/Media attachment]',
-            mediaId: mediaId,
+            body: trimmed || '[Media attachment(s)]',
+            mediaIds: mediaIds, // Can be single ID or semicolon-separated string
             fromUserName: this.fromUserName
         };
 
@@ -481,8 +609,9 @@ class ChatWebSocket {
     /**
      * Show retry option for failed verification
      */
-    showMediaRetry(mediaId, clientUploadId) {
+    showMediaRetry(mediaIds, clientUploadId) {
         // Could implement a retry button in UI here
+        // mediaIds can be an array or string
         // For now, user can click send again to retry
     }
 
