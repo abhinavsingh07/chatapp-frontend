@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.chatsphere.dto.MediaDTO;
 import com.example.chatsphere.dto.MediaPreSignedUrlResponse;
 import com.example.chatsphere.dto.MediaUploadCompleteResponse;
 import com.example.chatsphere.dto.MediaUploadInitRequest;
@@ -18,10 +19,11 @@ import com.example.chatsphere.util.SuccessResponse;
 
 /**
  * MediaController
- * Handles all media upload related endpoints
+ * Handles all media related endpoints
  * - Initialize media uploads
  * - Complete media uploads
  * - Generate pre-signed download URLs
+ * - Get conversation media metadata
  */
 @Controller
 public class MediaController {
@@ -100,6 +102,31 @@ public class MediaController {
             logger.info("Pre-signed download URL generated successfully for mediaId={}", mediaId);
         } else {
             logger.warn("Failed to generate pre-signed download URL for mediaId={}", mediaId);
+        }
+
+        return response;
+    }
+
+    /**
+     * Get media metadata for a specific media in a conversation
+     *
+     * @param conversationId The ID of the conversation
+     * @param mediaId        The ID of the media record
+     * @return SuccessResponse<MediaDTO> with media metadata
+     */
+    @GetMapping("/api/media/conversation/{conversationId}/media/{mediaId}")
+    @ResponseBody
+    public SuccessResponse<MediaPreSignedUrlResponse> getConversationMedia(
+            @PathVariable("conversationId") Long conversationId,
+            @PathVariable("mediaId") Long mediaId) {
+        logger.debug("Fetching media for conversationId={}, mediaId={}", conversationId, mediaId);
+
+        SuccessResponse<MediaPreSignedUrlResponse> response = mediaService.getConversationMedia(conversationId, mediaId);
+
+        if (response.getData() != null && !response.getData().isEmpty()) {
+            logger.info("Media fetched successfully for conversationId={}, mediaId={}", conversationId, mediaId);
+        } else {
+            logger.warn("No media found for conversationId={}, mediaId={}", conversationId, mediaId);
         }
 
         return response;

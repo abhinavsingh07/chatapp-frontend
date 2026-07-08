@@ -1,7 +1,10 @@
 /**
  * mediaLoader.js
  * Handles lazy-loading of media (images and videos) in chat messages using Intersection Observer.
- * 
+ *
+ * Dependencies:
+ * - MediaCache.js (IndexedDB caching layer) — must be loaded before this script
+ *
  * Features:
  * - Lazy load pre-signed URLs only when media enters viewport
  * - Support for IMAGE and VIDEO media types
@@ -9,6 +12,7 @@
  * - Video play button overlay
  * - Silent error handling (empty placeholder on failure)
  * - Responsive grid layout
+ * - Uses MediaCache for IndexedDB-backed fast repeat loads
  */
 
 class MediaLoader {
@@ -51,56 +55,99 @@ class MediaLoader {
     }
 
     /**
+     * Show loading spinner in placeholder
+     * @param {HTMLElement} placeholderElement - The placeholder div
+     */
+    static showLoadingSpinner(placeholderElement) {
+        placeholderElement.innerHTML = `
+            <div class="media-loading-spinner">
+                <div class="spinner-border-custom"></div>
+                <div class="media-loading-text">Loading...</div>
+            </div>
+        `;
+    }
+
+    /**
      * Load a single media item when it becomes visible
+     * First checks IndexedDB cache, then falls back to presigned URL
      * @param {HTMLElement} placeholderElement - The placeholder div element
      */
-    static loadMediaForElement(placeholderElement) {
+    static async loadMediaForElement(placeholderElement) {
         const mediaId = placeholderElement.dataset.mediaId;
         const mediaType = placeholderElement.dataset.mediaType;
+        let presignedUrl = placeholderElement.dataset.presignedUrl;
 
         if (!mediaId || MediaLoader.loadedMediaIds.has(mediaId)) {
             placeholderElement.dataset.loaded = 'true';
             return;
         }
 
-        let downloadUrl = `${ctx}/api/media/pre-signed-url/${mediaId}`;
-        // Fetch pre-signed URL from backend
-        fetch(downloadUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(responseData => {
-                // Extract presigned URL from response (check data array and presignedDownloadUrl field)
-                const data = responseData.data && responseData.data.length > 0
-                    ? responseData.data[0]
-                    : responseData;
+        try {
+            // Step 2: Cache miss - show loading spinner and fetch presigned URL from backend
+            MediaLoader.showLoadingSpinner(placeholderElement);
 
-                const presignedUrl = data.presignedDownloadUrl;
+            // Step 1: Check IndexedDB cache first
+            const cachedBlob = await MediaCache.getFromCache(mediaId);
+
+            if (cachedBlob) {
+                // Cache hit - render from cached blob
+                const blobUrl = MediaCache.getBlobAsUrl(cachedBlob);
+                MediaLoader.renderMedia(placeholderElement, mediaType, blobUrl);
+                MediaLoader.loadedMediaIds.add(mediaId);
+                placeholderElement.dataset.loaded = 'true';
+                return;
+            }
+
+            if (!presignedUrl) {
+
+                const downloadUrl = `${ctx}/api/media/pre-signed-url/${mediaId}`;
+                const urlResponse = await fetch(downloadUrl);
+
+                if (!urlResponse.ok) {
+                    throw new Error(`HTTP ${urlResponse.status}`);
+                }
+
+                const urlResponseData = await urlResponse.json();
+                const data = urlResponseData.data && urlResponseData.data.length > 0
+                    ? urlResponseData.data[0]
+                    : urlResponseData;
+
+                presignedUrl= data.presignedDownloadUrl;
 
                 if (!presignedUrl) {
                     console.warn(`[mediaLoader] No presigned URL in response for mediaId=${mediaId}`);
                     placeholderElement.dataset.loaded = 'true';
                     return;
                 }
+            }
+            // Step 3: Download the media blob from presigned URL
+            const blobResponse = await fetch(presignedUrl);
+            if (!blobResponse.ok) {
+                throw new Error(`Failed to download media: HTTP ${blobResponse.status}`);
+            }
 
-                MediaLoader.renderMedia(placeholderElement, mediaType, presignedUrl);
-                MediaLoader.loadedMediaIds.add(mediaId);
-                placeholderElement.dataset.loaded = 'true';
-            })
-            .catch(error => {
-                // Silent error handling - just leave placeholder empty
-                console.warn(`[mediaLoader] Failed to load media ${mediaId}:`, error);
-                placeholderElement.dataset.loaded = 'true';
-            });
+            const blob = await blobResponse.blob();
+
+            // Step 4: Cache the blob for future use
+            await MediaCache.putInCache(mediaId, mediaType, blob);
+
+            // Step 5: Render the media using blob URL
+            const blobUrl = MediaCache.getBlobAsUrl(blob);
+            MediaLoader.renderMedia(placeholderElement, mediaType, blobUrl);
+            MediaLoader.loadedMediaIds.add(mediaId);
+            placeholderElement.dataset.loaded = 'true';
+
+        } catch (error) {
+            // Silent error handling - just leave placeholder empty
+            console.warn(`[mediaLoader] Failed to load media ${mediaId}:`, error);
+            placeholderElement.dataset.loaded = 'true';
+        }
     }
 
     /**
      * Render media element (image or video) into placeholder
      * @param {HTMLElement} placeholderElement - The placeholder div
-     * @param {string} mediaType - 'IMAGE' or 'VIDEO'
+     * @param {string} mediaType - 'IMAGE', 'VIDEO', or 'DOCUMENT'
      * @param {string} presignedUrl - Pre-signed download URL
      */
     static renderMedia(placeholderElement, mediaType, presignedUrl) {
@@ -156,6 +203,66 @@ class MediaLoader {
             const playOverlay = MediaLoader.createPlayButtonOverlay();
             placeholderElement.appendChild(video);
             placeholderElement.appendChild(playOverlay);
+        }
+        else if (mediaType === 'DOCUMENT') {
+            // Create document link container
+            const docContainer = document.createElement('a');
+            docContainer.href = presignedUrl;
+            docContainer.target = '_blank';
+            docContainer.rel = 'noopener noreferrer';
+            docContainer.className = 'media-document-link';
+            docContainer.style.display = 'flex';
+            docContainer.style.flexDirection = 'column';
+            docContainer.style.alignItems = 'center';
+            docContainer.style.justifyContent = 'center';
+            docContainer.style.width = '100%';
+            docContainer.style.height = '100%';
+            docContainer.style.padding = '12px';
+            docContainer.style.textDecoration = 'none';
+            docContainer.style.color = '#2563EB';
+            docContainer.style.cursor = 'pointer';
+            docContainer.style.transition = 'all 0.3s ease';
+
+            // Document icon
+            const docIcon = document.createElement('i');
+            docIcon.className = 'fas fa-file-pdf fa-2x';
+            docIcon.style.marginBottom = '8px';
+            docIcon.style.color = '#DC2626';
+
+            // Filename from data attribute
+            const fileName = placeholderElement.dataset.fileName || 'Document';
+            const docName = document.createElement('span');
+            docName.textContent = fileName;
+            docName.style.fontSize = '12px';
+            docName.style.fontWeight = '500';
+            docName.style.textAlign = 'center';
+            docName.style.wordBreak = 'break-word';
+            docName.style.maxWidth = '100%';
+
+            // Download icon hint
+            const downloadIcon = document.createElement('i');
+            downloadIcon.className = 'fas fa-download fa-xs';
+            downloadIcon.style.marginTop = '4px';
+            downloadIcon.style.opacity = '0.6';
+            downloadIcon.style.fontSize = '10px';
+
+            docContainer.appendChild(docIcon);
+            docContainer.appendChild(docName);
+            docContainer.appendChild(downloadIcon);
+
+            // Hover effect
+            docContainer.addEventListener('mouseenter', () => {
+                docIcon.style.transform = 'scale(1.1)';
+                docContainer.style.backgroundColor = '#F0F9FF';
+                docContainer.style.borderRadius = '4px';
+            });
+
+            docContainer.addEventListener('mouseleave', () => {
+                docIcon.style.transform = 'scale(1)';
+                docContainer.style.backgroundColor = 'transparent';
+            });
+
+            placeholderElement.appendChild(docContainer);
         }
     }
 
@@ -215,8 +322,8 @@ class MediaLoader {
     static openImageLightbox(imgElement) {
         // Find all images in the same message bubble
         const messageBubble = imgElement.closest('.message-bubble');
-        const allImages = messageBubble ? 
-            Array.from(messageBubble.querySelectorAll('.media-image')) : 
+        const allImages = messageBubble ?
+            Array.from(messageBubble.querySelectorAll('.media-image')) :
             [imgElement];
 
         MediaLoader.currentModalImages = allImages;
@@ -327,6 +434,10 @@ class MediaLoader {
 }
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+    // Initialize IndexedDB cache
+    await MediaCache.initIndexedDB();
+
+    // Initialize media lazy loader
     MediaLoader.initMediaLazyLoader();
 });

@@ -30,7 +30,8 @@ public class EndpointRegistry {
             Map.entry("contacts.getByUserId", new ApiRequestBuilderUtil.ApiEndpoint("/api/contacts/search", HttpMethod.GET)),
             Map.entry("media.uploadInit", new ApiRequestBuilderUtil.ApiEndpoint("/api/media/upload-init", HttpMethod.POST)),
             Map.entry("media.uploadComplete", new ApiRequestBuilderUtil.ApiEndpoint("/api/media/upload-complete/{mediaId}", HttpMethod.POST)),
-            Map.entry("media.getPresignedUrl", new ApiRequestBuilderUtil.ApiEndpoint("/api/media/pre-signed-url/{mediaId}", HttpMethod.GET))
+            Map.entry("media.getPresignedUrl", new ApiRequestBuilderUtil.ApiEndpoint("/api/media/pre-signed-url/{mediaId}", HttpMethod.GET)),
+            Map.entry("media.getConversationMedia", new ApiRequestBuilderUtil.ApiEndpoint("/api/media/conversation/{conversationId}/media/{mediaId}", HttpMethod.GET))
     );
 
     public ApiRequestBuilderUtil.ApiEndpoint get(String key) {

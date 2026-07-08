@@ -1,5 +1,6 @@
 package com.example.chatsphere.service;
 
+import com.example.chatsphere.dto.MediaDTO;
 import com.example.chatsphere.dto.MediaPreSignedUrlResponse;
 import com.example.chatsphere.dto.MediaUploadCompleteResponse;
 import com.example.chatsphere.dto.MediaUploadInitRequest;
@@ -38,4 +39,14 @@ public interface MediaService {
      * @return SuccessResponse containing MediaPreSignedUrlResponse with presigned download URL
      */
     SuccessResponse<MediaPreSignedUrlResponse> getPresignedDownloadUrl(Long mediaId);
+
+    /**
+     * Get media metadata by conversation ID and media ID
+     * Calls backend /api/media/conversation/{conversationId}/media/{mediaId}
+     *
+     * @param conversationId The ID of the conversation
+     * @param mediaId        The ID of the media record
+     * @return SuccessResponse containing MediaDTO with media metadata
+     */
+    SuccessResponse<MediaPreSignedUrlResponse> getConversationMedia(Long conversationId, Long mediaId);
 }

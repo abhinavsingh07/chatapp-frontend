@@ -55,25 +55,24 @@
                                 <div class="message-content">
                                     <c:out value="${message.content}" />
                                 </div>
-                                
+
                                 <%-- Media Grid: Lazy-load images and videos --%>
-                                <c:if test="${not empty message.mediaList}">
-                                    <div class="message-media-grid">
-                                        <c:forEach var="media" items="${message.mediaList}">
-                                            <div class="media-lazy-placeholder" 
-                                                 data-media-id="${media.id}" 
-                                                 data-media-type="${media.mediaType}"
-                                                 data-file-name="${media.fileName}">
-                                            </div>
-                                        </c:forEach>
-                                    </div>
-                                </c:if>
-                                
-                                <%-- Protected: id="sentAt" + data-date — queried by convertSentAtUTCtoUserTimeZone()
-                                    --%>
-                                    <div id="sentAt" data-date="<c:out value='${message.sentAt}'/>"
-                                        class="message-time cr-bubble-time ${message.senderId == userid ? 'text-white-50' : 'text-muted'}">
-                                    </div>
+                                    <c:if test="${not empty message.mediaList}">
+                                        <div class="message-media-grid">
+                                            <c:forEach var="media" items="${message.mediaList}">
+                                                <div class="media-lazy-placeholder" data-media-id="${media.id}"
+                                                    data-media-type="${media.mediaType}"
+                                                    data-file-name="${media.fileName}">
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </c:if>
+
+                                    <%-- Protected: id="sentAt" + data-date — queried by
+                                        convertSentAtUTCtoUserTimeZone() --%>
+                                        <div id="sentAt" data-date="<c:out value='${message.sentAt}'/>"
+                                            class="message-time cr-bubble-time ${message.senderId == userid ? 'text-white-50' : 'text-muted'}">
+                                        </div>
                             </div>
                         </div>
                     </c:forEach>
@@ -103,92 +102,98 @@
 
 
         <%-- Media Preview Container (hidden by default) --%>
-        <div id="mediaPreviewContainer" class="d-none px-3 pt-2 pb-2">
-            <div id="mediaItemsList" class="d-flex flex-column gap-2"></div>
-            <div id="mediaPreviewImageArea" class="mt-2"></div>
-        </div>
+            <div id="mediaPreviewContainer" class="d-none px-3 pt-2 pb-2">
+                <div id="mediaItemsList" class="d-flex flex-column gap-2"></div>
+                <div id="mediaPreviewImageArea" class="mt-2"></div>
+            </div>
 
-        <%-- Upload Status Text (hidden by default) --%>
-        <div id="uploadStatusText" class="text-muted small mt-2 px-3 d-none"></div>
+            <%-- Upload Status Text (hidden by default) --%>
+                <div id="uploadStatusText" class="text-muted small mt-2 px-3 d-none"></div>
 
-        <div class="cr-input-bar">
-            <form id="messageForm" action="/submit" autocomplete="off">
-                <input type="hidden" name="chat_id" value="<c:out value='${conversationId}'/>">
-                <div class="cr-input-inner">
-                    <%-- Attachment Button --%>
-                    <button type="button" class="btn cr-attach-btn" id="attachMediaBtn" title="Attach file">
-                        <i class="fas fa-paperclip"></i>
-                    </button>
-                    <textarea class="form-control cr-textarea" id="messageInput" name="content"
-                        placeholder="Type a message" rows="1"></textarea>
-                    <button type="submit" class="btn cr-send-btn" id="sendButton" title="Send">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
+                <div class="cr-input-bar">
+                    <form id="messageForm" action="/submit" autocomplete="off">
+                        <input type="hidden" name="chat_id" value="<c:out value='${conversationId}'/>">
+                        <div class="cr-input-inner">
+                            <%-- Attachment Button --%>
+                                <button type="button" class="btn cr-attach-btn" id="attachMediaBtn" title="Attach file">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <textarea class="form-control cr-textarea" id="messageInput" name="content"
+                                    placeholder="Type a message" rows="1"></textarea>
+                                <button type="submit" class="btn cr-send-btn" id="sendButton" title="Send">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
 
-        <%-- Hidden File Input for Chat Media --%>
-        <input type="file" id="chatMediaInput" class="d-none" accept="image/*" multiple />
+                <%-- Hidden File Input for Chat Media (max 5 files)
+                    Accept types: Images (JPEG, PNG, GIF, WebP, BMP), Videos (MP4, WebM, etc), Documents (PDF, Word, Excel, PowerPoint, etc) --%>
+                    <input type="file" id="chatMediaInput" class="d-none" 
+                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,video/mp4,video/mpeg,video/quicktime,video/webm,video/x-msvideo,video/x-matroska,video/3gpp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,application/vnd.oasis.opendocument.text,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.presentation" 
+                        multiple 
+                        data-max-files="5" />
 
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="chatInfoSidebar" style="max-width:320px;">
-            <div class="offcanvas-header cr-offcanvas-header">
-                <h5 class="offcanvas-title text-white fw-semibold" style="font-size:0.95rem;">
-                    <i class="fas fa-info-circle me-2"></i>Chat Info
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
-                    aria-label="Close"></button>
-            </div>
+                    <div class="offcanvas offcanvas-end" tabindex="-1" id="chatInfoSidebar" style="max-width:320px;">
+                        <div class="offcanvas-header cr-offcanvas-header">
+                            <h5 class="offcanvas-title text-white fw-semibold" style="font-size:0.95rem;">
+                                <i class="fas fa-info-circle me-2"></i>Chat Info
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
+                        </div>
 
-            <div class="offcanvas-body p-0">
-                <%-- User profile block --%>
-                    <c:set var="other_user" value="${not empty toUserDetails ? toUserDetails : null}" />
-                    <c:if test="${not empty other_user}">
-                        <div class="p-4 text-center border-bottom">
-                            <c:choose>
-                                <c:when test="${not empty other_user.profilePictureUrl}">
-                                    <img src="<c:out value='${other_user.profilePictureUrl}'/>" alt="Avatar"
-                                        class="cr-offcanvas-profile-avatar mb-3">
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="cr-offcanvas-avatar-placeholder mx-auto mb-3">
-                                        <i class="fas fa-user"></i>
+                        <div class="offcanvas-body p-0">
+                            <%-- User profile block --%>
+                                <c:set var="other_user" value="${not empty toUserDetails ? toUserDetails : null}" />
+                                <c:if test="${not empty other_user}">
+                                    <div class="p-4 text-center border-bottom">
+                                        <c:choose>
+                                            <c:when test="${not empty other_user.profilePictureUrl}">
+                                                <img src="<c:out value='${other_user.profilePictureUrl}'/>" alt="Avatar"
+                                                    class="cr-offcanvas-profile-avatar mb-3">
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div class="cr-offcanvas-avatar-placeholder mx-auto mb-3">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
+                                        <h6 class="fw-semibold mb-0">
+                                            <c:out value="${other_user.name}" />
+                                        </h6>
+                                        <p class="text-muted small mb-0">@
+                                            <c:out value="${other_user.name}" />
+                                        </p>
+                                        <c:if test="${not empty other_user.about}">
+                                            <p class="text-muted small mt-2 mb-0" style="font-size:0.8rem;">
+                                                <c:out value="${other_user.about}" />
+                                            </p>
+                                        </c:if>
                                     </div>
-                                </c:otherwise>
-                            </c:choose>
-                            <h6 class="fw-semibold mb-0">
-                                <c:out value="${other_user.name}" />
-                            </h6>
-                            <p class="text-muted small mb-0">@
-                                <c:out value="${other_user.name}" />
-                            </p>
-                            <c:if test="${not empty other_user.about}">
-                                <p class="text-muted small mt-2 mb-0" style="font-size:0.8rem;">
-                                    <c:out value="${other_user.about}" />
-                                </p>
-                            </c:if>
-                        </div>
-                    </c:if>
+                                </c:if>
 
-                    <%-- Actions list --%>
-                        <div class="list-group list-group-flush">
-                            <button
-                                class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 js-search-chat-button"
-                                type="button">
-                                <span
-                                    style="width:32px;height:32px;background:#dbeafe;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#2563EB;flex-shrink:0;">
-                                    <i class="fas fa-search fa-sm"></i>
-                                </span>
-                                <span class="fw-medium" style="font-size:0.875rem;">Search in Chat</span>
-                            </button>
+                                <%-- Actions list --%>
+                                    <div class="list-group list-group-flush">
+                                        <button
+                                            class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 js-search-chat-button"
+                                            type="button">
+                                            <span
+                                                style="width:32px;height:32px;background:#dbeafe;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#2563EB;flex-shrink:0;">
+                                                <i class="fas fa-search fa-sm"></i>
+                                            </span>
+                                            <span class="fw-medium" style="font-size:0.875rem;">Search in Chat</span>
+                                        </button>
+                                    </div>
                         </div>
-            </div>
-        </div>
+                    </div>
     </div>
-    
+
+    <!-- Load MediaCache.js for IndexedDB media caching -->
+    <script src="${ctx}/js/app/MediaCache.js" nonce="${cspNonce}"></script>
     <!-- Load mediaLoader.js for lazy-loading media -->
     <script src="${ctx}/js/app/mediaLoader.js" nonce="${cspNonce}"></script>
-    
+
     <script nonce="${cspNonce}">
         //init in header.jsp
         // const ctx = "<c:out value='${ctx}'/>";//getting from commons.jsp

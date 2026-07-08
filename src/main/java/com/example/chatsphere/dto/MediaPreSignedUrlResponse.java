@@ -10,6 +10,10 @@ public class MediaPreSignedUrlResponse {
 
     private Integer downloadUrlExpiresInMinutes; // Expiration time in minutes
 
+    private String mediaType; // Media type (e.g., image/jpeg, video/mp4)
+    private String mediaName; // Original name of the media file
+    private String mediaId; // Unique identifier for the media record
+
     // Constructors
     public MediaPreSignedUrlResponse() {
     }
@@ -17,6 +21,15 @@ public class MediaPreSignedUrlResponse {
     public MediaPreSignedUrlResponse(String presignedDownloadUrl, Integer downloadUrlExpiresInMinutes) {
         this.presignedDownloadUrl = presignedDownloadUrl;
         this.downloadUrlExpiresInMinutes = downloadUrlExpiresInMinutes;
+    }
+
+    public MediaPreSignedUrlResponse(String presignedDownloadUrl, Integer downloadUrlExpiresInMinutes, String mediaType,
+            String mediaName, String mediaId) {
+        this.presignedDownloadUrl = presignedDownloadUrl;
+        this.downloadUrlExpiresInMinutes = downloadUrlExpiresInMinutes;
+        this.mediaType = mediaType;
+        this.mediaName = mediaName;
+        this.mediaId = mediaId;
     }
 
     // Getters and Setters
@@ -34,6 +47,30 @@ public class MediaPreSignedUrlResponse {
 
     public void setDownloadUrlExpiresInMinutes(Integer downloadUrlExpiresInMinutes) {
         this.downloadUrlExpiresInMinutes = downloadUrlExpiresInMinutes;
+    }
+
+    public String getMediaType() {
+        return mediaType;
+    }
+
+    public void setMediaType(String mediaType) {
+        this.mediaType = mediaType;
+    }
+
+    public String getMediaName() {
+        return mediaName;
+    }
+
+    public void setMediaName(String mediaName) {
+        this.mediaName = mediaName;
+    }
+
+    public String getMediaId() {
+        return mediaId;
+    }
+
+    public void setMediaId(String mediaId) {
+        this.mediaId = mediaId;
     }
 
 }

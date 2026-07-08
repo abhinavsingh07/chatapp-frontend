@@ -211,8 +211,6 @@ class ChatWebSocket {
             });
 
             bubble.appendChild(mediaGrid);
-
-
         }
 
         // Time
@@ -325,6 +323,16 @@ class ChatWebSocket {
             chatMediaInput.addEventListener('change', (e) => {
                 const files = e.target.files; // Changed to handle multiple files
                 if (!files || files.length === 0) return;
+
+                // Get max file limit from data attribute (default: 5)
+                const maxFiles = parseInt(chatMediaInput.dataset.maxFiles) || 5;
+                
+                // Check if file count exceeds limit
+                if (files.length > maxFiles) {
+                    showUploadError(`You can upload a maximum of ${maxFiles} files at a time. You selected ${files.length} files.`, 'chat');
+                    chatMediaInput.value = '';
+                    return;
+                }
 
                 // Clear previous selection
                 this.selectedMediaFiles = [];
@@ -481,6 +489,23 @@ class ChatWebSocket {
     }
 
     /**
+     * Build metadata for uploaded files to be attached to message
+     * @param {Array} initResults - Array of upload initialization results
+     * @returns {Array} Array of file metadata objects with filename, filetype, and mediaId
+     */
+    buildUploadedFilesMetadata(initResults) {
+        return initResults.map(uploadResult => {
+            const validation = validateSelectedFile(uploadResult.file, 'CHAT_ATTACHMENT');
+
+            return {
+                filename: uploadResult.file.name,
+                filetype: validation.mediaType,
+                mediaId: uploadResult.mediaId
+            };
+        });
+    }
+
+    /**
      * Handle media upload followed by message send
      * Supports multiple files (IMAGE and DOCUMENT only) with parallel uploads
      */
@@ -522,7 +547,7 @@ class ChatWebSocket {
 
             // Wait for all init calls to complete
             const initResults = await Promise.all(initPromises);
-            console.log('[chat.js] All media upload initializations completed:', initResults);
+            //console.log('[chat.js] All media upload initializations completed:', initResults);
             // Step 2: Upload all files to S3 in parallel
             setUploadLoadingState('uploading', 'chat');
             const uploadPromisesArray = initResults.map(result => {
@@ -542,7 +567,7 @@ class ChatWebSocket {
 
             // Wait for all completion calls
             const completeResults = await Promise.all(completePromises);
-            console.log('[chat.js] All media upload completeResults completed:', completeResults);
+            //console.log('[chat.js] All media upload completeResults completed:', completeResults);
 
             // Step 4: Collect all media IDs
             let allMediasActive = true;
@@ -557,15 +582,8 @@ class ChatWebSocket {
                 }
             }
 
-            const filesUploaded = initResults.map(file => {
-                const validation = validateSelectedFile(file.file, 'CHAT_ATTACHMENT');
-
-                return {
-                    filename: file.file.name,
-                    filetype: validation.mediaType,
-                    mediaId: file.mediaId
-                };
-            });
+            // Build uploaded file metadata for message
+            const filesUploaded = this.buildUploadedFilesMetadata(initResults);
 
             if (allMediasActive && mediaIds.length > 0) {
                 // Upload successful for all files
@@ -573,10 +591,12 @@ class ChatWebSocket {
 
                 // Convert mediaIds array to semicolon-separated string
                 this.selectedMediaIds = mediaIds;
-                console.log('[chat.js] All media uploads completed successfully. Media IDs:', mediaIds);
                 const mediaIdString = mediaIds.join(';');
-                console.log('[chat.js] Sending chat message with media IDs:', mediaIdString);
-                // Send message with all mediaIds
+                
+                //console.log('[chat.js] All media uploads completed successfully. Media IDs:', mediaIds);
+               // console.log('[chat.js] Sending chat message with media IDs:', mediaIdString);
+                
+                // Send message with all mediaIds and uploaded file metadata
                 this.sendChatMessageWithMedia(this.messageInput.value, mediaIdString, filesUploaded);
 
                 // Clear UI
@@ -615,7 +635,7 @@ class ChatWebSocket {
             conversationId: this.chatId,
             fromUserId: this.fromUserId,
             toUserId: this.toUserId,
-            body: trimmed || '[Media attachment(s)]',
+            body: trimmed || 'Media attachment(s)', // Fallback text if no message content
             mediaIds: mediaIds, // Can be single ID or semicolon-separated string
             fromUserName: this.fromUserName
         };

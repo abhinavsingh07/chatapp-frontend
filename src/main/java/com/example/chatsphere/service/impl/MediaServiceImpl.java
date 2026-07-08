@@ -1,6 +1,7 @@
 package com.example.chatsphere.service.impl;
 
 import com.apiservice.client.ApiRequest;
+import com.example.chatsphere.dto.MediaDTO;
 import com.example.chatsphere.dto.MediaPreSignedUrlResponse;
 import com.example.chatsphere.dto.MediaUploadCompleteResponse;
 import com.example.chatsphere.dto.MediaUploadInitRequest;
@@ -15,6 +16,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -96,6 +98,30 @@ public class MediaServiceImpl implements MediaService {
             logger.info("Pre-signed URL generated successfully for mediaId={}", mediaId);
         } else {
             logger.warn("No pre-signed URL response received for mediaId={}", mediaId);
+        }
+
+        return response;
+    }
+
+    @Override
+    public SuccessResponse<MediaPreSignedUrlResponse> getConversationMedia(Long conversationId, Long mediaId) {
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("conversationId", String.valueOf(conversationId));
+        pathParams.put("mediaId", String.valueOf(mediaId));
+
+        ApiRequest apiReq = apiRequestBuilderUtil.build("media.getConversationMedia", pathParams,
+                Collections.emptyMap());
+
+        logger.info("Fetching media for conversationId={}, mediaId={}", conversationId, mediaId);
+
+        SuccessResponse<MediaPreSignedUrlResponse> response = authenticatedApiService.call(apiReq,
+                new ParameterizedTypeReference<SuccessResponse<MediaPreSignedUrlResponse>>() {
+                });
+
+        if (response.getData() != null && !response.getData().isEmpty()) {
+            logger.info("Media fetched successfully for conversationId={}, mediaId={}", conversationId, mediaId);
+        } else {
+            logger.warn("No media found for conversationId={}, mediaId={}", conversationId, mediaId);
         }
 
         return response;
