@@ -189,11 +189,6 @@
                     </div>
     </div>
 
-    <!-- Load MediaCache.js for IndexedDB media caching -->
-    <script src="${ctx}/js/app/MediaCache.js" nonce="${cspNonce}"></script>
-    <!-- Load mediaLoader.js for lazy-loading media -->
-    <script src="${ctx}/js/app/mediaLoader.js" nonce="${cspNonce}"></script>
-
     <script nonce="${cspNonce}">
         //init in header.jsp
         // const ctx = "<c:out value='${ctx}'/>";//getting from commons.jsp

@@ -3,3 +3,4 @@
         <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
             <c:set var="ctx" value="${pageContext.request.contextPath}" scope="request" />
             <c:set var="userid" value="${userId}" scope="request" />
+            <c:set var="userMediaId" value="${userMediaId}" scope="request" />

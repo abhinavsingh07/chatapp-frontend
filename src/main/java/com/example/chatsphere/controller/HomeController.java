@@ -27,8 +27,9 @@ public class HomeController {
     public String homePage(Model model, HttpServletRequest request) {
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.HOME_PAGE_VIEW);
         logger.info("Loading home page for user");
-        String loggedInUserid = (String) request.getAttribute("userId");
-        List<ConversationLastMsgDTO> chatData = chatService.getLastMessageByLoggedInUserId(loggedInUserid);
+        //backend api getting userid from security context
+        //String loggedInUserid = (String) request.getAttribute("userId");
+        List<ConversationLastMsgDTO> chatData = chatService.getLastMessageByLoggedInUserId("123");
         //logger.info("/home endpoint called. Retrieved chat data for user {}: {}", loggedInUserid, chatData);
         model.addAttribute("chatData", chatData);
         //get loggedin user contacts ids

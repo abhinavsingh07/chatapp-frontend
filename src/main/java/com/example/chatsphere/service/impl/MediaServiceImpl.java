@@ -82,22 +82,22 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public SuccessResponse<MediaPreSignedUrlResponse> getPresignedDownloadUrl(Long mediaId) {
-        Map<String, String> pathParams = Map.of("mediaId", String.valueOf(mediaId));
+    public SuccessResponse<MediaPreSignedUrlResponse> getPresignedDownloadUrl(Long userId, Long mediaId) {
+        Map<String, String> pathParams = Map.of("userId", String.valueOf(userId), "mediaId", String.valueOf(mediaId));
 
         ApiRequest apiReq = apiRequestBuilderUtil.build("media.getPresignedUrl", pathParams,
                 Collections.emptyMap());
 
-        logger.info("Generating pre-signed download URL for mediaId={}", mediaId);
+        logger.info("Generating pre-signed download URL for userId={}, mediaId={}", userId, mediaId);
 
         SuccessResponse<MediaPreSignedUrlResponse> response = authenticatedApiService.call(apiReq,
                 new ParameterizedTypeReference<SuccessResponse<MediaPreSignedUrlResponse>>() {
                 });
 
         if (response.getData() != null && !response.getData().isEmpty()) {
-            logger.info("Pre-signed URL generated successfully for mediaId={}", mediaId);
+            logger.info("Pre-signed URL generated successfully for userId={}, mediaId={}", userId, mediaId);
         } else {
-            logger.warn("No pre-signed URL response received for mediaId={}", mediaId);
+            logger.warn("No pre-signed URL response received for userId={}, mediaId={}", userId, mediaId);
         }
 
         return response;

@@ -20,6 +20,7 @@ public class UserDTO {
     private String profilePictureUrl;
     private String about;
     private String roleName;
+    private String mediaId;
 
     public UserDTO() {
     }
@@ -123,4 +124,13 @@ public class UserDTO {
     public void setRoleName(String roleName) {
         this.roleName = roleName;
     }
+
+    public String getMediaId() {
+        return mediaId;
+    }
+
+    public void setMediaId(String mediaId) {
+        this.mediaId = mediaId;
+    }
+
 }

@@ -54,7 +54,7 @@ class MediaCache {
                     console.log('[MediaCache] IndexedDB initialized successfully');
 
                     // Request persistent storage to prevent browser auto-cleanup
-                    MediaCache.requestStoragePersistence();
+                    // MediaCache.requestStoragePersistence();
 
                     resolve();
                 };
@@ -263,30 +263,30 @@ class MediaCache {
         }
     }
 
-    /**
-     * Request persistent storage from the browser so cached data
-     * is not automatically evicted under storage pressure.
-     * @returns {Promise<boolean>} True if persistent storage granted
-     */
-    static async requestStoragePersistence() {
-        if (navigator.storage && navigator.storage.persist) {
-            try {
-                const granted = await navigator.storage.persist();
-                if (granted) {
-                    console.log('[MediaCache] Persistent storage granted — browser will not auto-clear cached data.');
-                } else {
-                    console.warn('[MediaCache] Persistent storage denied — cached data may be evicted under storage pressure.');
-                }
-                return granted;
-            } catch (error) {
-                console.warn('[MediaCache] Failed to request storage persistence:', error);
-                return false;
-            }
-        } else {
-            console.warn('[MediaCache] navigator.storage.persist API not available in this browser.');
-            return false;
-        }
-    }
+    // /**
+    //  * Request persistent storage from the browser so cached data
+    //  * is not automatically evicted under storage pressure.
+    //  * @returns {Promise<boolean>} True if persistent storage granted
+    //  */
+    // static async requestStoragePersistence() {
+    //     if (navigator.storage && navigator.storage.persist) {
+    //         try {
+    //             const granted = await navigator.storage.persist();
+    //             if (granted) {
+    //                 console.log('[MediaCache] Persistent storage granted — browser will not auto-clear cached data.');
+    //             } else {
+    //                 console.warn('[MediaCache] Persistent storage denied — cached data may be evicted under storage pressure.');
+    //             }
+    //             return granted;
+    //         } catch (error) {
+    //             console.warn('[MediaCache] Failed to request storage persistence:', error);
+    //             return false;
+    //         }
+    //     } else {
+    //         console.warn('[MediaCache] navigator.storage.persist API not available in this browser.');
+    //         return false;
+    //     }
+    // }
 
     /**
      * Convert blob to object URL

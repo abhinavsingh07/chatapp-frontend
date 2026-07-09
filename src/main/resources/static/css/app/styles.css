@@ -1047,6 +1047,34 @@ body {
     display: block;
 }
 
+/* ── Profile picture lazy-load containers ── */
+.profile-picture-container,
+[data-profilepicture="true"] {
+   width: 100%;
+}
+
+/* Profile page: match the 92px avatar size */
+.pf-avatar-wrap .profile-picture-container,
+.pf-avatar-wrap [data-profilepicture="true"] {
+    width: 92px;
+    height: 92px;
+}
+
+/* Chat sidebar: match the 48px ch-avatar size */
+.ch-avatar-wrap [data-profilepicture="true"] {
+    width: 48px;
+    height: 48px;
+}
+
+/* Avatar image inside lazy-load containers fills the parent */
+.profile-picture-container .pf-avatar,
+[data-profilepicture="true"] .pf-avatar {
+    width: 100%;
+    height: 100%;
+    border: none;
+    box-shadow: none;
+}
+
 .pf-avatar-edit {
     position: absolute;
     bottom: 2px;

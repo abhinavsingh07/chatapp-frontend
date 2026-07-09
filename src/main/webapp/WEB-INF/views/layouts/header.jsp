@@ -47,16 +47,23 @@
                                                 class="cs-user-btn btn dropdown-toggle d-flex align-items-center gap-2"
                                                 type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <div class="cs-user-avatar">
-                                                    <c:choose>
-                                                        <c:when test="${not empty username}">
-                                                            <%-- Show first letter of username as avatar initial --%>
-                                                                <span
-                                                                    class="cs-user-initial">${fn:substring(username,0,1)}</span>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <i class="fas fa-user" style="font-size:0.75rem;"></i>
-                                                        </c:otherwise>
-                                                    </c:choose>
+                                                    <c:if test="${not empty userMediaId}">
+                                                        <div data-usermediaid="${userMediaId}" data-userid="${userId}"
+                                                            data-profilepicture="true"></div>
+                                                    </c:if>
+                                                    <c:if test="${empty userMediaId}">
+                                                        <c:choose>
+                                                            <c:when test="${not empty username}">
+                                                                <%-- Show first letter of username as avatar initial
+                                                                    --%>
+                                                                    <span
+                                                                        class="cs-user-initial">${fn:substring(username,0,1)}</span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <i class="fas fa-user" style="font-size:0.75rem;"></i>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </c:if>
                                                 </div>
                                                 <c:if test="${not empty username}">
                                                     <span class="cs-user-name d-none d-lg-inline">

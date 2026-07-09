@@ -341,7 +341,7 @@ class ChatWebSocket {
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
 
-                    // Validate file - only IMAGE and DOCUMENT types allowed
+                    // Validate file - only IMAGE VIDEO and DOCUMENT types allowed
                     const validation = validateSelectedFile(file, 'CHAT_ATTACHMENT');
                     if (!validation.valid) {
                         showUploadError(validation.error, 'chat');
@@ -352,7 +352,7 @@ class ChatWebSocket {
 
                     // Only allow IMAGE, DOCUMENT, and VIDEO
                     if (validation.mediaType !== 'IMAGE' && validation.mediaType !== 'DOCUMENT' && validation.mediaType !== 'VIDEO') {
-                        showUploadError('Only IMAGE and DOCUMENT files are supported for multiple upload', 'chat');
+                        showUploadError('Only IMAGE, VIDEO, and DOCUMENT files are supported for multiple upload', 'chat');
                         chatMediaInput.value = '';
                         this.selectedMediaFiles = [];
                         return;

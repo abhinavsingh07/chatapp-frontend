@@ -28,30 +28,31 @@
                             </div>
 
                             <div class="pf-avatar-wrap mx-auto mb-2">
-                                <c:choose>
-                                    <c:when test="${not empty user.profilePictureUrl}">
-                                        <img id="avatarPreview" src="${fn:escapeXml(user.profilePictureUrl)}"
-                                            alt="Profile Avatar" class="pf-avatar">
-                                    </c:when>
-                                    <c:otherwise>
+                                <c:if test="${not empty userMediaId}">
+                                    <div class="profile-picture-container" data-usermediaid="${userMediaId}" data-userid="${userId}" data-profilepicture="true"></div>
+                                </c:if>
+                                <c:if test="${empty userMediaId}">
+                                    <div class="avatar-container">
                                         <img id="avatarPreview" src="${ctx}/icons/profile-user.png" alt="Profile Avatar"
                                             class="pf-avatar">
-                                    </c:otherwise>
-                                </c:choose>
-                                <!-- When you click on a label with a for attribute, it automatically-->
+                                    </div>
+                                </c:if>
+                                <!-- When you click on a label with a for attribute, it automatically opens window to select file-->
                                 <label for="profilePictureInput" class="pf-avatar-edit" title="Change photo">
                                     <i class="fas fa-pencil-alt"></i>
                                 </label>
                             </div>
-                            <input type="file" id="avatarInput" name="avatar" accept="image/*" class="d-none">
+                            <!-- <input type="file" id="avatarInput" name="avatar" accept="image/*" class="d-none"> -->
                             <input type="file" id="profilePictureInput" accept="image/*" class="d-none">
                             <p class="text-muted small mb-0">Click the pencil to change your photo</p>
 
                             <%-- Upload Status & Retry (hidden by default) --%>
-                            <div id="profileUploadStatus" class="alert alert-info small d-none mt-3 mb-2" role="alert"></div>
-                            <button type="button" class="btn btn-sm btn-outline-secondary d-none mt-2" id="profileRetryUploadBtn">
-                                Retry Upload
-                            </button>
+                                <div id="profileUploadStatus" class="alert alert-info small d-none mt-3 mb-2"
+                                    role="alert"></div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary d-none mt-2"
+                                    id="profileRetryUploadBtn">
+                                    Retry Upload
+                                </button>
                         </div>
 
                         <div class="pf-divider"></div>
@@ -309,7 +310,7 @@
 
                         // Store file and show upload button
                         profilePictureState.file = file;
-                        
+
                         // Show circular preview with yellow border
                         const reader = new FileReader();
                         reader.onload = function (e) {
@@ -324,7 +325,7 @@
                         reader.readAsDataURL(file);
 
                         //handle automatic upload after selection
-                         if (!profilePictureState.file) {
+                        if (!profilePictureState.file) {
                             showUploadError('No file selected', 'profile');
                             return;
                         }
@@ -371,6 +372,7 @@
                                     uploadProfilePictureBtn.classList.add('d-none');
                                     uploadProfilePictureBtn.disabled = false;
                                     resetUploadState('profile');
+                                    window.location.reload(); // Refresh to show the new profile picture
                                 }, 1000);
                             } else {
                                 showUploadError('Media status is not ACTIVE. Please try again.', 'profile');
@@ -388,7 +390,7 @@
                         } finally {
                             profilePictureState.isUploading = false;
                         }
-                        
+
                     });
                 }
 

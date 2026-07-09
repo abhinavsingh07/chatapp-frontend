@@ -9,7 +9,8 @@ public class ConversationLastMsgDTO {
     private String userName;
     private String userId;
     private String messageId;
-    private String userProfilePictureUrl;
+    // private String userProfilePictureUrl;
+    private String mediaId;
 
     // Getters and Setters
     public String getContent() {
@@ -68,12 +69,12 @@ public class ConversationLastMsgDTO {
         this.messageId = messageId;
     }
 
-    public String getUserProfilePictureUrl() {
-        return userProfilePictureUrl;
+    public String getMediaId() {
+        return mediaId;
     }
 
-    public void setUserProfilePictureUrl(String userProfilePictureUrl) {
-        this.userProfilePictureUrl = userProfilePictureUrl;
+    public void setMediaId(String mediaId) {
+        this.mediaId = mediaId;
     }
 
     public String getConversationType() {

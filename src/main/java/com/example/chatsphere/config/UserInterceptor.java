@@ -55,6 +55,7 @@ public class UserInterceptor implements HandlerInterceptor {
                 UserDTO user = userResponse.getData().get(0);
                 request.setAttribute("userId", user.getId());
                 request.setAttribute("username", user.getName());
+                request.setAttribute("userMediaId", user.getMediaId());
 
                 logger.debug("User details populated for userId: {}", user.getId());
             }

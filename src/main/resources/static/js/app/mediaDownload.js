@@ -17,7 +17,9 @@
 
 class MediaLoader {
     static observer = null;
+    static profilePictureObserver = null; // Separate observer for profile picture elements
     static loadedMediaIds = new Set(); // Track loaded media to avoid duplicate API calls
+    static loadedProfilePictureIds = new Set(); // Track loaded profile pictures to avoid duplicates
     static imageModal = null; // Reference to lightbox modal
     static currentImageIndex = 0; // Current image in modal
     static currentModalImages = []; // Images in current modal
@@ -75,6 +77,7 @@ class MediaLoader {
     static async loadMediaForElement(placeholderElement) {
         const mediaId = placeholderElement.dataset.mediaId;
         const mediaType = placeholderElement.dataset.mediaType;
+        const userId= placeholderElement.dataset.userId;
         let presignedUrl = placeholderElement.dataset.presignedUrl;
 
         if (!mediaId || MediaLoader.loadedMediaIds.has(mediaId)) {
@@ -100,7 +103,7 @@ class MediaLoader {
 
             if (!presignedUrl) {
 
-                const downloadUrl = `${ctx}/api/media/pre-signed-url/${mediaId}`;
+                const downloadUrl = `${ctx}/api/media/pre-signed-url/${userId}/${mediaId}`;
                 const urlResponse = await fetch(downloadUrl);
 
                 if (!urlResponse.ok) {
@@ -431,6 +434,172 @@ class MediaLoader {
             MediaLoader.observer.observe(placeholder);
         });
     }
+
+    // ──────────────────────────────────────────────
+    //  Profile Picture Observer
+    // ──────────────────────────────────────────────
+
+    /**
+     * Initialize a dedicated Intersection Observer for profile picture divs
+     * marked with data-profilepicture="true".
+     *
+     * Call this once on page load.  It watches for elements like:
+     *   <div data-usermediaid="abc-123" data-profilepicture="true"></div>
+     *
+     * The observer lazy-loads the profile picture: IndexedDB → presigned URL →
+     * download blob → cache → render as a circular <img> inside the container.
+     */
+    static initProfilePictureObserver() {
+        if (MediaLoader.profilePictureObserver) {
+            return; // Already initialized
+        }
+
+        const options = {
+            root: null,        // Use the viewport (profile pictures are typically in the header / sidebar)
+            rootMargin: '50px',
+            threshold: 0.01
+        };
+
+        MediaLoader.profilePictureObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !entry.target.dataset.profileLoaded) {
+                    MediaLoader.loadProfilePicture(entry.target);
+                }
+            });
+        }, options);
+
+        // Observe every profile-picture placeholder already in the DOM
+        document.querySelectorAll('[data-profilepicture="true"]').forEach(el => {
+            MediaLoader.profilePictureObserver.observe(el);
+        });
+    }
+
+    /**
+     * Load a single profile picture into the placeholder div.
+     *
+     * Flow:
+     *   1. Guard against duplicate loads (data-profile-loaded flag + Set).
+     *   2. Try IndexedDB cache first.
+     *   3. On miss → fetch presigned URL from /api/media/pre-signed-url/{mediaId}.
+     *   4. Download the image blob from the presigned URL.
+     *   5. Cache blob in IndexedDB via MediaCache.
+     *   6. Render a circular <img> tag inside the placeholder.
+     *
+     * @param {HTMLElement} placeholderEl - The div with data-usermediaid + data-profilepicture
+     */
+    static async loadProfilePicture(placeholderEl) {
+        const mediaId = placeholderEl.dataset.usermediaid;
+        const userId = placeholderEl.dataset.userid;
+
+        // Guard: already loaded or no media id
+        if (!mediaId || MediaLoader.loadedProfilePictureIds.has(mediaId)) {
+            placeholderEl.dataset.profileLoaded = 'true';
+            return;
+        }
+
+        try {
+
+            //show loader spinner while loading
+            MediaLoader.showLoadingSpinner(placeholderEl);
+
+            // ── 1. Check IndexedDB cache ──
+            const cachedBlob = await MediaCache.getFromCache(mediaId);
+
+            if (cachedBlob) {
+                const blobUrl = MediaCache.getBlobAsUrl(cachedBlob);
+                MediaLoader.renderProfilePicture(placeholderEl, blobUrl);
+                MediaLoader.loadedProfilePictureIds.add(mediaId);
+                placeholderEl.dataset.profileLoaded = 'true';
+                return;
+            }
+
+            // ── 2. Fetch presigned URL from backend ──
+            const downloadUrl = `${ctx}/api/media/pre-signed-url/${userId}/${mediaId}`;
+            const urlResponse = await fetch(downloadUrl);
+
+            if (!urlResponse.ok) {
+                throw new Error(`HTTP ${urlResponse.status}`);
+            }
+
+            const urlResponseData = await urlResponse.json();
+            const data = urlResponseData.data && urlResponseData.data.length > 0
+                ? urlResponseData.data[0]
+                : urlResponseData;
+
+            const presignedUrl = data.presignedDownloadUrl;
+
+            if (!presignedUrl) {
+                console.warn(`[mediaLoader] No presigned URL for profile picture mediaId=${mediaId}`);
+                placeholderEl.dataset.profileLoaded = 'true';
+                return;
+            }
+
+            // ── 3. Download the image blob ──
+            const blobResponse = await fetch(presignedUrl);
+            if (!blobResponse.ok) {
+                throw new Error(`Failed to download profile picture: HTTP ${blobResponse.status}`);
+            }
+
+            const blob = await blobResponse.blob();
+
+            // ── 4. Cache for future loads ──
+            await MediaCache.putInCache(mediaId, 'IMAGE', blob);
+
+            // ── 5. Render ──
+            const blobUrl = MediaCache.getBlobAsUrl(blob);
+            MediaLoader.renderProfilePicture(placeholderEl, blobUrl);
+            MediaLoader.loadedProfilePictureIds.add(mediaId);
+            placeholderEl.dataset.profileLoaded = 'true';
+
+        } catch (error) {
+            console.warn(`[mediaLoader] Failed to load profile picture ${mediaId}:`, error);
+            placeholderEl.dataset.profileLoaded = 'true';
+        }
+    }
+
+    /**
+     * Render the profile picture <img> inside the placeholder div.
+     *
+     * The image fills the parent .cs-user-avatar circle via CSS:
+     * width/height 100%, object-fit cover, border-radius 50%.
+     *
+     * @param {HTMLElement} placeholderEl - The div that holds data-profilepicture
+     * @param {string} srcUrl - Blob URL or presigned URL to use as img src
+     */
+    static renderProfilePicture(placeholderEl, srcUrl) {
+        // Clear any existing content
+        placeholderEl.innerHTML = '';
+
+        const img = document.createElement('img');
+        img.src = srcUrl;
+        img.alt = 'Profile picture';
+        img.classList.add('pf-avatar');
+
+        img.onload = () => {
+            img.style.opacity = '1';
+        };
+
+        img.onerror = () => {
+            console.warn('[mediaLoader] Profile picture image failed to load');
+            // Keep the initial-letter fallback visible (the sibling span.cs-user-initial)
+        };
+
+        placeholderEl.appendChild(img);
+    }
+
+    /**
+     * Re-scan the DOM for new profile-picture elements and start observing them.
+     * Call this after new UI sections containing profile pictures are inserted.
+     */
+    static observeNewProfilePictures() {
+        if (!MediaLoader.profilePictureObserver) {
+            MediaLoader.initProfilePictureObserver();
+        }
+
+        document.querySelectorAll('[data-profilepicture="true"]:not([data-profile-loaded])').forEach(el => {
+            MediaLoader.profilePictureObserver.observe(el);
+        });
+    }
 }
 
 // Initialize on page load
@@ -438,6 +607,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Initialize IndexedDB cache
     await MediaCache.initIndexedDB();
 
-    // Initialize media lazy loader
+    // Initialize media lazy loader (chat messages)
     MediaLoader.initMediaLazyLoader();
+
+    // Initialize profile picture observer (header, sidebar, etc.)
+    MediaLoader.initProfilePictureObserver();
 });

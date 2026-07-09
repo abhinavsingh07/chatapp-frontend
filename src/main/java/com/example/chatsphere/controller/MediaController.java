@@ -90,18 +90,19 @@ public class MediaController {
      * @param mediaId The ID of the media record
      * @return SuccessResponse<MediaPreSignedUrlResponse> with presigned download URL
      */
-    @GetMapping("/api/media/pre-signed-url/{mediaId}")
+    @GetMapping("/api/media/pre-signed-url/{userId}/{mediaId}")
     @ResponseBody
     public SuccessResponse<MediaPreSignedUrlResponse> getPresignedDownloadUrl(
+            @PathVariable("userId") Long userId,
             @PathVariable("mediaId") Long mediaId) {
-        logger.debug("Generating pre-signed download URL for mediaId={}", mediaId);
+        logger.debug("Generating pre-signed download URL for userId={}, mediaId={}", userId, mediaId);
 
-        SuccessResponse<MediaPreSignedUrlResponse> response = mediaService.getPresignedDownloadUrl(mediaId);
+        SuccessResponse<MediaPreSignedUrlResponse> response = mediaService.getPresignedDownloadUrl(userId, mediaId);
 
         if (response.getData() != null && !response.getData().isEmpty()) {
-            logger.info("Pre-signed download URL generated successfully for mediaId={}", mediaId);
+            logger.info("Pre-signed download URL generated successfully for userId={}, mediaId={}", userId, mediaId);
         } else {
-            logger.warn("Failed to generate pre-signed download URL for mediaId={}", mediaId);
+            logger.warn("Failed to generate pre-signed download URL for userId={}, mediaId={}", userId, mediaId);
         }
 
         return response;

@@ -8,3 +8,5 @@
     <script src="<c:url value='/js/app/app.js' />" type="text/javascript"></script>
     <script src="<c:url value='/js/app/chat.js' />" type="text/javascript"></script>
     <script src="<c:url value='/js/app/user-presence-poller.js' />" type="text/javascript"></script>
+    <script src="<c:url value='/js/app/mediaCache.js' />" nonce="${cspNonce}"></script>
+    <script src="<c:url value='/js/app/mediaDownLoad.js' />" nonce="${cspNonce}"></script>

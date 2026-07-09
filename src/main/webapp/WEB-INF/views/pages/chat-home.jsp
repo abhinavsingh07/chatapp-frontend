@@ -82,9 +82,8 @@
                         </c:when>
                         <c:otherwise>
                            <c:choose>
-                              <c:when test="${not empty data.userProfilePictureUrl}">
-                                 <img src="<c:out value='${data.userProfilePictureUrl}'/>" alt="Avatar"
-                                    class="ch-avatar ch-avatar-img">
+                              <c:when test="${not empty data.mediaId}">
+                                 <div data-usermediaid="${data.mediaId}" data-userid="${data.userId}" data-profilepicture="true"></div>
                               </c:when>
                               <c:otherwise>
                                  <div class="ch-avatar ch-avatar-default">
