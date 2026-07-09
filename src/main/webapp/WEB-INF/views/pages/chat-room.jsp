@@ -9,13 +9,15 @@
 
                 <%-- Avatar --%>
                     <c:choose>
-                        <c:when test="${not empty toUserDetails.profilePictureUrl}">
-                            <img src="<c:out value='${toUserDetails.profilePictureUrl}'/>" alt="Avatar"
-                                class="cr-header-avatar">
+                        <c:when test="${not empty toUserDetails.mediaId}">
+                            <div class="ch-avatar-wrap">
+                                <div data-usermediaid="${toUserDetails.mediaId}" data-userid="${toUserDetails.id}"
+                                    data-profilepicture="true"></div>
+                            </div>
                         </c:when>
                         <c:otherwise>
                             <div class="cr-header-avatar-placeholder">
-                                <i class="fas fa-users fa-sm"></i>
+                                <i class="fas fa-user fa-sm"></i>
                             </div>
                         </c:otherwise>
                     </c:choose>
@@ -127,12 +129,11 @@
                     </form>
                 </div>
 
-                <%-- Hidden File Input for Chat Media (max 5 files)
-                    Accept types: Images (JPEG, PNG, GIF, WebP, BMP), Videos (MP4, WebM, etc), Documents (PDF, Word, Excel, PowerPoint, etc) --%>
-                    <input type="file" id="chatMediaInput" class="d-none" 
-                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,video/mp4,video/mpeg,video/quicktime,video/webm,video/x-msvideo,video/x-matroska,video/3gpp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,application/vnd.oasis.opendocument.text,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.presentation" 
-                        multiple 
-                        data-max-files="5" />
+                <%-- Hidden File Input for Chat Media (max 5 files) Accept types: Images (JPEG, PNG, GIF, WebP, BMP),
+                    Videos (MP4, WebM, etc), Documents (PDF, Word, Excel, PowerPoint, etc) --%>
+                    <input type="file" id="chatMediaInput" class="d-none"
+                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,video/mp4,video/mpeg,video/quicktime,video/webm,video/x-msvideo,video/x-matroska,video/3gpp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,application/vnd.oasis.opendocument.text,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.presentation"
+                        multiple data-max-files="5" />
 
                     <div class="offcanvas offcanvas-end" tabindex="-1" id="chatInfoSidebar" style="max-width:320px;">
                         <div class="offcanvas-header cr-offcanvas-header">

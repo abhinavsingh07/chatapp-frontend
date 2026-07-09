@@ -77,7 +77,7 @@ class MediaLoader {
     static async loadMediaForElement(placeholderElement) {
         const mediaId = placeholderElement.dataset.mediaId;
         const mediaType = placeholderElement.dataset.mediaType;
-        const userId= placeholderElement.dataset.userId;
+        const userId = placeholderElement.dataset.userId;
         let presignedUrl = placeholderElement.dataset.presignedUrl;
 
         if (!mediaId || MediaLoader.loadedMediaIds.has(mediaId)) {
@@ -115,7 +115,7 @@ class MediaLoader {
                     ? urlResponseData.data[0]
                     : urlResponseData;
 
-                presignedUrl= data.presignedDownloadUrl;
+                presignedUrl = data.presignedDownloadUrl;
 
                 if (!presignedUrl) {
                     console.warn(`[mediaLoader] No presigned URL in response for mediaId=${mediaId}`);
@@ -491,12 +491,6 @@ class MediaLoader {
         const mediaId = placeholderEl.dataset.usermediaid;
         const userId = placeholderEl.dataset.userid;
 
-        // Guard: already loaded or no media id
-        if (!mediaId || MediaLoader.loadedProfilePictureIds.has(mediaId)) {
-            placeholderEl.dataset.profileLoaded = 'true';
-            return;
-        }
-
         try {
 
             //show loader spinner while loading
@@ -596,9 +590,10 @@ class MediaLoader {
             MediaLoader.initProfilePictureObserver();
         }
 
-        document.querySelectorAll('[data-profilepicture="true"]:not([data-profile-loaded])').forEach(el => {
-            MediaLoader.profilePictureObserver.observe(el);
-        });
+        document.querySelectorAll('[data-profilepicture="true"]:not([data-profile-loaded])')
+            .forEach(el => {
+                MediaLoader.profilePictureObserver.observe(el);
+            });
     }
 }
 

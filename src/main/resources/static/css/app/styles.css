@@ -288,8 +288,6 @@ body {
 
 /* ── User avatar circle ── */
 .cs-user-avatar {
-    width: 28px;
-    height: 28px;
     background: #2563EB;
     border-radius: 50%;
     display: flex;
@@ -1062,8 +1060,8 @@ body {
 
 /* Chat sidebar: match the 48px ch-avatar size */
 .ch-avatar-wrap [data-profilepicture="true"] {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
 }
 
 /* Avatar image inside lazy-load containers fills the parent */
@@ -2627,49 +2625,103 @@ body {
     opacity: 0.7;
 }
 
-/* ── Media Grid for lazy-loaded content ── */
+/* ══════════════════════════════════════════════════════════════
+   Media Grid — WhatsApp-style layout
+   ══════════════════════════════════════════════════════════════ */
+
 .message-media-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+    gap: 3px;
+    margin-top: 4px;
     width: 100%;
+    max-width: 336px;
+    border-radius: 6px;
+    overflow: hidden;
 }
 
-/* Mobile: single column */
-@media (max-width: 575.98px) {
-    .message-media-grid {
-        grid-template-columns: 1fr;
-    }
+/* ── 1 item : full width, natural aspect ratio ── */
+.message-media-grid:has(> :first-child:last-child) {
+    grid-template-columns: 1fr;
 }
 
-/* Tablet: 2 columns */
-@media (min-width: 576px) and (max-width: 991.98px) {
-    .message-media-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+/* ── 2 items : side-by-side equal squares ── */
+.message-media-grid:has(> :nth-child(2):last-child) {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* ── 3 items : one tall left, two stacked right ── */
+.message-media-grid:has(> :nth-child(3):last-child) {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+.message-media-grid:has(> :nth-child(3):last-child) > :first-child {
+    grid-row: 1 / span 2;
+}
+
+/* ── 4 items : 2×2 grid ── */
+.message-media-grid:has(> :nth-child(4):last-child) {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+/* ── 5+ items : 3-column grid ── */
+.message-media-grid:has(> :nth-child(5)) {
+    grid-template-columns: repeat(3, 1fr);
 }
 
 /* ── Media Lazy Placeholder ── */
 .media-lazy-placeholder {
     position: relative;
     aspect-ratio: 1 / 1;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: linear-gradient(90deg, #e9ecef 25%, #dee2e6 50%, #e9ecef 75%);
     background-size: 200% 100%;
-    border-radius: 0.375rem;
     overflow: hidden;
-    cursor: default;
+    cursor: pointer;
     animation: mediaSkeleton 1.5s infinite;
+    min-width: 0;
+    min-height: 0;
+}
+
+/* Single-image placeholder: drop forced square; let natural height control */
+.message-media-grid:has(> :first-child:last-child) .media-lazy-placeholder {
+    aspect-ratio: auto;
+    min-height: 60px;
+}
+
+/* Hide skeleton once any content (spinner / img / video) is injected */
+.media-lazy-placeholder:not(:empty) {
+    background: transparent;
+    animation: none;
+}
+
+/* Loaded placeholder: no background */
+.media-lazy-placeholder[data-loaded="true"] {
+    background: transparent;
+    animation: none;
 }
 
 @keyframes mediaSkeleton {
-    0% {
-        background-position: 200% 0;
-    }
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
 
-    100% {
-        background-position: -200% 0;
-    }
+/* ── Media Thumbnail ── */
+.media-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Single image: natural aspect ratio, not cropped to square */
+.message-media-grid:has(> :first-child:last-child) .media-thumbnail {
+    height: auto;
+    max-height: 300px;
+    border-radius: 4px;
+}
+
+.media-image {
+    cursor: pointer;
 }
 
 /* ── Media Loading Spinner ── */
@@ -2680,12 +2732,12 @@ body {
     justify-content: center;
     width: 100%;
     height: 100%;
-    min-height: 150px;
+    min-height: 80px;
 }
 
 .spinner-border-custom {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border: 3px solid rgba(100, 116, 139, 0.2);
     border-top: 3px solid #2563EB;
     border-radius: 50%;
@@ -2693,28 +2745,15 @@ body {
 }
 
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .media-loading-text {
-    font-size: 12px;
+    font-size: 11px;
     color: #64748B;
-    margin-top: 8px;
+    margin-top: 6px;
     text-align: center;
-}
-
-/* ── Media Thumbnail (loaded image/video) ── */
-.media-thumbnail {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 0.375rem;
-    display: block;
 }
 
 /* ── Video Play Button Overlay ── */
@@ -2723,21 +2762,36 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 50px;
-    height: 50px;
+    width: 44px;
+    height: 44px;
     background: rgba(0, 0, 0, 0.5);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     pointer-events: none;
     transition: background 0.2s ease;
 }
 
 .media-lazy-placeholder:hover .video-play-button {
     background: rgba(0, 0, 0, 0.7);
+}
+
+/* ── Dark-theme overrides ── */
+.theme-dark .media-lazy-placeholder {
+    background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+    background-size: 200% 100%;
+}
+
+.theme-dark .media-lazy-placeholder:not(:empty),
+.theme-dark .media-lazy-placeholder[data-loaded="true"] {
+    background: transparent;
+}
+
+.theme-dark .media-loading-text {
+    color: #94a3b8;
 }
 
 /* ── Lightbox Modal for Image Preview ── */
@@ -2875,51 +2929,6 @@ body {
 
 .media-lightbox-counter.d-none {
     display: none;
-}
-
-/* Media Grid and Lazy-loaded Images Styling */
-.message-media-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 8px;
-    margin-top: 8px;
-    width: 100%;
-    max-width: 300px;
-}
-
-.media-lazy-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f0f0f0;
-    border-radius: 8px;
-    overflow: hidden;
-    min-height: 150px;
-}
-
-.media-thumbnail {
-    max-width: 100%;
-    max-height: 250px;
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.media-image {
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.media-image:hover {
-    transform: scale(1.02);
-}
-
-.media-lazy-placeholder video {
-    width: 100%;
-    max-height: 250px;
-    border-radius: 8px;
 }
 
 /* Responsive adjustments for lightbox */

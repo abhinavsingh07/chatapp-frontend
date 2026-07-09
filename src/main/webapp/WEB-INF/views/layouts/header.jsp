@@ -48,8 +48,12 @@
                                                 type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <div class="cs-user-avatar">
                                                     <c:if test="${not empty userMediaId}">
-                                                        <div data-usermediaid="${userMediaId}" data-userid="${userId}"
-                                                            data-profilepicture="true"></div>
+                                                        <div class="ch-avatar-wrap">
+                                                            <div data-usermediaid="${userMediaId}"
+                                                                data-userid="${userId}" data-profilepicture="true">
+                                                            </div>
+                                                        </div>
+
                                                     </c:if>
                                                     <c:if test="${empty userMediaId}">
                                                         <c:choose>
