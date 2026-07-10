@@ -457,7 +457,7 @@
                   bindContactClickHandlers();
                   setTimeout(function () {
                      MediaLoader.observeNewProfilePictures();
-                  }, 1500);
+                  }, 1000);
                })
 
                function bindContactClickHandlers() {

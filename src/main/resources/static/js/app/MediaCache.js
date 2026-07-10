@@ -19,6 +19,7 @@ class MediaCache {
     static db = null;
     static isInitialized = false;
     static isAvailable = true; // Track if IndexedDB is available/working
+    static DEBUG = true; // Set to true for development logging
 
     // Storage limits per media type (in bytes)
     static SIZE_LIMITS = {
@@ -51,7 +52,7 @@ class MediaCache {
                 request.onsuccess = () => {
                     MediaCache.db = request.result;
                     MediaCache.isInitialized = true;
-                    console.log('[MediaCache] IndexedDB initialized successfully');
+                    MediaCache._debugLog('[MediaCache] IndexedDB initialized successfully');
 
                     // Request persistent storage to prevent browser auto-cleanup
                     // MediaCache.requestStoragePersistence();
@@ -69,7 +70,7 @@ class MediaCache {
                         // Create index on lastAccessed for LRU cleanup
                         store.createIndex('lastAccessed', 'lastAccessed', { unique: false });
 
-                        console.log('[MediaCache] Object store created');
+                        MediaCache._debugLog('[MediaCache] Object store created');
                     }
                 };
             });
@@ -103,10 +104,10 @@ class MediaCache {
                         const updateRequest = store.put(result);
                         updateRequest.onerror = () => console.warn('[MediaCache] Failed to update timestamp');
 
-                        console.log(`[MediaCache] Cache HIT for mediaId=${mediaId}`);
+                        MediaCache._debugLog(`[MediaCache] Cache HIT for mediaId=${mediaId}`);
                         resolve(result.blob);
                     } else {
-                        console.log(`[MediaCache] Cache MISS for mediaId=${mediaId}`);
+                        MediaCache._debugLog(`[MediaCache] Cache MISS for mediaId=${mediaId}`);
                         resolve(null);
                     }
                 };
@@ -147,7 +148,7 @@ class MediaCache {
             // Check if caching would exceed total quota
             const totalUsed = await MediaCache.getTotalCacheSize();
             if (totalUsed + blob.size > MediaCache.TOTAL_QUOTA) {
-                console.log('[MediaCache] Quota exceeded. Performing LRU cleanup...');
+                MediaCache._debugLog('[MediaCache] Quota exceeded. Performing LRU cleanup...');
                 await MediaCache.performLRUCleanup(blob.size);
             }
 
@@ -167,7 +168,7 @@ class MediaCache {
                 const request = store.put(cacheEntry);
 
                 request.onsuccess = () => {
-                    console.log(`[MediaCache] Cached mediaId=${mediaId} (${(blob.size / 1024 / 1024).toFixed(2)}MB)`);
+                    MediaCache._debugLog(`[MediaCache] Cached mediaId=${mediaId} (${(blob.size / 1024 / 1024).toFixed(2)}MB)`);
                     resolve(true);
                 };
 
@@ -247,7 +248,7 @@ class MediaCache {
                         deletedCount++;
                     }
 
-                    console.log(
+                    MediaCache._debugLog(
                         `[MediaCache] LRU cleanup: Deleted ${deletedCount} items, freed ${(freedSpace / 1024 / 1024).toFixed(2)}MB`
                     );
                     resolve();
@@ -313,7 +314,7 @@ class MediaCache {
                 const request = store.clear();
 
                 request.onsuccess = () => {
-                    console.log('[MediaCache] All cache cleared');
+                    MediaCache._debugLog('[MediaCache] All cache cleared');
                     resolve();
                 };
 
@@ -324,6 +325,17 @@ class MediaCache {
             });
         } catch (error) {
             console.warn('[MediaCache] Error clearing cache:', error);
+        }
+    }
+
+    /**
+     * Internal debug logging function
+     * Logs only if MediaCache.DEBUG is true
+     * @param  {...any} args - Arguments to log
+     */
+    static _debugLog(...args) {
+        if (MediaCache.DEBUG && typeof console !== 'undefined' && console.log) {
+            console.log.apply(console, args);
         }
     }
 }

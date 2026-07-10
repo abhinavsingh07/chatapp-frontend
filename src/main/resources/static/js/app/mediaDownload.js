@@ -23,6 +23,7 @@ class MediaLoader {
     static imageModal = null; // Reference to lightbox modal
     static currentImageIndex = 0; // Current image in modal
     static currentModalImages = []; // Images in current modal
+    static DEBUG = true; // Set to true for development logging
 
     /**
      * Initialize Intersection Observer for lazy-loading media
@@ -590,10 +591,21 @@ class MediaLoader {
             MediaLoader.initProfilePictureObserver();
         }
 
-        document.querySelectorAll('[data-profilepicture="true"]:not([data-profile-loaded])')
+        document.querySelectorAll('[data-profile-picture="true"]:not([data-profile-loaded])')
             .forEach(el => {
                 MediaLoader.profilePictureObserver.observe(el);
             });
+    }
+
+    /**
+     * Internal debug logging function
+     * Logs only if MediaLoader.DEBUG is true
+     * @param  {...any} args - Arguments to log
+     */
+    static _debugLog(...args) {
+        if (MediaLoader.DEBUG && typeof console !== 'undefined' && console.log) {
+            console.log.apply(console, args);
+        }
     }
 }
 
