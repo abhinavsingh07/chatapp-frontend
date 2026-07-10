@@ -49,8 +49,8 @@
                                                 <div class="cs-user-avatar">
                                                     <c:if test="${not empty userMediaId}">
                                                         <div class="ch-avatar-wrap">
-                                                            <div data-usermediaid="${userMediaId}"
-                                                                data-userid="${userId}" data-profilepicture="true">
+                                                            <div data-user-media-id="${userMediaId}"
+                                                                data-user-id="${userId}" data-profile-picture="true">
                                                             </div>
                                                         </div>
 

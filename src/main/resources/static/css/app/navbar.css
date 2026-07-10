@@ -1,0 +1,215 @@
+/* ============================================================
+   NAVBAR — header.jsp
+   ============================================================ */
+
+.cs-navbar {
+    background: linear-gradient(90deg, #0F172A 0%, #131E36 55%, #0F172A 100%);
+    height: 56px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    z-index: 1030;
+    padding: 0;
+}
+
+/* ── Brand ── */
+.cs-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    text-decoration: none;
+    padding: 0;
+}
+
+.cs-brand-icon {
+    width: 32px;
+    height: 32px;
+    background: #2563EB;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.cs-brand-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.2px;
+}
+
+/* ── Toggler (mobile) ── */
+.cs-toggler {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.05rem;
+    padding: 0.35rem 0.5rem;
+}
+
+.cs-toggler:focus {
+    box-shadow: none;
+    color: #fff;
+}
+
+/* ── Nav links ── */
+.cs-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: rgba(255, 255, 255, 0.65) !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.35rem 0.75rem !important;
+    border-radius: 7px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.cs-nav-link i {
+    font-size: 0.82rem;
+    width: 14px;
+    text-align: center;
+}
+
+.cs-nav-link:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.cs-nav-link.active,
+.cs-nav-link[aria-current="page"] {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+/* ── User button ── */
+.cs-user-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 20px !important;
+    padding: 0.3rem 0.75rem 0.3rem 0.35rem !important;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.cs-user-btn:hover,
+.cs-user-btn:focus,
+.cs-user-btn.show {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.cs-user-btn::after {
+    font-size: 0.65rem;
+    margin-left: 0.2rem;
+    opacity: 0.6;
+}
+
+/* ── User avatar circle ── */
+.cs-user-avatar {
+    background: #2563EB;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cs-user-avatar--lg {
+    width: 36px;
+    height: 36px;
+}
+
+.cs-user-initial {
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.cs-user-name {
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Dropdown menu ── */
+.cs-dropdown {
+    min-width: 210px;
+    border-radius: 14px !important;
+    overflow: hidden;
+    background: #fff;
+}
+
+.cs-dropdown-header {
+    background: #f8f9fc;
+}
+
+.cs-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem !important;
+    font-size: 0.875rem;
+    color: #374151;
+    border-radius: 0;
+    transition: background 0.12s ease;
+}
+
+.cs-dropdown-item i {
+    width: 16px;
+    text-align: center;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+}
+
+.cs-dropdown-item:hover {
+    background: #f5f6f8;
+    color: #111827;
+}
+
+.cs-dropdown-item--danger {
+    color: #dc2626;
+}
+
+.cs-dropdown-item--danger i {
+    color: #dc2626 !important;
+}
+
+.cs-dropdown-item--danger:hover {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+/* ── Mobile collapsed menu ── */
+@media (max-width: 991.98px) {
+    .cs-navbar .navbar-collapse {
+        background: #0F172A;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 1rem 1rem;
+        margin-top: 0;
+    }
+
+    .cs-nav-link {
+        padding: 0.55rem 0.75rem !important;
+    }
+
+    .cs-user-btn {
+        margin-top: 0.5rem;
+        width: 100%;
+        justify-content: flex-start;
+        border-radius: 8px !important;
+    }
+
+    .cs-dropdown {
+        width: 100%;
+        border-radius: 10px !important;
+    }
+}

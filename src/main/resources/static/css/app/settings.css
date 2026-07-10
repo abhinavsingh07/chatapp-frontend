@@ -1,0 +1,282 @@
+/* ============================================================
+   SETTINGS PAGES — settings.jsp
+   ============================================================ */
+
+/* ── Legacy settings (standalone page) ── */
+.settings-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.settings-header {
+    margin-bottom: 30px;
+}
+
+.settings-header h1 {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.settings-header p {
+    color: #666;
+    font-size: 14px;
+}
+
+.settings-section {
+    background-color: white;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border-left: 4px solid #2563EB;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.settings-section:last-child {
+    border-bottom: none;
+}
+
+.settings-section h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.settings-item:last-child {
+    border-bottom: none;
+}
+
+.settings-item-info h3 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.settings-item-info p {
+    font-size: 13px;
+    color: #999;
+    margin: 0;
+}
+
+.settings-item-action {
+    display: flex;
+    gap: 10px;
+}
+
+#enableNotificationBtn {
+    background-color: #2563EB;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+#enableNotificationBtn:hover {
+    background-color: #1d4ed8;
+}
+
+#enableNotificationBtn:disabled {
+    background-color: #28a745;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.notification-status {
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.notification-status.granted {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.notification-status.denied {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.back-link {
+    margin-bottom: 20px;
+}
+
+.back-link a {
+    color: #2563EB;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.back-link a:hover {
+    text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Settings Page (settings.jsp) — st-* namespace
+   ═══════════════════════════════════════════════════════════ */
+
+.st-page-wrap {
+    max-width: 680px;
+    margin: 2rem auto;
+    padding: 0 1rem 3rem;
+}
+
+.st-main-card {
+    border-radius: 16px !important;
+    overflow: hidden;
+}
+
+/* ── Card header ── */
+.st-card-header {
+    background: linear-gradient(90deg, #0F172A 0%, #1a2744 55%, #0F172A 100%);
+    min-height: 58px;
+    padding: 0.9rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+}
+
+.st-header-icon {
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.st-back-btn {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: color 0.15s ease;
+    margin-left: auto;
+}
+
+.st-back-btn:hover {
+    color: #fff;
+}
+
+/* ── Sections ── */
+.st-section {
+    padding: 1.25rem 1.5rem;
+}
+
+.st-divider {
+    height: 1px;
+    background: #f0f2f5;
+    margin: 0;
+}
+
+.st-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #9ca3af;
+    margin-bottom: 0.5rem;
+}
+
+.st-section-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    background: #dbeafe;
+    color: #2563EB;
+}
+
+.st-section-icon--purple {
+    background: #ede9fe;
+    color: #6366F1;
+}
+
+/* ── Items ── */
+.st-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.95rem 0;
+    border-bottom: 1px solid #f5f5f7;
+}
+
+.st-item:last-of-type {
+    border-bottom: none;
+}
+
+.st-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.st-item-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #111827;
+    margin-bottom: 0.2rem;
+}
+
+.st-item-desc {
+    font-size: 0.78rem;
+    color: #9ca3af;
+    line-height: 1.45;
+}
+
+.st-item-action {
+    flex-shrink: 0;
+}
+
+/* ── Notification status ── */
+.st-notify-status {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.st-notify-status--granted {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.st-notify-status--denied {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}

@@ -469,7 +469,7 @@ class MediaLoader {
         }, options);
 
         // Observe every profile-picture placeholder already in the DOM
-        document.querySelectorAll('[data-profilepicture="true"]').forEach(el => {
+        document.querySelectorAll('[data-profile-picture="true"]').forEach(el => {
             MediaLoader.profilePictureObserver.observe(el);
         });
     }
@@ -485,11 +485,11 @@ class MediaLoader {
      *   5. Cache blob in IndexedDB via MediaCache.
      *   6. Render a circular <img> tag inside the placeholder.
      *
-     * @param {HTMLElement} placeholderEl - The div with data-usermediaid + data-profilepicture
+     * @param {HTMLElement} placeholderEl - The div with data-user-media-id + data-profile-picture
      */
     static async loadProfilePicture(placeholderEl) {
-        const mediaId = placeholderEl.dataset.usermediaid;
-        const userId = placeholderEl.dataset.userid;
+        const mediaId = placeholderEl.dataset.userMediaId;
+        const userId = placeholderEl.dataset.userId;
 
         try {
 

@@ -1,0 +1,150 @@
+/* ============================================================
+   RESPONSIVE & MEDIA QUERIES — breakpoints, dark auto,
+   print, high-contrast, reduced-motion
+   ============================================================ */
+
+/* ── Tablet (≤768px) ── */
+@media (max-width: 768px) {
+    .chat-sidebar {
+        height: calc(100vh - 160px);
+    }
+
+    .message-bubble {
+        max-width: 85%;
+    }
+
+    .btn-floating {
+        bottom: 1rem;
+        right: 1rem;
+        width: 48px;
+        height: 48px;
+    }
+
+    .navbar-nav .nav-link {
+        padding: 0.5rem 1rem;
+    }
+
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .avatar-xl {
+        width: 64px;
+        height: 64px;
+    }
+}
+
+/* ── Mobile (≤576px) ── */
+@media (max-width: 576px) {
+    .container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    .message-bubble {
+        max-width: 90%;
+        padding: 0.75rem !important;
+    }
+
+    .chat-item {
+        padding: 0.75rem !important;
+    }
+
+    .contact-item {
+        padding: 0.75rem !important;
+    }
+
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* ── Auto Dark Theme (OS preference) ── */
+@media (prefers-color-scheme: dark) {
+    .theme-auto {
+        --light-color: #212529;
+        --dark-color: #f8f9fa;
+        --chat-bg: #2c2c2c;
+        background-color: #1a1a1a;
+        color: #f8f9fa;
+    }
+
+    .theme-auto .bg-light {
+        background-color: #2c2c2c !important;
+    }
+
+    .theme-auto .bg-white {
+        background-color: #343a40 !important;
+    }
+
+    .theme-auto .text-dark {
+        color: #f8f9fa !important;
+    }
+
+    .theme-auto .border {
+        border-color: #495057 !important;
+    }
+}
+
+/* ── Print ── */
+@media print {
+    .navbar,
+    .btn,
+    .dropdown,
+    .message-input,
+    .btn-floating {
+        display: none !important;
+    }
+
+    .chat-sidebar {
+        display: none !important;
+    }
+
+    .message-bubble {
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: 1px solid #000 !important;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+    }
+}
+
+/* ── High Contrast Mode ── */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid #000;
+    }
+
+    .btn {
+        border: 2px solid;
+    }
+
+    .message-bubble {
+        border: 2px solid #000;
+    }
+
+    .form-control {
+        border: 2px solid #000;
+    }
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .typing-dots span {
+        animation: none;
+    }
+
+    .loading::after {
+        animation: none;
+    }
+}

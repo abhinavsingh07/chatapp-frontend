@@ -1047,26 +1047,26 @@ body {
 
 /* ── Profile picture lazy-load containers ── */
 .profile-picture-container,
-[data-profilepicture="true"] {
+[data-profile-picture="true"] {
    width: 100%;
 }
 
 /* Profile page: match the 92px avatar size */
 .pf-avatar-wrap .profile-picture-container,
-.pf-avatar-wrap [data-profilepicture="true"] {
+.pf-avatar-wrap [data-profile-picture="true"] {
     width: 92px;
     height: 92px;
 }
 
 /* Chat sidebar: match the 48px ch-avatar size */
-.ch-avatar-wrap [data-profilepicture="true"] {
+.ch-avatar-wrap [data-profile-picture="true"] {
     width: 40px;
     height: 40px;
 }
 
 /* Avatar image inside lazy-load containers fills the parent */
 .profile-picture-container .pf-avatar,
-[data-profilepicture="true"] .pf-avatar {
+[data-profile-picture="true"] .pf-avatar {
     width: 100%;
     height: 100%;
     border: none;
@@ -2739,7 +2739,7 @@ body {
     width: 32px;
     height: 32px;
     border: 3px solid rgba(100, 116, 139, 0.2);
-    border-top: 3px solid #2563EB;
+    border-top: 3px solid #FFFF;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -2751,7 +2751,7 @@ body {
 
 .media-loading-text {
     font-size: 11px;
-    color: #64748B;
+    color: #FFFFFF;
     margin-top: 6px;
     text-align: center;
 }

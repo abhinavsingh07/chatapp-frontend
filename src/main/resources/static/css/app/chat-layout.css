@@ -1,0 +1,340 @@
+/* ============================================================
+   CHAT LAYOUT — sidebar, chat list, welcome panel
+   ============================================================ */
+
+/* ── Chat Sidebar ── */
+.chat-sidebar {
+    height: calc(100vh - 120px);
+    background-color: white;
+}
+
+.chat-list {
+    overflow-y: auto;
+}
+
+.chat-item {
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.chat-item:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.chat-item.active {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-left: 3px solid var(--primary-color);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Chat Layout Shell (chat.jsp)
+   ══════════════════════════════════════════════════════════════ */
+
+.ch-layout {
+    display: flex;
+    height: calc(100vh - 56px);
+    overflow: hidden;
+    background: linear-gradient(160deg, #EFF6FF 0%, #F0F2F5 100%);
+}
+
+/* ── Mobile sticky header ── */
+.ch-mobile-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #0F172A;
+    color: white;
+    padding: 0.875rem 1.25rem;
+}
+
+.ch-mobile-btn {
+    color: rgba(255, 255, 255, 0.9);
+    border: none;
+    padding: 0.35rem 0.5rem;
+}
+
+.ch-mobile-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+}
+
+/* ── Sidebar ── */
+.ch-sidebar {
+    width: 360px;
+    min-width: 280px;
+    max-width: 380px;
+    background: #fff;
+    border-right: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex-shrink: 0;
+}
+
+.ch-sidebar-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+}
+
+.ch-header-avatar {
+    width: 34px;
+    height: 34px;
+    background: #2563EB;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ch-icon-btn {
+    width: 34px;
+    height: 34px;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50% !important;
+    background: #f0f2f5 !important;
+    border: none !important;
+}
+
+.ch-icon-btn:hover {
+    background: #e2e8f0 !important;
+}
+
+/* ── Search ── */
+.ch-search-wrap {
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+}
+
+.ch-search-icon {
+    background: #f0f2f5;
+    border: 1px solid #f0f2f5;
+    border-right: none;
+    border-radius: 20px 0 0 20px !important;
+    padding-left: 0.85rem;
+}
+
+.ch-search-input {
+    background: #f0f2f5;
+    border: 1px solid #f0f2f5;
+    border-left: none;
+    border-radius: 0 20px 20px 0 !important;
+    font-size: 0.85rem;
+}
+
+.ch-search-input:focus {
+    background: #f0f2f5;
+    box-shadow: none;
+    border-color: #f0f2f5;
+}
+
+/* ── Chat list ── */
+.ch-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* ── Chat item — .chat-item MUST stay (JS querySelectorAll) ── */
+.ch-item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.8rem 1.25rem;
+    border-bottom: 1px solid #f7f7f7;
+    cursor: pointer;
+    transition: background 0.12s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.ch-item:hover {
+    background: #f5f6f8;
+}
+
+/* ── Avatar ── */
+.ch-avatar-wrap {
+    flex-shrink: 0;
+}
+
+.ch-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    object-fit: cover;
+}
+
+.ch-avatar-group {
+    background: #2563EB;
+    color: white;
+}
+
+.ch-avatar-default {
+    background: #e9ecef;
+    color: #94a3b8;
+}
+
+.ch-avatar-img {
+    object-fit: cover;
+}
+
+/* ── Item body ── */
+.ch-item-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.ch-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 3px;
+}
+
+/* h6 class kept — JS uses querySelector('h6') inside .chat-item */
+.ch-item-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+.ch-item-time {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* p class kept — JS uses querySelector('p') inside .chat-item */
+.ch-item-preview {
+    font-size: 0.78rem;
+    color: #6b7280;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ch-item-preview--empty {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* ── Empty state ── */
+.ch-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    text-align: center;
+}
+
+.ch-empty-icon {
+    width: 72px;
+    height: 72px;
+    background: #f0f2f5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: #9ca3af;
+    margin-bottom: 1rem;
+}
+
+.ch-empty-title {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.35rem;
+}
+
+.ch-empty-text {
+    font-size: 0.82rem;
+    color: #9ca3af;
+    margin-bottom: 1.25rem;
+}
+
+/* ── Right welcome panel (desktop only) ── */
+.ch-welcome {
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #EFF6FF 0%, #F0F4FF 50%, #F0F2F5 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.ch-welcome::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(37, 99, 235, 0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+}
+
+.ch-welcome-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 360px;
+    padding: 2rem;
+}
+
+.ch-welcome-icon {
+    width: 88px;
+    height: 88px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 24px rgba(37, 99, 235, 0.15);
+}
+
+/* ── Profile picture lazy-load containers ── */
+.profile-picture-container,
+[data-profile-picture="true"] {
+    width: 100%;
+}
+
+/* Chat sidebar: match the 48px ch-avatar size */
+.ch-avatar-wrap [data-profile-picture="true"] {
+    width: 40px;
+    height: 40px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 767.98px) {
+    .ch-layout {
+        height: auto;
+        min-height: calc(100vh - 100px);
+    }
+
+    .ch-sidebar {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        flex: 1;
+    }
+
+    .ch-list {
+        max-height: calc(100vh - 160px);
+    }
+}

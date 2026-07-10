@@ -29,7 +29,7 @@
 
                             <div class="pf-avatar-wrap mx-auto mb-2">
                                 <c:if test="${not empty userMediaId}">
-                                    <div class="profile-picture-container" data-usermediaid="${userMediaId}" data-userid="${userId}" data-profilepicture="true"></div>
+                                    <div class="profile-picture-container" data-user-media-id="${userMediaId}" data-user-id="${userId}" data-profile-picture="true"></div>
                                 </c:if>
                                 <c:if test="${empty userMediaId}">
                                     <div class="avatar-container">

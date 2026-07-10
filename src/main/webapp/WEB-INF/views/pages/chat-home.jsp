@@ -83,7 +83,7 @@
                         <c:otherwise>
                            <c:choose>
                               <c:when test="${not empty data.mediaId}">
-                                 <div data-usermediaid="${data.mediaId}" data-userid="${data.userId}" data-profilepicture="true"></div>
+                                 <div data-user-media-id="${data.mediaId}" data-user-id="${data.userId}" data-profile-picture="true"></div>
                               </c:when>
                               <c:otherwise>
                                  <div class="ch-avatar ch-avatar-default">

@@ -369,8 +369,8 @@
                         if (contact.mediaId != null && contact.mediaId !== "") {
                            // html += '<img src="' + contact.mediaId + '" alt="Avatar" />';
                            html += '<div class="ch-avatar-wrap">'
-                              + '<div data-usermediaid="' + contact.mediaId + '"'
-                              + ' data-userid="' + contact.contactUserId + '" data-profilepicture="true">'
+                              + '<div data-user-media-id="' + contact.mediaId + '"'
+                              + ' data-user-id="' + contact.contactUserId + '" data-profile-picture="true">'
                               + '</div>'
                               + '</div>';
                         } else {
@@ -389,7 +389,7 @@
                         var metaParts = [];
                         if (contact.contactEmail) metaParts.push(contact.contactEmail);
                         if (contact.phoneNumber) metaParts.push('@' + contact.phoneNumber);
-                        var metaText = metaParts.join('|');
+                        var metaText = metaParts.join(' | ');
                         html += '<div class="ct-contact-meta">' + (metaText || "No contact info") + '</div>';
 
                         // Status badge
