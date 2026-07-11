@@ -31,10 +31,10 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public String getOrCreateConversationId(String fromUserId, String toUserId) {
-        logger.info("Fetching or creating conversation ID for users: {} and {}", fromUserId, toUserId);
+    public String getOrCreateConversationId(String toUserId) {
+        logger.info("Fetching or creating conversation ID for toUserId: {}", toUserId);
         Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("fromUserId", fromUserId);
+        // pathParams.put("fromUserId", fromUserId);
         pathParams.put("toUserId", toUserId);
         // Build API request
         ApiRequest apiRequest = apiRequestBuilderUtil.build("conv.getOrCreateConv", pathParams, Collections.emptyMap());
@@ -44,12 +44,12 @@ public class ChatServiceImpl implements ChatService {
         // Validate response
         List<String> conversationIds = response.getData();
         if (conversationIds == null || conversationIds.isEmpty()) {
-            logger.error("No conversation ID returned for users: {} and {}", fromUserId, toUserId);
+            logger.error("No conversation ID returned for toUserId: {}", toUserId);
             return null;
         }
 
         String conversationId = conversationIds.get(0);
-        logger.info("Fetched/Created conversation ID: {} for users: {} and {}", conversationId, fromUserId, toUserId);
+        logger.info("Fetched/Created conversation ID: {} for toUserId: {}", conversationId, toUserId);
 
         return conversationId;
     }
@@ -77,12 +77,10 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public List<ConversationLastMsgDTO> getLastMessageByLoggedInUserId(String userId) {
-        logger.info("Fetching last messages for logged-in user ID: {}", userId);
-        Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("userId", userId);
+    public List<ConversationLastMsgDTO> getLastMessageByLoggedInUserId() {
+        logger.info("Fetching last messages for logged-in user");
         // Build API request - assuming the API key for this is "conversation.getLastMessagesByUser"
-        ApiRequest apiRequest = apiRequestBuilderUtil.build("conv.getLastConversationByLoggedInUser", pathParams, Collections.emptyMap());
+        ApiRequest apiRequest = apiRequestBuilderUtil.build("conv.getLastConversationByLoggedInUser", Collections.emptyMap(), Collections.emptyMap());
         // Dispatch API call
         SuccessResponse<ConversationLastMsgDTO> response = authenticatedApiService.call(apiRequest, new ParameterizedTypeReference<SuccessResponse<ConversationLastMsgDTO>>() {
         });
@@ -90,11 +88,11 @@ public class ChatServiceImpl implements ChatService {
         // Validate response
         List<ConversationLastMsgDTO> lastMessages = response.getData();
         if (lastMessages == null || lastMessages.isEmpty()) {
-            logger.warn("No last messages found for logged-in user ID: {}", userId);
+            logger.warn("No last messages found for logged-in user");
             return Collections.emptyList();
         }
 
-        logger.info("Fetched {} last messages for logged-in user ID: {}", lastMessages.size(), userId);
+        logger.info("Fetched {} last messages for logged-in user", lastMessages.size());
         return lastMessages;
     }
 

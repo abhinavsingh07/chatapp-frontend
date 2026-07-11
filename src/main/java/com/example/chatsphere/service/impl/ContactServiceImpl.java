@@ -29,19 +29,15 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public SuccessResponse<ContactUserDTO> getContactsByUserId(String userId) {
-        logger.info("Preparing to fetch contacts for userId: {}", userId);
-
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("userId", userId);
-
-        ApiRequest apiReq = apiRequestBuilderUtil.build("contacts.getByUserId", Collections.emptyMap(), queryParams);
-        logger.info("Fetching contacts for userId: {}",userId);
-
+    public SuccessResponse<ContactUserDTO> getContactsByUserId() {
+        //prepare api request
+        logger.info("Fetching contacts for logged-in user");
+        ApiRequest apiReq = apiRequestBuilderUtil.build("contacts.getByUserId", Collections.emptyMap(), Collections.emptyMap());
+        //call api
         SuccessResponse<ContactUserDTO> response = authenticatedApiService.call(apiReq, new ParameterizedTypeReference<SuccessResponse<ContactUserDTO>>() {
         });
 
-        logger.info("Retrieved {} contacts for userId: {}", response.getData().size(), userId);
+        logger.info("Retrieved {} contacts", response.getData().size());
         return response;
     }
 

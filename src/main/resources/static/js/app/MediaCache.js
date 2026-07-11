@@ -339,3 +339,6 @@ class MediaCache {
         }
     }
 }
+
+
+window.MediaCache = MediaCache; // Expose globally for legacy code or inline scripts

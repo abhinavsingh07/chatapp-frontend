@@ -43,7 +43,7 @@ public class ContactUserDTO {
     /**
      * URL to the contact's profile picture.
      */
-    private String profilePictureUrl;
+    private String mediaId;
 
     /**
      * Custom status message of the contact (if any).
@@ -63,7 +63,7 @@ public class ContactUserDTO {
     /**
      * All-args constructor
      */
-    public ContactUserDTO(String contactId, String contactStatus, String emailStatus, String contactUserId, String name, String phoneNumber, String email, String profilePictureUrl, String status,boolean mutual) {
+    public ContactUserDTO(String contactId, String contactStatus, String emailStatus, String contactUserId, String name, String phoneNumber, String email, String mediaId, String status,boolean mutual) {
         this.contactId = contactId;
         this.contactStatus = contactStatus;
         this.emailStatus = emailStatus;
@@ -71,7 +71,7 @@ public class ContactUserDTO {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.email = email;
-        this.profilePictureUrl = profilePictureUrl;
+        this.mediaId = mediaId;
         this.status = status;
         this.mutual = mutual;
     }
@@ -133,12 +133,12 @@ public class ContactUserDTO {
         this.email = email;
     }
 
-    public String getProfilePictureUrl() {
-        return profilePictureUrl;
+    public String getMediaId() {
+        return mediaId;
     }
 
-    public void setProfilePictureUrl(String profilePictureUrl) {
-        this.profilePictureUrl = profilePictureUrl;
+    public void setMediaId(String mediaId) {
+        this.mediaId = mediaId;
     }
 
     public String getStatus() {

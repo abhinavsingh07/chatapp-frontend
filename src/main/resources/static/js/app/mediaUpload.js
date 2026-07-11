@@ -546,23 +546,4 @@ function debugLog() {
     }
 }
 
-/**
- * Export public API (for module systems or explicit access)
- * If using as module, uncomment below
- */
-// if (typeof module !== 'undefined' && module.exports) {
-//     module.exports = {
-//         generateClientUploadId,
-//         validateSelectedFile,
-//         initMediaUpload,
-//         uploadFileToS3,
-//         completeMediaUpload,
-//         retryUploadComplete,
-//         showUploadError,
-//         showUploadSuccess,
-//         setUploadLoadingState,
-//         resetUploadState,
-//         MEDIA_CONFIG,
-//         UPLOAD_STATE
-//     };
-// }
+window.MediaU

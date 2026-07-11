@@ -11,3 +11,6 @@ DateFormatter.prototype.formatUTCToLocalTimeZone = function (dateString) {
     };
     return new Date(dateString).toLocaleString(undefined, options);
 }
+
+//as using webpack and module bundlers, we can expose the ajaxRequest function globally so that jsp javascript can access it without importing it explicitly. This is useful for legacy code or when you want to use the function in inline scripts.
+window.DateFormatter = DateFormatter;

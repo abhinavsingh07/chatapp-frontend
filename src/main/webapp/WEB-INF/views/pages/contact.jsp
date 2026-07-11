@@ -165,7 +165,6 @@
                      if (!validator.isSafe(toUserId)) return;
 
                      const url = `${ctx}/api/conversation/get-or-create/`
-                        + encodeURIComponent(userId) + "/"
                         + encodeURIComponent(toUserId);
 
                      ajaxRequest(
@@ -342,7 +341,7 @@
 
                function loadContacts() {
                   ajaxRequest(
-                     "${ctx}/api/contact/${userid}", //  spring mvc endpoint
+                     "${ctx}/api/contact", //  spring mvc endpoint
                      "GET",
                      null,
                      function (response) {

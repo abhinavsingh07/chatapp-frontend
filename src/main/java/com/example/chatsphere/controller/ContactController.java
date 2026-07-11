@@ -37,17 +37,17 @@ public class ContactController {
     }
 
     // API endpoints
-    @GetMapping("/api/contact/{userId}")
+    @GetMapping("/api/contact")
     @ResponseBody
-    public SuccessResponse<ContactUserDTO> getContactsByUserId(@PathVariable(required = true) String userId) {
-        logger.debug("Fetching contact list for userId={}", userId);
+    public SuccessResponse<ContactUserDTO> getContactsByUserId() {
+        logger.debug("Fetching contact list for logged-in user");
 
-        SuccessResponse<ContactUserDTO> contacts = contactService.getContactsByUserId(userId);
+        SuccessResponse<ContactUserDTO> contacts = contactService.getContactsByUserId();
 
         if (contacts.getData() == null || contacts.getData().isEmpty()) {
-            logger.info("No contacts found for userId={}", userId);
+            logger.info("No contacts found for logged-in user");
         } else {
-            logger.info("Found {} contact(s) for userId={}", contacts.getData().size(), userId);
+            logger.info("Found {} contact(s) for logged-in user", contacts.getData().size());
         }
 
         return contacts;

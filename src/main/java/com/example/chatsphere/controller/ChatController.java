@@ -62,12 +62,12 @@ public class ChatController {
         return PageMappings.INDEX_PAGE;
     }
 
-    @GetMapping("/api/conversation/get-or-create/{fromUserId}/{toUserId}")
+    @GetMapping("/api/conversation/get-or-create/{toUserId}")
     @ResponseBody
-    public SuccessResponse<String> getOrCreateConversationId(@PathVariable String fromUserId, @PathVariable String toUserId) {
-        logger.info("Fetching/creating conversation between fromUserId={} and toUserId={}", fromUserId, toUserId);
+    public SuccessResponse<String> getOrCreateConversationId(@PathVariable String toUserId) {
+        logger.info("Fetching/creating conversation for toUserId={}", toUserId);
 
-        String conversationId = chatService.getOrCreateConversationId(fromUserId, toUserId);
+        String conversationId = chatService.getOrCreateConversationId(toUserId);
         return new SuccessResponse<>("200", "Conversation fetched/created successfully", Arrays.asList(conversationId));
     }
 
@@ -80,17 +80,6 @@ public class ChatController {
         String message = messages.isEmpty() ? "No messages found for this conversation" : "Messages fetched successfully";
 
         return new SuccessResponse<>("200", message, messages);
-    }
-
-    @GetMapping("/api/messages/last-messages/user/{userId}")
-    @ResponseBody
-    public SuccessResponse<ConversationLastMsgDTO> getLastMessageByLoggedInUserId(@PathVariable String userId) {
-        logger.info("Fetching last messages for logged-in userId={}", userId);
-
-        List<ConversationLastMsgDTO> lastMessages = chatService.getLastMessageByLoggedInUserId(userId);
-        String message = lastMessages.isEmpty() ? "No last messages found for this user" : "Last messages fetched successfully";
-
-        return new SuccessResponse<>("200", message, lastMessages);
     }
 
 }

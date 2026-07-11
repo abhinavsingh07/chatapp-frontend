@@ -620,3 +620,5 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Initialize profile picture observer (header, sidebar, etc.)
     MediaLoader.initProfilePictureObserver();
 });
+
+window.MediaLoader = MediaLoader; // Expose globally for legacy code or inline scripts

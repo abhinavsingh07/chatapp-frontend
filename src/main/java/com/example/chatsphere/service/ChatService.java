@@ -7,10 +7,10 @@ import com.example.chatsphere.dto.MessageDTO;
 
 public interface ChatService {
 
-    String getOrCreateConversationId(String fromUserId, String toUserId);
+    String getOrCreateConversationId(String toUserId);
 
     List<MessageDTO> getMessagesByConversationId(String conversationId);
 
-    List<ConversationLastMsgDTO> getLastMessageByLoggedInUserId(String userId);
+    List<ConversationLastMsgDTO> getLastMessageByLoggedInUserId();
 
 }

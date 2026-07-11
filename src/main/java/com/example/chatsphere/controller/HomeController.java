@@ -28,18 +28,9 @@ public class HomeController {
         model.addAttribute(PageMappings.VIEW_PLACEHOLDER, PageMappings.HOME_PAGE_VIEW);
         logger.info("Loading home page for user");
         //backend api getting userid from security context
-        //String loggedInUserid = (String) request.getAttribute("userId");
-        List<ConversationLastMsgDTO> chatData = chatService.getLastMessageByLoggedInUserId("123");
+        List<ConversationLastMsgDTO> chatData = chatService.getLastMessageByLoggedInUserId();
         //logger.info("/home endpoint called. Retrieved chat data for user {}: {}", loggedInUserid, chatData);
         model.addAttribute("chatData", chatData);
-        //get loggedin user contacts ids
-        //todo
-        // List<String> loggedInUserContactIds = chatData.stream()
-        //         .map(ConversationLastMsgDTO::getParticipantId)
-        //         .filter(participantId -> participantId != null && !participantId.isBlank())
-        //         .toList();
-        // model.addAttribute("chatData", chatData);
-        // request.setAttribute("loggedInUserContactIds", loggedInUserContactIds);
         return PageMappings.INDEX_PAGE;
     }
 
