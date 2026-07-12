@@ -301,9 +301,9 @@
                         if (!file) return;
 
                         // Validate file
-                        const validation = validateSelectedFile(file, 'PROFILE_PICTURE');
+                        const validation = MediaUploader.validateSelectedFile(file, 'PROFILE_PICTURE');
                         if (!validation.valid) {
-                            showUploadError(validation.error, 'profile');
+                            MediaUploader.showUploadError(validation.error, 'profile');
                             profilePictureInput.value = '';
                             return;
                         }
@@ -326,7 +326,7 @@
 
                         //handle automatic upload after selection
                         if (!profilePictureState.file) {
-                            showUploadError('No file selected', 'profile');
+                            MediaUploader.showUploadError('No file selected', 'profile');
                             return;
                         }
 
@@ -336,33 +336,33 @@
 
                         profilePictureState.isUploading = true;
                         uploadProfilePictureBtn.disabled = true;
-                        setUploadLoadingState('preparing', 'profile');
+                        MediaUploader.setUploadLoadingState('preparing', 'profile');
 
                         try {
-                            profilePictureState.clientUploadId = generateClientUploadId();
+                            profilePictureState.clientUploadId = MediaUploader.generateClientUploadId();
 
                             // Step 1: Initialize upload
-                            setUploadLoadingState('preparing', 'profile');
-                            const initResponse = await initMediaUpload('PROFILE_PICTURE', profilePictureState.clientUploadId, {
+                            MediaUploader.setUploadLoadingState('preparing', 'profile');
+                            const initResponse = await MediaUploader.initMediaUpload('PROFILE_PICTURE', profilePictureState.clientUploadId, {
                                 file: profilePictureState.file
                             });
 
                             profilePictureState.mediaId = initResponse.mediaId;
 
                             // Step 2: Upload to S3
-                            setUploadLoadingState('uploading', 'profile');
-                            await uploadFileToS3(initResponse.uploadUrl, profilePictureState.file, (progress) => {
-                                setUploadLoadingState('uploading', 'profile');
+                            MediaUploader.setUploadLoadingState('uploading', 'profile');
+                            await MediaUploader.uploadFileToS3(initResponse.uploadUrl, profilePictureState.file, (progress) => {
+                                MediaUploader.setUploadLoadingState('uploading', 'profile');
                             });
 
                             // Step 3: Complete upload
-                            setUploadLoadingState('verifying', 'profile');
-                            const completeResponse = await completeMediaUpload(profilePictureState.mediaId, profilePictureState.clientUploadId);
+                            MediaUploader.setUploadLoadingState('verifying', 'profile');
+                            const completeResponse = await MediaUploader.completeMediaUpload(profilePictureState.mediaId, profilePictureState.clientUploadId);
 
                             if (completeResponse.status === 'ACTIVE') {
                                 // Upload successful
-                                showUploadSuccess('Profile picture updated successfully!', 'profile');
-                                setUploadLoadingState('completed', 'profile');
+                                MediaUploader.showUploadSuccess('Profile picture updated successfully!', 'profile');
+                                MediaUploader.setUploadLoadingState('completed', 'profile');
 
                                 // Reset UI after success
                                 setTimeout(() => {
@@ -371,15 +371,15 @@
                                     profilePictureInput.value = '';
                                     uploadProfilePictureBtn.classList.add('d-none');
                                     uploadProfilePictureBtn.disabled = false;
-                                    resetUploadState('profile');
+                                    MediaUploader.resetUploadState('profile');
                                     window.location.reload(); // Refresh to show the new profile picture
                                 }, 1000);
                             } else {
-                                showUploadError('Media status is not ACTIVE. Please try again.', 'profile');
+                                MediaUploader.showUploadError('Media status is not ACTIVE. Please try again.', 'profile');
                                 uploadProfilePictureBtn.disabled = false;
                             }
                         } catch (error) {
-                            showUploadError(error || 'Upload failed. Please try again.', 'profile');
+                            MediaUploader.showUploadError(error || 'Upload failed. Please try again.', 'profile');
 
                             // Show retry button if verification failed
                             if (profilePictureState.mediaId && profileRetryUploadBtn) {
@@ -400,19 +400,19 @@
                         e.preventDefault();
 
                         if (!profilePictureState.mediaId || !profilePictureState.clientUploadId) {
-                            showUploadError('No upload to retry', 'profile');
+                            MediaUploader.showUploadError('No upload to retry', 'profile');
                             return;
                         }
 
                         profileRetryUploadBtn.disabled = true;
-                        setUploadLoadingState('verifying', 'profile');
+                        MediaUploader.setUploadLoadingState('verifying', 'profile');
 
                         try {
-                            const completeResponse = await retryUploadComplete(profilePictureState.mediaId, profilePictureState.clientUploadId);
+                            const completeResponse = await MediaUploader.retryUploadComplete(profilePictureState.mediaId, profilePictureState.clientUploadId);
 
                             if (completeResponse.status === 'ACTIVE') {
-                                showUploadSuccess('Profile picture verified and updated!', 'profile');
-                                setUploadLoadingState('completed', 'profile');
+                                MediaUploader.showUploadSuccess('Profile picture verified and updated!', 'profile');
+                                MediaUploader.setUploadLoadingState('completed', 'profile');
 
                                 // Reset UI
                                 setTimeout(() => {
@@ -421,14 +421,14 @@
                                     profilePictureInput.value = '';
                                     uploadProfilePictureBtn?.classList.add('d-none');
                                     profileRetryUploadBtn.classList.add('d-none');
-                                    resetUploadState('profile');
+                                    MediaUploader.resetUploadState('profile');
                                 }, 1000);
                             } else {
-                                showUploadError('Verification still failing. Please try uploading again.', 'profile');
+                                MediaUploader.showUploadError('Verification still failing. Please try uploading again.', 'profile');
                                 profileRetryUploadBtn.disabled = false;
                             }
                         } catch (error) {
-                            showUploadError(error || 'Retry failed. Please try again.', 'profile');
+                            MediaUploader.showUploadError(error || 'Retry failed. Please try again.', 'profile');
                             profileRetryUploadBtn.disabled = false;
                         }
                     });

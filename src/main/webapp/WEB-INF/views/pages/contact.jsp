@@ -341,7 +341,7 @@
 
                function loadContacts() {
                   ajaxRequest(
-                     "${ctx}/api/contact", //  spring mvc endpoint
+                     "${ctx}/api/contact?userDetailsRequired=true&mediaDetailsRequired=true", //  spring mvc endpoint
                      "GET",
                      null,
                      function (response) {

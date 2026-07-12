@@ -68,8 +68,7 @@ Validator.prototype.isStrongPassword = function (password) {
   return typeof clean === "string" && passwordRegex.test(clean);
 };
 
-
-
+window.Validator = Validator; // Expose globally for legacy code or inline scripts  
 
 
 // Example usage

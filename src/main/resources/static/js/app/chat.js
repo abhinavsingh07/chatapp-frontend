@@ -329,7 +329,7 @@ class ChatWebSocket {
                 
                 // Check if file count exceeds limit
                 if (files.length > maxFiles) {
-                    showUploadError(`You can upload a maximum of ${maxFiles} files at a time. You selected ${files.length} files.`, 'chat');
+                    MediaUploader.showUploadError(`You can upload a maximum of ${maxFiles} files at a time. You selected ${files.length} files.`, 'chat');
                     chatMediaInput.value = '';
                     return;
                 }
@@ -342,9 +342,9 @@ class ChatWebSocket {
                     const file = files[i];
 
                     // Validate file - only IMAGE VIDEO and DOCUMENT types allowed
-                    const validation = validateSelectedFile(file, 'CHAT_ATTACHMENT');
+                    const validation = MediaUploader.validateSelectedFile(file, 'CHAT_ATTACHMENT');
                     if (!validation.valid) {
-                        showUploadError(validation.error, 'chat');
+                        MediaUploader.showUploadError(validation.error, 'chat');
                         chatMediaInput.value = ''; // Reset input
                         this.selectedMediaFiles = []; // Clear all selected files
                         return;
@@ -352,7 +352,7 @@ class ChatWebSocket {
 
                     // Only allow IMAGE, DOCUMENT, and VIDEO
                     if (validation.mediaType !== 'IMAGE' && validation.mediaType !== 'DOCUMENT' && validation.mediaType !== 'VIDEO') {
-                        showUploadError('Only IMAGE, VIDEO, and DOCUMENT files are supported for multiple upload', 'chat');
+                        MediaUploader.showUploadError('Only IMAGE, VIDEO, and DOCUMENT files are supported for multiple upload', 'chat');
                         chatMediaInput.value = '';
                         this.selectedMediaFiles = [];
                         return;
@@ -485,7 +485,7 @@ class ChatWebSocket {
             previewContainer.classList.add('d-none');
         }
 
-        resetUploadState('chat');
+        MediaUploader.resetUploadState('chat');
     }
 
     /**
@@ -495,7 +495,7 @@ class ChatWebSocket {
      */
     buildUploadedFilesMetadata(initResults) {
         return initResults.map(uploadResult => {
-            const validation = validateSelectedFile(uploadResult.file, 'CHAT_ATTACHMENT');
+            const validation = MediaUploader.validateSelectedFile(uploadResult.file, 'CHAT_ATTACHMENT');
 
             return {
                 filename: uploadResult.file.name,
@@ -517,7 +517,7 @@ class ChatWebSocket {
         }
 
         this.isUploadingMedia = true;
-        setUploadLoadingState('preparing', 'chat');
+        MediaUploader.setUploadLoadingState('preparing', 'chat');
         const sendBtn = document.getElementById('sendButton');
         if (sendBtn) sendBtn.disabled = true;
 
@@ -526,12 +526,12 @@ class ChatWebSocket {
             this.selectedMediaIds = [];
 
             // Step 1: Prepare all uploads (initMediaUpload in parallel)
-            setUploadLoadingState('preparing', 'chat');
-            showUploadError('', 'chat');
+            MediaUploader.setUploadLoadingState('preparing', 'chat');
+            MediaUploader.showUploadError('', 'chat');
 
             const initPromises = this.selectedMediaFiles.map((file, index) => {
-                const clientUploadId = generateClientUploadId();
-                return initMediaUpload('CHAT_ATTACHMENT', clientUploadId, {
+                const clientUploadId = MediaUploader.generateClientUploadId();
+                return MediaUploader.initMediaUpload('CHAT_ATTACHMENT', clientUploadId, {
                     file: file,
                     conversationId: this.chatId
                 }).then(initResponse => {
@@ -549,10 +549,10 @@ class ChatWebSocket {
             const initResults = await Promise.all(initPromises);
             //console.log('[chat.js] All media upload initializations completed:', initResults);
             // Step 2: Upload all files to S3 in parallel
-            setUploadLoadingState('uploading', 'chat');
+            MediaUploader.setUploadLoadingState('uploading', 'chat');
             const uploadPromisesArray = initResults.map(result => {
-                return uploadFileToS3(result.uploadUrl, result.file, (progress) => {
-                    setUploadLoadingState('uploading', 'chat');
+                return MediaUploader.uploadFileToS3(result.uploadUrl, result.file, (progress) => {
+                    MediaUploader.setUploadLoadingState('uploading', 'chat');
                 }).then(() => result); // Return result after upload completes
             });
 
@@ -560,9 +560,9 @@ class ChatWebSocket {
             const uploadResults = await Promise.all(uploadPromisesArray);
 
             // Step 3: Complete all uploads in parallel
-            setUploadLoadingState('verifying', 'chat');
+            MediaUploader.setUploadLoadingState('verifying', 'chat');
             const completePromises = initResults.map(result => {
-                return completeMediaUpload(result.mediaId, result.clientUploadId);
+                return MediaUploader.completeMediaUpload(result.mediaId, result.clientUploadId);
             });
 
             // Wait for all completion calls
@@ -587,7 +587,7 @@ class ChatWebSocket {
 
             if (allMediasActive && mediaIds.length > 0) {
                 // Upload successful for all files
-                showUploadSuccess(`${mediaIds.length} media files uploaded successfully!`, 'chat');
+                MediaUploader.showUploadSuccess(`${mediaIds.length} media files uploaded successfully!`, 'chat');
 
                 // Convert mediaIds array to semicolon-separated string
                 this.selectedMediaIds = mediaIds;
@@ -605,10 +605,10 @@ class ChatWebSocket {
                     this.messageInput.value = '';
                 }, 500);
             } else {
-                showUploadError('Some media uploads failed. Please try again.', 'chat');
+                MediaUploader.showUploadError('Some media uploads failed. Please try again.', 'chat');
             }
         } catch (error) {
-            showUploadError(error || 'Upload failed. Please try again.', 'chat');
+            MediaUploader.showUploadError(error || 'Upload failed. Please try again.', 'chat');
 
             // Allow retry
             if (this.selectedMediaIds.length > 0) {
@@ -617,7 +617,7 @@ class ChatWebSocket {
         } finally {
             this.isUploadingMedia = false;
             if (sendBtn) sendBtn.disabled = false;
-            setUploadLoadingState('completed', 'chat');
+            MediaUploader.setUploadLoadingState('completed', 'chat');
         }
     }
 

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.Collections;
 
@@ -39,10 +40,11 @@ public class ContactController {
     // API endpoints
     @GetMapping("/api/contact")
     @ResponseBody
-    public SuccessResponse<ContactUserDTO> getContactsByUserId() {
+    public SuccessResponse<ContactUserDTO> getContactsByUserId(@RequestParam (value = "userDetailsRequired", required = false, defaultValue = "false") String userDetailsRequired,
+                                                              @RequestParam(value = "mediaDetailsRequired", required = false, defaultValue = "false") String mediaDetailsRequired) {
         logger.debug("Fetching contact list for logged-in user");
 
-        SuccessResponse<ContactUserDTO> contacts = contactService.getContactsByUserId();
+        SuccessResponse<ContactUserDTO> contacts = contactService.getContactsByUserId(userDetailsRequired, mediaDetailsRequired);
 
         if (contacts.getData() == null || contacts.getData().isEmpty()) {
             logger.info("No contacts found for logged-in user");

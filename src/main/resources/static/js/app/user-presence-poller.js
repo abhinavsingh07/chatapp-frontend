@@ -37,3 +37,5 @@ class UserPresencePoller {
     }
 
 }
+
+window.UserPresencePoller= UserPresencePoller; // Expose globally for legacy code or inline scripts

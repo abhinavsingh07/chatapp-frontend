@@ -20,7 +20,7 @@ public interface ContactService {
      * @param userId the unique identifier of the user
      * @return a list of ContactDTO objects for the specified user
      */
-   SuccessResponse<ContactUserDTO>  getContactsByUserId();
+   SuccessResponse<ContactUserDTO>  getContactsByUserId(String userDetailsRequired, String mediaDetailsRequired);
 
     /**
      * Removes a contact by its ID.
