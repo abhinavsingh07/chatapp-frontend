@@ -48,7 +48,7 @@ public class MediaServiceImpl implements MediaService {
 
         if (response.getData() != null && !response.getData().isEmpty()) {
             MediaUploadInitResponse data = response.getData().get(0);
-            logger.info("Media upload initialized successfully. mediaId={}, s3Key='{}'", data.getMediaId());
+            logger.info("Media upload initialized successfully. mediaId={}, s3Key='{}'", data.getMediaId(), data.getS3Key());
         } else {
             logger.warn("No upload initialization response received for clientUploadId='{}'",
                     request.getClientUploadId());
@@ -82,22 +82,22 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public SuccessResponse<MediaPreSignedUrlResponse> getPresignedDownloadUrl(Long userId, Long mediaId) {
-        Map<String, String> pathParams = Map.of("userId", String.valueOf(userId), "mediaId", String.valueOf(mediaId));
+    public SuccessResponse<MediaPreSignedUrlResponse> getPresignedDownloadUrl(Long mediaId) {
+        Map<String, String> pathParams = Map.of("mediaId", String.valueOf(mediaId));
 
         ApiRequest apiReq = apiRequestBuilderUtil.build("media.getPresignedUrl", pathParams,
                 Collections.emptyMap());
 
-        logger.info("Generating pre-signed download URL for userId={}, mediaId={}", userId, mediaId);
+        logger.info("Generating pre-signed download URL for mediaId={}", mediaId);
 
         SuccessResponse<MediaPreSignedUrlResponse> response = authenticatedApiService.call(apiReq,
                 new ParameterizedTypeReference<SuccessResponse<MediaPreSignedUrlResponse>>() {
                 });
 
         if (response.getData() != null && !response.getData().isEmpty()) {
-            logger.info("Pre-signed URL generated successfully for userId={}, mediaId={}", userId, mediaId);
+            logger.info("Pre-signed URL generated successfully for mediaId={}", mediaId);
         } else {
-            logger.warn("No pre-signed URL response received for userId={}, mediaId={}", userId, mediaId);
+            logger.warn("No pre-signed URL response received for mediaId={}", mediaId);
         }
 
         return response;

@@ -680,6 +680,8 @@ class ChatWebSocket {
     }
 }
 
+window.ChatWebSocket = ChatWebSocket;
+
 // ----------------- Usage -----------------
 // document.addEventListener("DOMContentLoaded", () => {
 //     //console.log("DOM fully loaded and parsed");

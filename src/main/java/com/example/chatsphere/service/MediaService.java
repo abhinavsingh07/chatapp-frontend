@@ -38,7 +38,7 @@ public interface MediaService {
      * @param mediaId The ID of the media record
      * @return SuccessResponse containing MediaPreSignedUrlResponse with presigned download URL
      */
-    SuccessResponse<MediaPreSignedUrlResponse> getPresignedDownloadUrl(Long userId, Long mediaId);
+    SuccessResponse<MediaPreSignedUrlResponse> getPresignedDownloadUrl(Long mediaId);
 
     /**
      * Get media metadata by conversation ID and media ID
