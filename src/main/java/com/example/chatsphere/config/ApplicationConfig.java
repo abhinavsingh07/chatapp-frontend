@@ -40,6 +40,7 @@ public class ApplicationConfig implements WebMvcConfigurer {
                 .excludePathPatterns(
                         "/api/**",
                         "/static/**",
+                        "/dist/**",
                         "/login",
                         "/register",
                         "/forgot-password",

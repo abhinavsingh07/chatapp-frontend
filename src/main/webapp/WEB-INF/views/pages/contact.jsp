@@ -4,6 +4,35 @@
          .mutual-button:disabled {
             pointer-events: auto;
          }
+
+         .ct-profile-avatar-shell {
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+            padding: 4px;
+         }
+
+         .ct-profile-avatar-shell [data-profile-picture="true"] {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+         }
+
+         .ct-profile-avatar-shell .pf-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ffffff;
+         }
       </style>
 
       <div class="container-fluid px-3 px-lg-4 py-4">
@@ -228,15 +257,17 @@
 
                   // Determine avatar
                   var avatarHTML = "";
-                  if (user.profilePictureUrl && user.profilePictureUrl.trim() !== "") {
-                     avatarHTML = '<img src="' + user.profilePictureUrl + '" class="rounded-circle mb-3" ' +
-                        'style="width: 80px; height: 80px; object-fit: cover;">';
+                  if (user.mediaId && user.mediaId.trim() !== "") {
+                     avatarHTML = '<div class="ct-profile-avatar-shell">'
+                        + '<div data-user-media-id="' + user.mediaId + '" data-user-id="' + user.id + '" data-profile-picture="true">'
+                        + '</div>'
+                        + '</div>';
                   } else {
-                     avatarHTML = '<div class="avatar bg-secondary text-white rounded-circle d-inline-flex ' +
-                        'align-items-center justify-content-center mb-3" ' +
-                        'style="width: 80px; height: 80px;">' +
-                        '<i class="fas fa-user fa-2x"></i>' +
-                        '</div>';
+                     avatarHTML = '<div class="ct-profile-avatar-shell">'
+                        + '<div class="avatar bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center w-100 h-100">'
+                        + '<i class="fas fa-user fa-2x"></i>'
+                        + '</div>'
+                        + '</div>';
                   }
 
                   // Determine name
@@ -272,6 +303,10 @@
                   html += '</div>';
 
                   profileContent.innerHTML = html;
+                  const profilePictureDiv = profileContent.querySelector('[data-profile-picture="true"]');
+                  if (profilePictureDiv) {
+                     MediaLoader.loadProfilePicture(profilePictureDiv);
+                  }
                }
 
 

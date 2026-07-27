@@ -256,7 +256,7 @@
         }
 
         function initSocket() {
-            const chatWs = new window.ChatWebSocket(conversationId, userId, toUserId);
+            const chatWs = new ChatWebSocket(conversationId, userId, toUserId);
             //token goes with cookie
             // chatWs.connect();
             chatWs.bindInputEvents();

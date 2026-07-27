@@ -104,7 +104,7 @@ class MediaLoader {
 
             if (!presignedUrl) {
 
-                const downloadUrl = `${ctx}/api/media/pre-signed-url/${userId}/${mediaId}`;
+                const downloadUrl = `${ctx}/api/media/pre-signed-url/${mediaId}`;
                 const urlResponse = await fetch(downloadUrl);
 
                 if (!urlResponse.ok) {
@@ -324,6 +324,8 @@ class MediaLoader {
      * @param {HTMLImageElement} imgElement - The clicked image
      */
     static openImageLightbox(imgElement) {
+        MediaLoader.createLightboxModal();
+
         // Find all images in the same message bubble
         const messageBubble = imgElement.closest('.message-bubble');
         const allImages = messageBubble ?
@@ -509,7 +511,7 @@ class MediaLoader {
             }
 
             // ── 2. Fetch presigned URL from backend ──
-            const downloadUrl = `${ctx}/api/media/pre-signed-url/${userId}/${mediaId}`;
+            const downloadUrl = `${ctx}/api/media/pre-signed-url/${mediaId}`;
             const urlResponse = await fetch(downloadUrl);
 
             if (!urlResponse.ok) {
@@ -569,6 +571,12 @@ class MediaLoader {
         img.src = srcUrl;
         img.alt = 'Profile picture';
         img.classList.add('pf-avatar');
+        img.style.cursor = 'pointer';
+
+        img.addEventListener('click', (e) => {
+            e.stopPropagation();
+            MediaLoader.openImageLightbox(img);
+        });
 
         img.onload = () => {
             img.style.opacity = '1';
